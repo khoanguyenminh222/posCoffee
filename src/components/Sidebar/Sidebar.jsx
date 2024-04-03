@@ -1,13 +1,16 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHome, faBurger, faHistory, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
+import { faHome, faBars, faBurger, faHistory, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
 import Link from 'next/link';
 
-const Sidebar = () => {
+const Sidebar = ({isOpen, toggleSidebar}) => {
+    
+
     return (
-        <div className="bg-white text-gray-500 w-20 h-screen flex flex-col justify-between">
+        <div className={`fixed inset-y-0 left-0 z-50 bg-white text-gray-500 w-20 flex flex-col justify-between transform transition-all duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
             {/* Logo và các menu */}
             <div className="py-4 flex-grow flex flex-col items-center">
+            <FontAwesomeIcon icon={faBars} size='lg' onClick={toggleSidebar} className='transition duration-300 ease-in-out transform hover:scale-110 cursor-pointer hover:text-amber-700'/>
                 <img src="/images/logoCoffee.png" alt="Logo" className="mb-2" />
                 <ul className="text-center">
                     <Link href={"/"}>
@@ -32,6 +35,7 @@ const Sidebar = () => {
                 <FontAwesomeIcon icon={faSignOutAlt} size='2x'/>
                 <span className="text-sm">Đăng xuất</span>
             </div>
+            
         </div>
     );
 };

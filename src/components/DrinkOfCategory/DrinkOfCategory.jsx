@@ -26,7 +26,7 @@ function DrinkOfCategory({ category }) {
 
   return (
     <>
-      <div className="bg-white rounded-xl shadow-md overflow-hidden mb-4 w-1/3">
+      <div className="bg-white rounded-xl shadow-md my-2 mx-2">
         <div className="p-4">
           <div className="flex items-center">
             <img className="h-20 w-20 rounded-full object-cover" src="/images/coffee1.png" alt="Drink" />

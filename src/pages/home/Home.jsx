@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch } from '@fortawesome/free-solid-svg-icons';
+import { faSearch, faBars } from '@fortawesome/free-solid-svg-icons';
 import Sidebar from '@/components/Sidebar/Sidebar';
 import Bill from '@/components/Bill/Bill';
 import Category from '@/components/Category/Category';
@@ -13,32 +13,29 @@ function Home() {
     setSelectedCategory(category);
   };
 
+  const [isOpen, setIsOpen] = useState(false);
+
+  const toggleSidebar = () => {
+    setIsOpen(!isOpen);
+    document.body.style.overflowX = isOpen ? "auto" : "hidden";
+  };
+
+
   return (
     <div className="flex">
       {/* Sidebar */}
-      <Sidebar />
+      {/* Toggle button */}
+      <button className="fixed top-4 left-4 bg-white p-2 rounded-full shadow-md focus:outline-none z-10 transition-all duration-300 ease-in-out transform hover:scale-110" onClick={toggleSidebar}>
+        <FontAwesomeIcon icon={faBars} size='lg' className="text-gray-500" />
+      </button>
+      <Sidebar isOpen={isOpen} toggleSidebar={toggleSidebar}/>
 
-      <div className="flex-grow bg-gray-200 flex h-screen">
-        <div className="flex-grow p-6">
-          <div className="flex">
-            {/* Tiêu đề loại thức uống */}
-            <h2 className="text-xl font-semibold mb-4 w-1/3">Loại thức uống</h2>
-
-            {/* Thanh tìm kiếm */}
-            <div className="relative w-2/3">
-              <input
-                type="text"
-                className="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:border-blue-500 mr-2 w-full"
-                placeholder="Tìm kiếm..."
-              />
-              <span className="absolute top-0 right-0 mt-2 mr-2 cursor-pointer">
-                <FontAwesomeIcon icon={faSearch} />
-              </span>
-            </div>
-          </div>
-
-          {/* Phần category */}
-            <div className="mt-4 flex flex-wrap overflow-auto w-100" style={{scrollbarWidth: 'thin', scrollbarColor: 'gray', scrollbarTrackColor: 'rgba(0, 0, 0, 0.1)'}}>
+      <div className={`flex-grow h-screen bg-gray-200 flex ${isOpen ? 'ml-20' : 'ml-0'} transition-all duration-300 ease-in-out`}>
+        <div className="flex-grow flex flex-col w-3/4">
+          
+          <div className="flex-grow px-4 flex">
+            {/* Phần category */}
+            <div className="flex flex-col overflow-auto w-1/5 mr-4 max-h-screen" style={{scrollbarWidth: 'thin', scrollbarColor: 'gray', scrollbarTrackColor: 'rgba(0, 0, 0, 0.1)'}}>
               <Category onClick={handleCategoryClick} categoryName="Cà phê" />
               <Category onClick={handleCategoryClick} categoryName="Trà sữa" />
               <Category onClick={handleCategoryClick} categoryName="Trà trái cây" />
@@ -46,18 +43,16 @@ function Home() {
               <Category onClick={handleCategoryClick} categoryName="Sữa chua" />
               <Category onClick={handleCategoryClick} categoryName="Sữa chua" />
             </div>
-          
-          
 
-          {/* Phần drink */}
-          <div className='flex flex-wrap overflow-auto h-4/6'>
-            {selectedCategory && <DrinkOfCategory category={selectedCategory} />} 
-            {selectedCategory && <DrinkOfCategory category={selectedCategory} />}
-            {selectedCategory && <DrinkOfCategory category={selectedCategory} />}
-            {selectedCategory && <DrinkOfCategory category={selectedCategory} />}
-            {selectedCategory && <DrinkOfCategory category={selectedCategory} />}
+            {/* Phần drink */}
+            <div className='flex flex-wrap overflow-auto h-full w-4/5 justify-center max-h-screen' style={{scrollbarWidth: 'thin', scrollbarColor: 'gray', scrollbarTrackColor: 'rgba(0, 0, 0, 0.1)'}}>
+              {selectedCategory && <DrinkOfCategory category={selectedCategory} />}
+              {selectedCategory && <DrinkOfCategory category={selectedCategory} />}
+              {selectedCategory && <DrinkOfCategory category={selectedCategory} />}
+              {selectedCategory && <DrinkOfCategory category={selectedCategory} />}
+              {selectedCategory && <DrinkOfCategory category={selectedCategory} />}
+            </div>
           </div>
-          
         </div>
 
         {/* Component Bill */}
