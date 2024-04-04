@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ref, getDownloadURL } from 'firebase/storage';
 
-function Category({ onClick, category, storage }) {
+function Category({category, storage, onClick }) {
   const [imageUrl, setImageUrl] = useState(null);
   useEffect(() => {
     const fetchImageUrl = async () => {

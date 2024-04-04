@@ -1,15 +1,122 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFire, faDroplet } from '@fortawesome/free-solid-svg-icons';
+import { faFire, faTint } from '@fortawesome/free-solid-svg-icons';
+import { ref, getDownloadURL } from 'firebase/storage';
+import { storage } from '@/firebase';
 
-function DrinkOfCategory({ category }) {
-
+function DrinkOfCategory({ drink, addToBill }) {
+  const { temperature, sugar, ice } = drink.options;
+  const [selectedTemperature, setSelectedTemperature] = useState(null);
+  const [selectedSugar, setSelectedSugar] = useState(null);
+  const [selectedIce, setSelectedIce] = useState(null);
+  const [selectedSize, setSelectedSize] = useState(null);
+  const [quantity, setQuantity] = useState(1);
+  const [imageUrl, setImageUrl] = useState(null);
+  useEffect(() => {
+    const fetchImageUrl = async () => {
+      try {
+        const storageRef = ref(storage, drink.image);
+        const url = await getDownloadURL(storageRef);
+        setImageUrl(url);
+      } catch (error) {
+        console.error('Error getting image URL:', error);
+      }
+    };
+    fetchImageUrl();
+  }, [drink.img, storage]);
 
   return (
-    <div className="flex flex-col overflow-auto w-1/5 mr-4 max-h-screen" style={{ scrollbarWidth: 'thin', scrollbarColor: 'gray', scrollbarTrackColor: 'rgba(0, 0, 0, 0.1)' }}>
-      {category.drinks.map(drink => (
-        <Category key={drink._id} category={category} drink={drink} storage={storage} />
-      ))}
+    <div className="flex flex-col items-center max-w-xs mx-auto mt-6">
+      <div className="bg-white rounded-lg shadow-md w-64">
+        <img src={imageUrl} alt="Drink" className="rounded-t-lg w-full h-48 object-cover" />
+        <div className="p-6">
+          <div className='flex flex-col'>
+            <div className="font-semibold text-lg">{drink.name}</div>
+            <div className='flex justify-between'>
+              <div className="text-gray-600 text-sm mt-2">{selectedSize === 'M' ? drink.prices.M : drink.prices.L}đ</div>
+              <div className="flex items-center">
+                {['M', 'L'].map((option, index) => (
+                  <div key={index} className={`w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center cursor-pointer mr-2 ${selectedSize === option ? 'bg-amber-500 text-white rounded-full' : ''}`} onClick={() => setSelectedSize((prevOption) => prevOption === option ? null : option)}>
+                    {option}
+                  </div>
+                ))}
+
+              </div>
+            </div>
+
+          </div>
+
+          <div className="mt-4">
+            <div className="flex justify-between text-gray-700">
+              <div className="flex items-center">
+                {Array.isArray(temperature) && temperature.length > 0 && temperature.map((option, index) => (
+                  <div key={index} className="ml-2">
+                    {option == "hot" ?
+                      <FontAwesomeIcon icon={faFire} className={`text-red-500 p-2 rounded-full bg-gray-200 mr-2 cursor-pointer ${selectedTemperature === option ? 'bg-amber-500 rounded-full' : ''}`} onClick={() => setSelectedTemperature((prevOption) => prevOption === option ? null : option)} />
+                      :
+                      <FontAwesomeIcon icon={faTint} className={`text-blue-500 p-2 rounded-full bg-gray-200 cursor-pointer ${selectedTemperature === option ? 'bg-amber-500 rounded-full' : ''}`} onClick={() => setSelectedTemperature((prevOption) => prevOption === option ? null : option)} />}
+                  </div>
+                ))}
+
+              </div>
+
+            </div>
+            <div className="text-gray-700 mt-2">
+              <div className="flex items-center justify-between">
+                {Array.isArray(sugar) && sugar.length > 0 && <div>Đường:</div>}
+
+                <div className='flex'>
+                  {Array.isArray(sugar) && sugar.length > 0 && sugar.map((option, index) => (
+                    <div key={index} className={`ml-2 p-1 text-sm bg-gray-200 rounded-full cursor-pointer ${selectedSugar === option ? 'bg-amber-500 text-white rounded-full' : ''}`} onClick={() => setSelectedSugar((prevOption) => prevOption === option ? null : option)}>
+                      {option}
+                    </div>
+                  ))}
+
+                </div>
+
+              </div>
+              <div className="flex items-center mt-2 justify-between">
+                {Array.isArray(ice) && ice.length > 0 && <div>Đá:</div>}
+                <div className='flex'>
+                  {Array.isArray(ice) && ice.length > 0 && ice.map((option, index) => (
+                    <div key={index} className={`ml-2 p-1 text-sm bg-gray-200 rounded-full cursor-pointer ${selectedIce === option ? 'bg-amber-500 text-white rounded-full' : ''}`} onClick={() => setSelectedIce((prevOption) => prevOption === option ? null : option)}>
+                      {option}
+                    </div>
+                  ))}
+                </div>
+
+              </div>
+            </div>
+            <div className="flex items-center justify-center mt-4">
+              <div className="relative">
+                <button
+                  onClick={() => setQuantity((prevQuantity) => Math.max(1, prevQuantity - 1))}
+                  className="absolute inset-y-0 left-0 px-3 bg-gray-200 text-gray-600 focus:outline-none"
+                >
+                  -
+                </button>
+                <input
+                  type="number"
+                  className="w-20 pl-6 pr-2 text-center bg-gray-200 focus:outline-none"
+                  value={quantity}
+                  onChange={(e) => setQuantity(parseInt(e.target.value))}
+                />
+                <button
+                  onClick={() => setQuantity((prevQuantity) => prevQuantity + 1)}
+                  className="absolute inset-y-0 right-0 px-3 bg-gray-200 text-gray-600 focus:outline-none"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+            <div className="mt-4 flex items-center justify-center">
+              <button onClick={()=>addToBill(drink)} className="bg-amber-600 text-white px-4 py-2 rounded-full hover:bg-amber-700 transition duration-300">
+                Thêm vào hóa đơn
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
