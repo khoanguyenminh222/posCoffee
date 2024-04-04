@@ -1,9 +1,10 @@
 import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPrint  } from '@fortawesome/free-solid-svg-icons';
+import { faPrint } from '@fortawesome/free-solid-svg-icons';
 import DrinkBill from '../DrinkBill/DrinkBill';
 
-function Bill({billItems}) {
+function Bill({ billItems, onDeleteAll, onDeleteItem, onIncrementItem, onDecrementItem }) {
+    const totalAmount = billItems.reduce((total, item) => total + item.price * item.quantity, 0);
     return (
         <div className="w-1/4 h-full bg-white p-4 shadow-md rounded-md relative">
             {/* Avatar và tên người dùng */}
@@ -13,14 +14,20 @@ function Bill({billItems}) {
             </div>
 
             {/* Phần hiển thị hóa đơn */}
-            <div className="mb-4 overflow-y-auto max-h-96" style={{scrollbarWidth: 'thin', scrollbarColor: 'gray', scrollbarTrackColor: 'rgba(0, 0, 0, 0.1)'}}>
+            <div className="mb-4 overflow-y-auto max-h-96" style={{ scrollbarWidth: 'thin', scrollbarColor: 'gray', scrollbarTrackColor: 'rgba(0, 0, 0, 0.1)' }}>
                 {/* Tiêu đề hóa đơn */}
                 <h2 className="text-lg font-semibold mb-2">Hóa đơn</h2>
+                <button onClick={onDeleteAll} className="bg-red-500 text-white px-2 py-1 rounded-md mb-4">Xoá hết</button>
 
                 {/* Danh sách các mặt hàng trong hóa đơn */}
                 <div>
                     {billItems.map(item => (
-                        <DrinkBill key={item.id} item={item}/>
+                        <DrinkBill
+                            key={item.id}
+                            item={item}
+                            onDelete={() => onDeleteItem(item)}
+                            onIncrement={() => onIncrementItem(item)}
+                            onDecrement={() => onDecrementItem(item)} />
                     ))}
                 </div>
             </div>
@@ -29,7 +36,7 @@ function Bill({billItems}) {
                 {/* Hiển thị tổng tiền */}
                 <div className="text-lg font-semibold mb-2 flex justify-between">
                     <span>Tổng tiền:</span> {/* Thay số này bằng biến hoặc tính toán thực tế */}
-                    <span>120.000Đ</span>
+                    <span>{totalAmount}đ</span>
                 </div>
 
                 {/* Nút in hoá đơn */}

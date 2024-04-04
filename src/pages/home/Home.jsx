@@ -53,14 +53,32 @@ function Home() {
   };
 
   const addToBill = (drink, quantity) => {
-    const billItem = {
-      id: drink._id,
-      name: drink.name,
-      price: selectedOptions.size === 'M' ? drink.prices.M : drink.prices.L,
-      quantity: quantity,
-      options: selectedOptions
-    };
-    setBillItems([...billItems, billItem]);
+    // Kiểm tra xem đã tồn tại billItem có id là drink._id và options giống nhau không
+    const existingItem = billItems.find(item => item.id === drink._id && JSON.stringify(item.options) === JSON.stringify(selectedOptions));
+    
+    // Nếu tồn tại billItem có id là drink._id và options giống nhau, không thêm mới vào billItems
+    if (existingItem) {
+      // Cập nhật số lượng của billItem đã tồn tại
+      const updatedBillItems = billItems.map(item => {
+        if (item.id === drink._id && JSON.stringify(item.options) === JSON.stringify(selectedOptions)) {
+          return { ...item, quantity: item.quantity + quantity };
+        }
+        return item;
+      });
+  
+      setBillItems(updatedBillItems);
+    } else {
+      // Nếu chưa tồn tại billItem có id là drink._id và options giống nhau, thêm mới vào billItems
+      const billItem = {
+        id: drink._id,
+        name: drink.name,
+        price: selectedOptions.size === 'M' ? drink.prices.M : drink.prices.L,
+        quantity: quantity,
+        options: selectedOptions
+      };
+  
+      setBillItems([...billItems, billItem]);
+    }
   };
 
   const searchDrinks = () => {
@@ -83,6 +101,40 @@ function Home() {
     const filteredDrinks = searchDrinks();
     setDrinks(filteredDrinks);
   }, [selectedOptions]);
+
+
+  const onDeleteAll = () => {
+    setBillItems([]);
+  };
+
+  const onDeleteItem = (item) => {
+    setBillItems(billItems.filter(billItem => {
+      // Kiểm tra xem billItem có id khác với item.id hoặc options khác với item.options không
+      return billItem.id !== item.id || JSON.stringify(billItem.options) !== JSON.stringify(item.options);
+    }));
+  };
+  
+
+  const onIncrementItem = (item) => {
+    const updatedBillItems = billItems.map(billItem => {
+      if (billItem.id === item.id) {
+        return { ...billItem, quantity: billItem.quantity + 1 };
+      }
+      return billItem;
+    });
+    setBillItems(updatedBillItems);
+  };
+
+  const onDecrementItem = (item) => {
+    const updatedBillItems = billItems.map(billItem => {
+      if (billItem.id === item.id && billItem.quantity > 1) {
+        return { ...billItem, quantity: billItem.quantity - 1 };
+      }
+      return billItem;
+    });
+    setBillItems(updatedBillItems);
+  };
+
 
   return (
     <div className="flex">
@@ -118,7 +170,11 @@ function Home() {
         </div>
 
         {/* Component Bill */}
-        <Bill billItems={billItems}/>
+        <Bill billItems={billItems}
+          onDeleteAll={onDeleteAll}
+          onDeleteItem={onDeleteItem}
+          onIncrementItem={onIncrementItem}
+          onDecrementItem={onDecrementItem}/>
       </div>
     </div>
   );

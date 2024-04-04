@@ -13,6 +13,7 @@ function DrinkOfCategory({ drink, addToBill, setSelectedOptions  }) {
   const [quantity, setQuantity] = useState(1);
   const [imageUrl, setImageUrl] = useState(null);
   const [error, setError] = useState('');
+  
   useEffect(() => {
     const fetchImageUrl = async () => {
       try {
@@ -32,6 +33,15 @@ function DrinkOfCategory({ drink, addToBill, setSelectedOptions  }) {
       [optionName]: optionValue
     }));
   };
+
+  useEffect(()=>{
+    updateSelectedOptions('size', selectedSize);
+    updateSelectedOptions('temperature', selectedTemperature);
+    updateSelectedOptions('ice', selectedIce);
+    updateSelectedOptions('sugar', selectedSugar);
+  },[selectedSize, selectedTemperature, selectedIce, selectedSugar]);
+
+  
 
   const handleAddToBill = () => {
     if (!selectedTemperature || !selectedSize) {
@@ -53,7 +63,7 @@ function DrinkOfCategory({ drink, addToBill, setSelectedOptions  }) {
               <div className="text-gray-600 text-sm mt-2">{selectedSize === 'M' ? drink.prices.M : drink.prices.L}đ</div>
               <div className="flex items-center">
                 {['M', 'L'].map((option, index) => (
-                  <div key={index} className={`w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center cursor-pointer mr-2 ${selectedSize === option ? 'bg-blue-500 text-white rounded-full' : ''}`} onClick={() => {setSelectedSize((prevOption) => prevOption === option ? null : option); updateSelectedOptions('size', option);}}>
+                  <div key={index} className={`w-6 h-6 rounded-full flex items-center justify-center cursor-pointer mr-2 ${selectedSize === option ? 'bg-amber-500 text-white rounded-full' : 'bg-gray-200'}`} onClick={() => {setSelectedSize((prevOption) => prevOption === option ? null : option); updateSelectedOptions('size', option);}}>
                     {option}
                   </div>
                 ))}
@@ -69,9 +79,9 @@ function DrinkOfCategory({ drink, addToBill, setSelectedOptions  }) {
                 {Array.isArray(temperature) && temperature.length > 0 && temperature.map((option, index) => (
                   <div key={index} className="ml-2">
                     {option == "hot" ?
-                      <FontAwesomeIcon icon={faFire} className={`text-red-500 p-2 rounded-full bg-gray-200 mr-2 cursor-pointer ${selectedTemperature === option ? 'bg-amber-500 rounded-full' : ''}`} onClick={() => {setSelectedTemperature((prevOption) => prevOption === option ? null : option); updateSelectedOptions('temperature', option);}} />
+                      <FontAwesomeIcon icon={faFire} className={`text-red-500 p-2 rounded-full mr-2 cursor-pointer ${selectedTemperature === option ? 'bg-amber-500 rounded-full' : 'bg-gray-200'}`} onClick={() => {setSelectedTemperature((prevOption) => prevOption === option ? null : option); updateSelectedOptions('temperature', option);}} />
                       :
-                      <FontAwesomeIcon icon={faTint} className={`text-blue-500 p-2 rounded-full bg-gray-200 cursor-pointer ${selectedTemperature === option ? 'bg-amber-500 rounded-full' : ''}`} onClick={() => {setSelectedTemperature((prevOption) => prevOption === option ? null : option); updateSelectedOptions('temperature', option);}} />}
+                      <FontAwesomeIcon icon={faTint} className={`text-blue-500 p-2 rounded-full cursor-pointer ${selectedTemperature === option ? 'bg-amber-500 rounded-full' : 'bg-gray-200'}`} onClick={() => {setSelectedTemperature((prevOption) => prevOption === option ? null : option); updateSelectedOptions('temperature', option);}} />}
                   </div>
                 ))}
 
@@ -84,7 +94,7 @@ function DrinkOfCategory({ drink, addToBill, setSelectedOptions  }) {
 
                 <div className='flex'>
                   {Array.isArray(sugar) && sugar.length > 0 && sugar.map((option, index) => (
-                    <div key={index} className={`ml-2 p-1 text-sm bg-gray-200 rounded-full cursor-pointer ${selectedSugar === option ? 'bg-amber-500 text-white rounded-full' : ''}`} onClick={() => {setSelectedSugar((prevOption) => prevOption === option ? null : option); updateSelectedOptions('sugar', option);}}>
+                    <div key={index} className={`ml-2 p-1 text-sm rounded-full cursor-pointer ${selectedSugar === option ? 'bg-amber-500 text-white rounded-full' : 'bg-gray-200'}`} onClick={() => {setSelectedSugar((prevOption) => prevOption === option ? null : option); updateSelectedOptions('sugar', option);}}>
                       {option}
                     </div>
                   ))}
@@ -96,7 +106,7 @@ function DrinkOfCategory({ drink, addToBill, setSelectedOptions  }) {
                 {Array.isArray(ice) && ice.length > 0 && <div>Đá:</div>}
                 <div className='flex'>
                   {Array.isArray(ice) && ice.length > 0 && ice.map((option, index) => (
-                    <div key={index} className={`ml-2 p-1 text-sm bg-gray-200 rounded-full cursor-pointer ${selectedIce === option ? 'bg-amber-500 text-white rounded-full' : ''}`} onClick={() => {setSelectedIce((prevOption) => prevOption === option ? null : option); updateSelectedOptions('ice', option);}}>
+                    <div key={index} className={`ml-2 p-1 text-sm rounded-full cursor-pointer ${selectedIce === option ? 'bg-amber-500 text-white rounded-full' : 'bg-gray-200'}`} onClick={() => {setSelectedIce((prevOption) => prevOption === option ? null : option); updateSelectedOptions('ice', option);}}>
                       {option}
                     </div>
                   ))}

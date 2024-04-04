@@ -1,22 +1,23 @@
 import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPen } from '@fortawesome/free-solid-svg-icons';
+import { faPen, faTrash } from '@fortawesome/free-solid-svg-icons';
 
-function DrinkBill({item}) {
+function DrinkBill({item, onDelete, onIncrement, onDecrement}) {
+    const { temperature, sugar, ice, size } = item.options;
     const [showNoteInput, setShowNoteInput] = useState(false);
 
     const handleNoteClick = () => {
         setShowNoteInput(!showNoteInput);
     };
-    console.log(item);
     return (
         <div className='mb-6'>
             <div className="flex items-center mb-1">
-                <img src="/images/coffee1.png" alt="Đồ uống" className="w-8 h-8 rounded mr-2" />
                 <div className="flex-grow">
-                    <div className="font-semibold">{item.name}</div>
+                    <div className="font-semibold capitalize">{item.name}</div>
                     <div className="flex items-center">
-                        <div className="text-sm mr-2">x2</div>
+                    <button onClick={() => onDecrement(item)} className="text-sm mr-2 bg-gray-200 rounded-full px-2 focus:outline-none">-</button>
+                        <div className="text-sm mr-2">{item.quantity}</div>
+                        <button onClick={() => onIncrement(item)} className="text-sm bg-gray-200 rounded-full px-2 focus:outline-none">+</button>
                         <div
                             className="text-sm text-orange-500 flex items-center cursor-pointer"
                             onClick={handleNoteClick}
@@ -26,7 +27,8 @@ function DrinkBill({item}) {
                         </div>
                     </div>
                 </div>
-                <div className="text-sm ml-auto">20.000Đ</div>
+                <div className="text-sm ml-auto">{item.price}đ</div>
+                <button onClick={() => onDelete(item)} className="text-sm ml-4 text-red-500 focus:outline-none"><FontAwesomeIcon icon={faTrash} /></button>
             </div>
             {showNoteInput && (
                 <input
@@ -37,9 +39,13 @@ function DrinkBill({item}) {
             )}
             {/* Thêm thông tin về đá%, đường%, và size */}
             <div className="text-sm">
-                <div>Đá: 50%</div>
-                <div>Đường: 30%</div>
-                <div>Size: Lớn</div>
+                <div className='flex'>
+                    {size && <div>Size: {size}</div>}
+                    {temperature && <div className='ml-3'>{temperature=="cold"?"lạnh":"nóng"}</div>}
+                </div>
+                
+                {ice && <div>Đá: {ice}</div>}
+                {sugar && <div>Đường: {sugar}</div>}
             </div>
         </div>
     );
