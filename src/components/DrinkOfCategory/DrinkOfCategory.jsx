@@ -4,14 +4,15 @@ import { faFire, faTint } from '@fortawesome/free-solid-svg-icons';
 import { ref, getDownloadURL } from 'firebase/storage';
 import { storage } from '@/firebase';
 
-function DrinkOfCategory({ drink, addToBill }) {
+function DrinkOfCategory({ drink, addToBill, setSelectedOptions  }) {
   const { temperature, sugar, ice } = drink.options;
-  const [selectedTemperature, setSelectedTemperature] = useState(null);
+  const [selectedTemperature, setSelectedTemperature] = useState('cold');
   const [selectedSugar, setSelectedSugar] = useState(null);
   const [selectedIce, setSelectedIce] = useState(null);
-  const [selectedSize, setSelectedSize] = useState(null);
+  const [selectedSize, setSelectedSize] = useState('M');
   const [quantity, setQuantity] = useState(1);
   const [imageUrl, setImageUrl] = useState(null);
+  const [error, setError] = useState('');
   useEffect(() => {
     const fetchImageUrl = async () => {
       try {
@@ -25,18 +26,34 @@ function DrinkOfCategory({ drink, addToBill }) {
     fetchImageUrl();
   }, [drink.img, storage]);
 
+  const updateSelectedOptions = (optionName, optionValue) => {
+    setSelectedOptions(prevOptions => ({
+      ...prevOptions,
+      [optionName]: optionValue
+    }));
+  };
+
+  const handleAddToBill = () => {
+    if (!selectedTemperature || !selectedSize) {
+      setError('Please select temperature and size.');
+      return;
+    }
+    addToBill(drink, quantity, selectedTemperature, selectedSize);
+    setError('');
+  };
+
   return (
     <div className="flex flex-col items-center max-w-xs mx-auto mt-6">
       <div className="bg-white rounded-lg shadow-md w-64">
         <img src={imageUrl} alt="Drink" className="rounded-t-lg w-full h-48 object-cover" />
         <div className="p-6">
           <div className='flex flex-col'>
-            <div className="font-semibold text-lg">{drink.name}</div>
+            <div className="font-semibold text-lg uppercase text-nowrap">{drink.name}</div>
             <div className='flex justify-between'>
               <div className="text-gray-600 text-sm mt-2">{selectedSize === 'M' ? drink.prices.M : drink.prices.L}đ</div>
               <div className="flex items-center">
                 {['M', 'L'].map((option, index) => (
-                  <div key={index} className={`w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center cursor-pointer mr-2 ${selectedSize === option ? 'bg-amber-500 text-white rounded-full' : ''}`} onClick={() => setSelectedSize((prevOption) => prevOption === option ? null : option)}>
+                  <div key={index} className={`w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center cursor-pointer mr-2 ${selectedSize === option ? 'bg-blue-500 text-white rounded-full' : ''}`} onClick={() => {setSelectedSize((prevOption) => prevOption === option ? null : option); updateSelectedOptions('size', option);}}>
                     {option}
                   </div>
                 ))}
@@ -52,9 +69,9 @@ function DrinkOfCategory({ drink, addToBill }) {
                 {Array.isArray(temperature) && temperature.length > 0 && temperature.map((option, index) => (
                   <div key={index} className="ml-2">
                     {option == "hot" ?
-                      <FontAwesomeIcon icon={faFire} className={`text-red-500 p-2 rounded-full bg-gray-200 mr-2 cursor-pointer ${selectedTemperature === option ? 'bg-amber-500 rounded-full' : ''}`} onClick={() => setSelectedTemperature((prevOption) => prevOption === option ? null : option)} />
+                      <FontAwesomeIcon icon={faFire} className={`text-red-500 p-2 rounded-full bg-gray-200 mr-2 cursor-pointer ${selectedTemperature === option ? 'bg-amber-500 rounded-full' : ''}`} onClick={() => {setSelectedTemperature((prevOption) => prevOption === option ? null : option); updateSelectedOptions('temperature', option);}} />
                       :
-                      <FontAwesomeIcon icon={faTint} className={`text-blue-500 p-2 rounded-full bg-gray-200 cursor-pointer ${selectedTemperature === option ? 'bg-amber-500 rounded-full' : ''}`} onClick={() => setSelectedTemperature((prevOption) => prevOption === option ? null : option)} />}
+                      <FontAwesomeIcon icon={faTint} className={`text-blue-500 p-2 rounded-full bg-gray-200 cursor-pointer ${selectedTemperature === option ? 'bg-amber-500 rounded-full' : ''}`} onClick={() => {setSelectedTemperature((prevOption) => prevOption === option ? null : option); updateSelectedOptions('temperature', option);}} />}
                   </div>
                 ))}
 
@@ -67,7 +84,7 @@ function DrinkOfCategory({ drink, addToBill }) {
 
                 <div className='flex'>
                   {Array.isArray(sugar) && sugar.length > 0 && sugar.map((option, index) => (
-                    <div key={index} className={`ml-2 p-1 text-sm bg-gray-200 rounded-full cursor-pointer ${selectedSugar === option ? 'bg-amber-500 text-white rounded-full' : ''}`} onClick={() => setSelectedSugar((prevOption) => prevOption === option ? null : option)}>
+                    <div key={index} className={`ml-2 p-1 text-sm bg-gray-200 rounded-full cursor-pointer ${selectedSugar === option ? 'bg-amber-500 text-white rounded-full' : ''}`} onClick={() => {setSelectedSugar((prevOption) => prevOption === option ? null : option); updateSelectedOptions('sugar', option);}}>
                       {option}
                     </div>
                   ))}
@@ -79,7 +96,7 @@ function DrinkOfCategory({ drink, addToBill }) {
                 {Array.isArray(ice) && ice.length > 0 && <div>Đá:</div>}
                 <div className='flex'>
                   {Array.isArray(ice) && ice.length > 0 && ice.map((option, index) => (
-                    <div key={index} className={`ml-2 p-1 text-sm bg-gray-200 rounded-full cursor-pointer ${selectedIce === option ? 'bg-amber-500 text-white rounded-full' : ''}`} onClick={() => setSelectedIce((prevOption) => prevOption === option ? null : option)}>
+                    <div key={index} className={`ml-2 p-1 text-sm bg-gray-200 rounded-full cursor-pointer ${selectedIce === option ? 'bg-amber-500 text-white rounded-full' : ''}`} onClick={() => {setSelectedIce((prevOption) => prevOption === option ? null : option); updateSelectedOptions('ice', option);}}>
                       {option}
                     </div>
                   ))}
@@ -109,8 +126,9 @@ function DrinkOfCategory({ drink, addToBill }) {
                 </button>
               </div>
             </div>
-            <div className="mt-4 flex items-center justify-center">
-              <button onClick={()=>addToBill(drink)} className="bg-amber-600 text-white px-4 py-2 rounded-full hover:bg-amber-700 transition duration-300">
+            <div className="mt-4 flex-col justify-center text-center">
+              {error && <div className="text-red-500">{error}</div>}
+              <button onClick={handleAddToBill} className="bg-amber-600 text-white px-4 py-2 rounded-full hover:bg-amber-700 transition duration-300">
                 Thêm vào hóa đơn
               </button>
             </div>

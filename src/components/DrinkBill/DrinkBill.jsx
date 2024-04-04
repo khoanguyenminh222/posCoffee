@@ -2,19 +2,19 @@ import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPen } from '@fortawesome/free-solid-svg-icons';
 
-function DrinkBill() {
+function DrinkBill({item}) {
     const [showNoteInput, setShowNoteInput] = useState(false);
 
     const handleNoteClick = () => {
         setShowNoteInput(!showNoteInput);
     };
-
+    console.log(item);
     return (
         <div className='mb-6'>
             <div className="flex items-center mb-1">
                 <img src="/images/coffee1.png" alt="Đồ uống" className="w-8 h-8 rounded mr-2" />
                 <div className="flex-grow">
-                    <div className="font-semibold">Tên đồ uống</div>
+                    <div className="font-semibold">{item.name}</div>
                     <div className="flex items-center">
                         <div className="text-sm mr-2">x2</div>
                         <div

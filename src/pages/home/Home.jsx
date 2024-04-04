@@ -13,6 +13,13 @@ function Home() {
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
+  const [selectedOptions, setSelectedOptions] = useState({
+    temperature: null,
+    sugar: null,
+    ice: null,
+    size: null
+  });
+  const [billItems, setBillItems] = useState([]);
 
   const toggleSidebar = () => {
     setIsOpen(!isOpen);
@@ -45,10 +52,37 @@ function Home() {
     }
   };
 
-  const addToBill = (drink) => {
-    // Implement logic to add the selected drink to the bill
-    console.log('Added to bill:', drink);
+  const addToBill = (drink, quantity) => {
+    const billItem = {
+      id: drink._id,
+      name: drink.name,
+      price: selectedOptions.size === 'M' ? drink.prices.M : drink.prices.L,
+      quantity: quantity,
+      options: selectedOptions
+    };
+    setBillItems([...billItems, billItem]);
   };
+
+  const searchDrinks = () => {
+    const filteredDrinks = drinks.filter(drink => {
+      if (
+        (selectedOptions.temperature && !drink.options.temperature.includes(selectedOptions.temperature)) ||
+        (selectedOptions.sugar && !drink.options.sugar.includes(selectedOptions.sugar)) ||
+        (selectedOptions.ice && !drink.options.ice.includes(selectedOptions.ice)) ||
+        (selectedOptions.size && selectedOptions.size !== 'M' && selectedOptions.size !== 'L')
+      ) {
+        return false;
+      }
+      return true;
+    });
+    return filteredDrinks;
+  };
+
+  useEffect(() => {
+    // Call searchDrinks whenever selected options change
+    const filteredDrinks = searchDrinks();
+    setDrinks(filteredDrinks);
+  }, [selectedOptions]);
 
   return (
     <div className="flex">
@@ -75,7 +109,7 @@ function Home() {
             <div className='flex flex-wrap overflow-auto h-full w-4/5 justify-center max-h-screen' style={{ scrollbarWidth: 'thin', scrollbarColor: 'gray', scrollbarTrackColor: 'rgba(0, 0, 0, 0.1)' }}>
             {selectedCategory && 
               drinks.map(drink => (
-                <DrinkOfCategory key={drink._id} drink={drink} addToBill={addToBill}/>
+                <DrinkOfCategory key={drink._id} drink={drink} addToBill={addToBill} setSelectedOptions={setSelectedOptions}/>
               ))}
             
 
@@ -84,7 +118,7 @@ function Home() {
         </div>
 
         {/* Component Bill */}
-        <Bill />
+        <Bill billItems={billItems}/>
       </div>
     </div>
   );

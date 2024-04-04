@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPrint  } from '@fortawesome/free-solid-svg-icons';
 import DrinkBill from '../DrinkBill/DrinkBill';
 
-function Bill() {
+function Bill({billItems}) {
     return (
         <div className="w-1/4 h-full bg-white p-4 shadow-md rounded-md relative">
             {/* Avatar và tên người dùng */}
@@ -19,11 +19,9 @@ function Bill() {
 
                 {/* Danh sách các mặt hàng trong hóa đơn */}
                 <div>
-                    <DrinkBill />
-                    <DrinkBill />
-                    <DrinkBill />
-                    <DrinkBill />
-                    {/* Thêm các mặt hàng khác tương tự nếu cần */}
+                    {billItems.map(item => (
+                        <DrinkBill key={item.id} item={item}/>
+                    ))}
                 </div>
             </div>
             <div className="absolute bottom-0 left-0 w-full bg-white p-4">
