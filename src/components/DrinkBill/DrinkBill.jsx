@@ -5,9 +5,13 @@ import { faPen, faTrash } from '@fortawesome/free-solid-svg-icons';
 function DrinkBill({item, onDelete, onIncrement, onDecrement}) {
     const { temperature, sugar, ice, size } = item.options;
     const [showNoteInput, setShowNoteInput] = useState(false);
+    const [note, setNote] = useState('');
 
     const handleNoteClick = () => {
         setShowNoteInput(!showNoteInput);
+    };
+    const handleChangeNote = (event) => {
+        setNote(event.target.value);
     };
     return (
         <div className='mb-6'>
@@ -35,6 +39,8 @@ function DrinkBill({item, onDelete, onIncrement, onDecrement}) {
                     type="text"
                     className="border border-gray-300 rounded p-1 w-full focus:outline-none mb-4"
                     placeholder="Nhập ghi chú"
+                    value={note}
+                    onChange={handleChangeNote}
                 />
             )}
             {/* Thêm thông tin về đá%, đường%, và size */}
