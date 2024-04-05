@@ -1,9 +1,15 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPrint } from '@fortawesome/free-solid-svg-icons';
 import DrinkBill from '../DrinkBill/DrinkBill';
+import { baseURL, billRoutes } from '@/api/api';
+import axios from 'axios';
+import { useReactToPrint } from 'react-to-print';
+import BillToPrint from './BillToPrint';
 
 function Bill({ billItems, onDeleteAll, onDeleteItem, onIncrementItem, onDecrementItem }) {
+    const [printButton, setPrintButton] = useState(false);
+    const [bill, setBill] = useState([]);
     const user = {
         "_id": "660f55ff0437f3e3fe1d9ba2",
         "username": "nhanvien1",
@@ -11,6 +17,34 @@ function Bill({ billItems, onDeleteAll, onDeleteItem, onIncrementItem, onDecreme
         "role": "user",
     };
     const totalAmount = billItems.reduce((total, item) => total + item.price * item.quantity, 0);
+
+    const componentRef = useRef();
+
+    const handlePrint = useReactToPrint({
+        content: () => componentRef.current,
+    });
+    const handlePrintBill = async () => {
+        try {
+            if (billItems.length === 0) {
+                alert("Không có đồ uống trong hóa đơn để lưu.");
+                return; // Không có đồ uống, không thực hiện lưu
+            }
+            const data = {
+                userId: user._id,
+                drinks: billItems,
+                totalAmount: totalAmount,
+            };
+            // Gửi yêu cầu POST đến API
+            const response = await axios.post(`${baseURL}${billRoutes}`, data);
+            await setBill(response.data)
+            setPrintButton(true);
+        } catch (error) {
+            console.error('Lỗi khi gửi yêu cầu POST:', error);
+            // Xử lý lỗi nếu cần
+        }
+    };
+
+
     return (
         <div className="w-1/4 h-full bg-white p-4 shadow-md rounded-md relative">
             {/* Avatar và tên người dùng */}
@@ -27,9 +61,9 @@ function Bill({ billItems, onDeleteAll, onDeleteItem, onIncrementItem, onDecreme
 
                 {/* Danh sách các mặt hàng trong hóa đơn */}
                 <div>
-                    {billItems.map(item => (
+                    {billItems.map((item,index) => (
                         <DrinkBill
-                            key={item.id}
+                            key={index}
                             item={item}
                             onDelete={() => onDeleteItem(item)}
                             onIncrement={() => onIncrementItem(item)}
@@ -46,9 +80,15 @@ function Bill({ billItems, onDeleteAll, onDeleteItem, onIncrementItem, onDecreme
                 </div>
 
                 {/* Nút in hoá đơn */}
-                <button className="bg-amber-600 text-white px-4 py-2 rounded hover:bg-amber-700 flex items-center">
-                    <FontAwesomeIcon icon={faPrint} className="mr-2" /> In hoá đơn
+                {printButton ?
+                <button onClick={handlePrint} className="bg-amber-600 text-white px-4 py-2 rounded hover:bg-amber-700 flex items-center">
+                        <FontAwesomeIcon icon={faPrint} className="mr-2" /> In hoá đơn
                 </button>
+                :
+                <button onClick={handlePrintBill} className="bg-amber-600 text-white px-4 py-2 rounded hover:bg-amber-700 flex items-center">
+                        <FontAwesomeIcon icon={faPrint} className="mr-2" /> Lưu
+                </button>} 
+                <BillToPrint ref={componentRef} bill={bill} billItems={billItems} user={user} totalAmount={totalAmount} />
             </div>
         </div>
     );

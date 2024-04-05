@@ -147,7 +147,7 @@ function Home() {
       <Sidebar isOpen={isOpen} toggleSidebar={toggleSidebar} />
 
       <div className={`flex-grow h-screen bg-gray-200 flex ${isOpen ? 'ml-20' : 'ml-0'} transition-all duration-300 ease-in-out`}>
-        <div className="flex-grow flex flex-col w-3/4">
+        <div className="flex-grow flex flex-col w-3/5">
 
           <div className="flex-grow px-4 flex">
             {/* Phần category */}
