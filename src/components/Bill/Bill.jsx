@@ -4,13 +4,19 @@ import { faPrint } from '@fortawesome/free-solid-svg-icons';
 import DrinkBill from '../DrinkBill/DrinkBill';
 
 function Bill({ billItems, onDeleteAll, onDeleteItem, onIncrementItem, onDecrementItem }) {
+    const user = {
+        "_id": "660f55ff0437f3e3fe1d9ba2",
+        "username": "nhanvien1",
+        "fullname": "Nguyễn Văn B",
+        "role": "user",
+    };
     const totalAmount = billItems.reduce((total, item) => total + item.price * item.quantity, 0);
     return (
         <div className="w-1/4 h-full bg-white p-4 shadow-md rounded-md relative">
             {/* Avatar và tên người dùng */}
             <div className="mb-4 flex items-center">
                 <img src="/images/avatar.png" alt="Avatar" className="w-10 h-10 rounded-full mr-2" />
-                <span className="text-lg font-semibold">Tên người dùng</span>
+                <span className="text-lg font-semibold">{user.fullname}</span>
             </div>
 
             {/* Phần hiển thị hóa đơn */}
