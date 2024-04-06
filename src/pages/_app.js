@@ -15,13 +15,8 @@ export default function App({ Component, pageProps }) {
   // Sử dụng hook useRouter để lấy thông tin về route hiện tại
   const router = useRouter();
   const { pathname } = router;
+  
 
-  // Kiểm tra pathname để đảm bảo rằng Component luôn chạy vào trang Home
-  useEffect(() => {
-    if (pathname === '/') {
-      router.push('/home');
-    }
-  }, [pathname]);
   return (
     <>
       {pathname === '/login' ? <Login />
@@ -35,7 +30,7 @@ export default function App({ Component, pageProps }) {
           </button>
           <Sidebar isOpen={isOpen} toggleSidebar={toggleSidebar} />
 
-          <div className={`flex-grow h-screen bg-gray-200 flex ${isOpen ? 'ml-20' : 'ml-0'} transition-all duration-300 ease-in-out`}>
+          <div className={`flex-grow bg-gray-200 flex ${isOpen ? 'ml-20' : 'ml-0'} transition-all duration-300 ease-in-out`}>
             <Component {...pageProps} />
           </div>
         </div>

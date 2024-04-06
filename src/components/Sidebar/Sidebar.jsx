@@ -19,7 +19,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                             <span className="text-sm">Trang chủ</span>
                         </li>
                     </Link>
-                    <Link href="/manage">
+                    <Link href="/management">
                         <li className="py-4 flex flex-col items-center transition duration-300 ease-in-out transform hover:scale-110 cursor-pointer hover:text-amber-700">
                             <FontAwesomeIcon icon={faBurger} size='2x' />
                             <span className="text-sm">Quản lý</span>
