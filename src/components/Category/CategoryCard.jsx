@@ -76,7 +76,7 @@ const CategoryCard = ({ category, onSelect }) => {
 
     return (
         <>
-            <div onClick={() => onSelect(category)} className="bg-white shadow-md rounded-md p-4">
+            <div onClick={() => onSelect(category)} className="bg-white shadow-md rounded-md p-4 mb-4 cursor-pointer hover:shadow-2xl">
                 {imageUrl && <img src={imageUrl} alt={category.name} className="w-full h-32 object-cover mb-4 rounded-md" />}
                 <h2 className="text-lg font-semibold">{name}</h2>
                 {name !== "All" ?
