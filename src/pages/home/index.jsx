@@ -55,7 +55,7 @@ function Home() {
   const addToBill = (drink, quantity) => {
     // Kiểm tra xem đã tồn tại billItem có id là drink._id và options giống nhau không
     const existingItem = billItems.find(item => item.id === drink._id && JSON.stringify(item.options) === JSON.stringify(selectedOptions));
-    
+
     // Nếu tồn tại billItem có id là drink._id và options giống nhau, không thêm mới vào billItems
     if (existingItem) {
       // Cập nhật số lượng của billItem đã tồn tại
@@ -65,7 +65,7 @@ function Home() {
         }
         return item;
       });
-  
+
       setBillItems(updatedBillItems);
     } else {
       // Nếu chưa tồn tại billItem có id là drink._id và options giống nhau, thêm mới vào billItems
@@ -76,7 +76,7 @@ function Home() {
         quantity: quantity,
         options: selectedOptions
       };
-  
+
       setBillItems([...billItems, billItem]);
     }
   };
@@ -113,7 +113,7 @@ function Home() {
       return billItem.id !== item.id || JSON.stringify(billItem.options) !== JSON.stringify(item.options);
     }));
   };
-  
+
 
   const onIncrementItem = (item) => {
     const updatedBillItems = billItems.map(billItem => {
@@ -137,46 +137,37 @@ function Home() {
 
 
   return (
-    <div className="flex">
+    <>
+      <div className="flex-grow flex flex-col w-3/5">
+        <div className="flex-grow px-4 flex">
+          {/* Phần category */}
+          <div className="flex flex-col overflow-auto w-1/5 mr-4 max-h-screen" style={{ scrollbarWidth: 'thin', scrollbarColor: 'gray', scrollbarTrackColor: 'rgba(0, 0, 0, 0.1)' }}>
+            {categories.map(category => (
+              <Category key={category._id} category={category} storage={storage} onClick={handleCategoryClick} />
+            ))}
+          </div>
 
-      {/* Sidebar */}
-      {/* Toggle button */}
-      <button className="fixed top-4 left-4 bg-white p-2 rounded-full shadow-md focus:outline-none z-10 transition-all duration-300 ease-in-out transform hover:scale-110" onClick={toggleSidebar}>
-        <FontAwesomeIcon icon={faBars} size='lg' className="text-gray-500" />
-      </button>
-      <Sidebar isOpen={isOpen} toggleSidebar={toggleSidebar} />
-
-      <div className={`flex-grow h-screen bg-gray-200 flex ${isOpen ? 'ml-20' : 'ml-0'} transition-all duration-300 ease-in-out`}>
-        <div className="flex-grow flex flex-col w-3/5">
-
-          <div className="flex-grow px-4 flex">
-            {/* Phần category */}
-            <div className="flex flex-col overflow-auto w-1/5 mr-4 max-h-screen" style={{ scrollbarWidth: 'thin', scrollbarColor: 'gray', scrollbarTrackColor: 'rgba(0, 0, 0, 0.1)' }}>
-              {categories.map(category => (
-                <Category key={category._id} category={category} storage={storage} onClick={handleCategoryClick} />
-              ))}
-            </div>
-
-            {/* Phần drink */}
-            <div className='flex flex-wrap overflow-auto h-full w-4/5 justify-center max-h-screen' style={{ scrollbarWidth: 'thin', scrollbarColor: 'gray', scrollbarTrackColor: 'rgba(0, 0, 0, 0.1)' }}>
-            {selectedCategory && 
+          {/* Phần drink */}
+          <div className='flex flex-wrap overflow-auto h-full w-4/5 justify-center max-h-screen' style={{ scrollbarWidth: 'thin', scrollbarColor: 'gray', scrollbarTrackColor: 'rgba(0, 0, 0, 0.1)' }}>
+            {selectedCategory &&
               drinks.map(drink => (
-                <DrinkOfCategory key={drink._id} drink={drink} addToBill={addToBill} setSelectedOptions={setSelectedOptions}/>
+                <DrinkOfCategory key={drink._id} drink={drink} addToBill={addToBill} setSelectedOptions={setSelectedOptions} />
               ))}
-            
 
-            </div>
+
           </div>
         </div>
+      </div>
 
-        {/* Component Bill */}
+      {/* Component Bill */}
+      <div className="w-1/4 h-full bg-white p-4 shadow-md rounded-md relative">
         <Bill billItems={billItems}
           onDeleteAll={onDeleteAll}
           onDeleteItem={onDeleteItem}
           onIncrementItem={onIncrementItem}
-          onDecrementItem={onDecrementItem}/>
+          onDecrementItem={onDecrementItem} />
       </div>
-    </div>
+    </>
   );
 }
 
