@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPrint } from '@fortawesome/free-solid-svg-icons';
+import { faL, faPrint } from '@fortawesome/free-solid-svg-icons';
 import DrinkBill from '../DrinkBill/DrinkBill';
 import { baseURL, billRoutes } from '@/api/api';
 import axios from 'axios';
@@ -8,7 +8,7 @@ import { useReactToPrint } from 'react-to-print';
 import BillToPrint from './BillToPrint';
 
 function Bill({ billItems, onDeleteAll, onDeleteItem, onIncrementItem, onDecrementItem }) {
-    const [printButton, setPrintButton] = useState(false);
+    const [isPrinted, setIsPrinted] = useState(false);
     const [bill, setBill] = useState([]);
     const user = {
         "_id": "660f55ff0437f3e3fe1d9ba2",
@@ -36,8 +36,8 @@ function Bill({ billItems, onDeleteAll, onDeleteItem, onIncrementItem, onDecreme
             };
             // Gửi yêu cầu POST đến API
             const response = await axios.post(`${baseURL}${billRoutes}`, data);
-            await setBill(response.data)
-            setPrintButton(true);
+            setBill(response.data)
+            setIsPrinted(true);
         } catch (error) {
             console.error('Lỗi khi gửi yêu cầu POST:', error);
             // Xử lý lỗi nếu cần
@@ -57,7 +57,7 @@ function Bill({ billItems, onDeleteAll, onDeleteItem, onIncrementItem, onDecreme
             <div className="mb-4 overflow-y-auto max-h-96" style={{ scrollbarWidth: 'thin', scrollbarColor: 'gray', scrollbarTrackColor: 'rgba(0, 0, 0, 0.1)' }}>
                 {/* Tiêu đề hóa đơn */}
                 <h2 className="text-lg font-semibold mb-2">Hóa đơn</h2>
-                <button onClick={onDeleteAll} className="bg-red-500 text-white px-2 py-1 rounded-md mb-4">Xoá hết</button>
+                <button onClick={()=>{onDeleteAll(); setIsPrinted(false)}} className="bg-red-500 text-white px-2 py-1 rounded-md mb-4">Xoá hết</button>
 
                 {/* Danh sách các mặt hàng trong hóa đơn */}
                 <div>
@@ -80,7 +80,7 @@ function Bill({ billItems, onDeleteAll, onDeleteItem, onIncrementItem, onDecreme
                 </div>
 
                 {/* Nút in hoá đơn */}
-                {printButton ?
+                {isPrinted ?
                 <button onClick={handlePrint} className="bg-amber-600 text-white px-4 py-2 rounded hover:bg-amber-700 flex items-center">
                         <FontAwesomeIcon icon={faPrint} className="mr-2" /> In hoá đơn
                 </button>
