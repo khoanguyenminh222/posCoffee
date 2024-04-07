@@ -18,6 +18,7 @@ function Management() {
   const [isAddingCategory, setIsAddingCategory] = useState(false);
   const [isAddingDrink, setIsAddingDrink] = useState(false);
 
+  // mở form add category/ drink
   const handleAddCategory = () => {
     setIsAddingCategory(true);
   };
@@ -66,11 +67,51 @@ function Management() {
       });
   }, []);
 
+  useEffect(() => {
+    if (selectedCategory && selectedCategory.name !== 'All') {
+      const filteredDrinks = drinks.filter(drink => drink.categoryId === selectedCategory._id);
+      setSelectedDrinks(filteredDrinks);
+    } else {
+      setSelectedDrinks(drinks);
+    }
+  }, [drinks, selectedCategory]);
+  //CATEGORY
+  //cập nhật lại state category sau khi thêm
   const handleSaveCategory = (newCategoryData) => {
     setCategories(prevDrinks => [...prevDrinks, newCategoryData]);
   };
-
-  // Hàm xoá đồ uống và cập nhật state
+  //cập nhtaaj lại state category sau khi chỉnh sửa
+  const editCategoryAndUpdateState = (newCategoryData) => {
+    // Cập nhật state của categories bằng cách thay đổi thông tin category đã chỉnh sửa trong danh sách categories
+    const updatedCategories = categories.map(category => {
+        if (category._id === newCategoryData._id) {
+            return { ...category, name: newCategoryData.name, img: newCategoryData.img };
+        }
+        return category;
+    });
+    setCategories(updatedCategories);
+};
+  //cập nhật lại state category sau khi xoá
+  const deleteCategoryAndUpdateState = async (categoryId, categoryName) => {
+    if (window.confirm(`Bạn có muốn xoá ${categoryName}?`)) {
+      try {
+        const response = await axios.delete(`${baseURL}${categoriesRoutes}/${categoryId}`);
+        if (response.status === 201) {
+          alert("Xoá thành công");
+          const updatedCategories = categories.filter(category => category._id !== categoryId);
+          setCategories(updatedCategories);
+        } else {
+          alert("Có lỗi xảy ra");
+        }
+      } catch (error) {
+        console.error('Error deleting category:', error);
+        alert("Error deleting category");
+      }
+    }
+  };
+ 
+  //DRINK
+  //cập nhật lại state drink sau khi xoá
   const deleteDrinkAndUpdateState = async (drinkId, drinkname) => {
     if (window.confirm(`Bạn có muốn xoá ${drinkname}?`)) {
       try {
@@ -99,34 +140,7 @@ function Management() {
       }
     }
   };
-  
-  
-  useEffect(() => {
-    if (selectedCategory && selectedCategory.name !== 'All') {
-      const filteredDrinks = drinks.filter(drink => drink.categoryId === selectedCategory._id);
-      setSelectedDrinks(filteredDrinks);
-    } else {
-      setSelectedDrinks(drinks);
-    }
-  }, [drinks, selectedCategory]);
-
-  const deleteCategoryAndUpdateState = async (categoryId, categoryName) => {
-    if (window.confirm(`Bạn có muốn xoá ${categoryName}?`)) {
-      try {
-        const response = await axios.delete(`${baseURL}${categoriesRoutes}/${categoryId}`);
-        if (response.status === 201) {
-          alert("Xoá thành công");
-          const updatedCategories = categories.filter(category => category._id !== categoryId);
-          setCategories(updatedCategories);
-        } else {
-          alert("Có lỗi xảy ra");
-        }
-      } catch (error) {
-        console.error('Error deleting category:', error);
-        alert("Error deleting category");
-      }
-    }
-  };
+  // cập nhật lại state drink sau khi chỉnh sửa
   const editDrinkAndUpdateState = (newDrinkData) => {
     // Cập nhật state của đồ uống sau khi chỉnh sửa
     const updatedDrinks = drinks.map(drink => {
@@ -147,9 +161,7 @@ function Management() {
       setSelectedDrinks(updatedDrinks);
     }
   };
-  
-  
-
+  //cập nhật lại state drink sau khi thêm mới
   const handleSaveDrink = (newDrinkData) => {
     // Thêm đồ uống mới vào danh sách drinks
     setDrinks(prevDrinks => [...prevDrinks, newDrinkData]);
@@ -164,6 +176,7 @@ function Management() {
     }
   };
 
+  //đóng form add category / drink
   const handleCancelAddCategory = () => {
     setIsAddingCategory(false);
   }
@@ -176,7 +189,7 @@ function Management() {
         <h1 className="text-3xl font-semibold my-4">Mặt hàng</h1>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {categories.map(category => (
-            <CategoryCard key={category._id} category={category} onSelect={handleCategorySelect} onDeleteCategory={deleteCategoryAndUpdateState} />
+            <CategoryCard key={category._id} category={category} onSelect={handleCategorySelect} onDeleteCategory={deleteCategoryAndUpdateState} onEditCategory={editCategoryAndUpdateState}/>
           ))}
         </div>
         <h1 className="text-3xl font-semibold my-4">Thức uống</h1>

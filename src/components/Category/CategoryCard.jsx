@@ -8,7 +8,7 @@ import axios from 'axios';
 import EditCategoryForm from './EditCategoryForm';
 import { baseURL, categoriesRoutes } from '@/api/api';
 
-const CategoryCard = ({ category, onSelect, onDeleteCategory }) => {
+const CategoryCard = ({ category, onSelect, onDeleteCategory, onEditCategory }) => {
     const [name,setName] = useState(category.name);
     const [img, setImg] = useState(category.img);
     const [imageUrl, setImageUrl] = useState(null);
@@ -45,12 +45,11 @@ const CategoryCard = ({ category, onSelect, onDeleteCategory }) => {
         if(formData){
             setName(formData.name);
             setImg(formData.img)
+            onEditCategory({ _id: category._id, name: formData.name, img: formData.img });
             alert('Cập nhật thành công')
         }else{
             alert('Có lỗi xảy ra')
         }
-        // Xử lý lưu thông tin chỉnh sửa category
-        // Thực hiện hành động cần thiết sau khi lưu thành công, ví dụ: đóng form chỉnh sửa
         setIsEditing(false);
     };
 
