@@ -6,17 +6,23 @@ import { baseURL, categoriesRoutes, drinksRoutes } from '@/api/api';
 import CategoryCard from '@/components/Category/CategoryCard';
 import DrinkCard from '@/components/DrinkOfCategory/DrinkCard';
 import AddCategoryForm from '@/components/Category/AddCategoryForm';
+import AddDrinkForm from '@/components/DrinkOfCategory/AddDrinkForm';
 
 function Management() {
   const [categories, setCategories] = useState([]);
   const [drinks, setDrinks] = useState([]);
-  const [selectedDrinks, setSelectedDrinks] = useState([]);
+  const [selectedDrinks, setSelectedDrinks] = useState();
+  const [selectedCategory, setSelectedCategory] = useState(null);
 
   // hiện form category add
   const [isAddingCategory, setIsAddingCategory] = useState(false);
+  const [isAddingDrink, setIsAddingDrink] = useState(false);
 
   const handleAddCategory = () => {
     setIsAddingCategory(true);
+  };
+  const handleAddDrink = () => {
+    setIsAddingDrink(true);
   };
 
   const sortDrinks = () => {
@@ -26,6 +32,7 @@ function Management() {
   };
 
   const handleCategorySelect = (selectedCategory) => {
+    setSelectedCategory(selectedCategory);
     if (selectedCategory.name === 'All') {
       sortDrinks(); // Sắp xếp lại các đồ uống
     } else {
@@ -59,34 +66,86 @@ function Management() {
       });
   }, []);
 
+  // Hàm xoá đồ uống và cập nhật state
+  const deleteDrinkAndUpdateState = async (drinkId, drinkname) => {
+    if (window.confirm(`Bạn có muôn xoá ${drinkname}?`)) {
+      try {
+        // Gửi request POST sử dụng axios
+        const response = await axios.delete(`${baseURL}${drinksRoutes}/${drinkId}`);
+        if (response.status == 201) {
+          alert("Xoá thành công")
+          // Cập nhật state drinks bằng danh sách mới
+          setDrinks(prevDrinks => prevDrinks.filter(drink => drink._id !== drinkId));
+        } else {
+          alert("Có lỗi xảy ra");
+        }
+      } catch (error) {
+        console.error('Error deleting drink:', error);
+        // Xử lý lỗi nếu có
+      }
+    }
+  };
+  useEffect(() => {
+    setSelectedDrinks(drinks);
+  }, [drinks]);
+
+  const deleteCategoryAndUpdateState = async (categoryId, categoryName) => {
+    if (window.confirm(`Bạn có muốn xoá ${categoryName}?`)) {
+      try {
+        const response = await axios.delete(`${baseURL}${categoriesRoutes}/${categoryId}`);
+        if (response.status === 201) {
+          alert("Xoá thành công");
+          const updatedCategories = categories.filter(category => category._id !== categoryId);
+          setCategories(updatedCategories);
+        } else {
+          alert("Có lỗi xảy ra");
+        }
+      } catch (error) {
+        console.error('Error deleting category:', error);
+      }
+    }
+  };
+  const editDrinkAndUpdateState = (newDrinkData) => {
+    // Cập nhật state của đồ uống sau khi chỉnh sửa
+    const updatedSelectedDrinks = selectedDrinks.map(item => (item._id === newDrinkData._id ? newDrinkData : item));
+    setDrinks(updatedSelectedDrinks);
+};
+  const handleCancelAddCategory = () =>{
+    setIsAddingCategory(false);
+  }
+  const handleCancelAddDrink = () =>{
+    setIsAddingDrink(false);
+  }
   return (
     <>
-    <div className="container mx-auto px-4 max-h-full">
-      <h1 className="text-3xl font-semibold my-4">Mặt hàng</h1>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {categories.map(category => (
-          <CategoryCard key={category._id} category={category} onSelect={() => handleCategorySelect(category)}/>
-        ))}
+      <div className="container mx-auto px-4 max-h-full">
+        <h1 className="text-3xl font-semibold my-4">Mặt hàng</h1>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {categories.map(category => (
+            <CategoryCard key={category._id} category={category} onSelect={handleCategorySelect} onDeleteCategory={deleteCategoryAndUpdateState} />
+          ))}
+        </div>
+        <h1 className="text-3xl font-semibold my-4">Thức uống</h1>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {selectedCategory && selectedDrinks.map(drink => (
+            <DrinkCard key={drink._id} drink={drink} editCard={editDrinkAndUpdateState} deleteDrink={deleteDrinkAndUpdateState} />
+          ))}
+        </div>
+        <button className="fixed bottom-16 right-4 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-full shadow-md focus:outline-none z-10" onClick={handleAddCategory}>
+          <FontAwesomeIcon icon={faCoffee} className="mr-2" />
+          Add Category
+        </button>
+        <button className="fixed bottom-4 right-4 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-full shadow-md focus:outline-none z-10" onClick={handleAddDrink}>
+          <FontAwesomeIcon icon={faCoffee} className="mr-2" />
+          Add Drink
+        </button>
       </div>
-      <h1 className="text-3xl font-semibold my-4">Thức uống</h1>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-      {selectedDrinks.map(drink => (
-          <DrinkCard key={drink._id} drink={drink} />
-        ))}
-      </div>
-      <button className="fixed bottom-16 right-4 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-full shadow-md focus:outline-none z-10" onClick={handleAddCategory}>
-        <FontAwesomeIcon icon={faCoffee} className="mr-2" />
-        Add Category
-      </button>
-      <button className="fixed bottom-4 right-4 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-full shadow-md focus:outline-none z-10" onClick={() => console.log('Add Drink')}>
-        <FontAwesomeIcon icon={faCoffee} className="mr-2" />
-        Add Drink
-      </button>
-    </div>
-    {isAddingCategory && (
-      <AddCategoryForm />
-    )}
-
+      {isAddingCategory && (
+        <AddCategoryForm onCancel={handleCancelAddCategory}/>
+      )}
+      {isAddingDrink && (
+        <AddDrinkForm onCancel={handleCancelAddDrink}/>
+      )}
     </>
   );
 }

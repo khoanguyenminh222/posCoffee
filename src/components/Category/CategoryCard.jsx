@@ -8,7 +8,7 @@ import axios from 'axios';
 import EditCategoryForm from './EditCategoryForm';
 import { baseURL, categoriesRoutes } from '@/api/api';
 
-const CategoryCard = ({ category, onSelect }) => {
+const CategoryCard = ({ category, onSelect, onDeleteCategory }) => {
     const [name,setName] = useState(category.name);
     const [img, setImg] = useState(category.img);
     const [imageUrl, setImageUrl] = useState(null);
@@ -30,21 +30,7 @@ const CategoryCard = ({ category, onSelect }) => {
     }, [img, storage]);
 
     const handleDelete = async () => {
-        if (window.confirm(`Bạn có muốn xoá ${category.name}?`)) {
-            try {
-                // Gửi request POST sử dụng axios
-                const response = await axios.delete(`${baseURL}${categoriesRoutes}/${category._id}`);
-                console.log(response);
-                if(response.status==201){
-                    alert("Xoá thành công")
-                }else{
-                    alert("Có lỗi xảy ra");
-                }
-              } catch (error) {
-                console.error('Error saving category:', error);
-                // Xử lý lỗi nếu có
-              }
-        }
+        onDeleteCategory(category._id, category.name);
     };
 
     const handleEdit = () => {

@@ -6,7 +6,7 @@ import { storage } from '@/firebase';
 import EditDrinkFrom from './EditDrinkFrom';
 import { baseURL, drinksRoutes } from '@/api/api';
 
-const DrinkCard = ({ drink }) => {
+const DrinkCard = ({ drink, deleteDrink, editCard }) => {
     const [imageUrl, setImageUrl] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
     useEffect(() => {
@@ -32,26 +32,15 @@ const DrinkCard = ({ drink }) => {
     const handleSaveEdit = (formdata) => {
         if(formdata.status==201){
             alert("Cập nhật thành công");
+            editCard(formdata.data)
+            setIsEditing(false);
         }else{
             alert("Có lỗi xảy ra");
         }
-        setIsEditing(false);
+        
     };
     const handleDelete = async() => {
-        if (window.confirm(`Bạn có muôn xoá ${drink.name}?`)) {
-            try {
-                // Gửi request POST sử dụng axios
-                const response = await axios.delete(`${baseURL}${drinksRoutes}/${drink._id}`);
-                if(response.status==201){
-                    alert("Xoá thành công")
-                }else{
-                    alert("Có lỗi xảy ra");
-                }
-              } catch (error) {
-                console.error('Error saving category:', error);
-                // Xử lý lỗi nếu có
-              }
-        }
+        deleteDrink(drink._id,drink.name)
     }
 
     return (
@@ -66,13 +55,13 @@ const DrinkCard = ({ drink }) => {
             <div className="mt-4">
                 <h3 className="text-md font-semibold mb-1">Tùy chọn:</h3>
                 <ul className="list-disc list-inside">
-                    {drink.options.temperature && (
+                    {drink.options.temperature && drink.options.temperature.length > 0 && (
                         <li className="text-gray-600">Nhiệt độ: {drink.options.temperature.join(', ')}</li>
                     )}
-                    {drink.options.sugar.length > 0 && (
+                    {drink.options.sugar && drink.options.sugar.length > 0 && (
                         <li className="text-gray-600">Đường: {drink.options.sugar.join(', ')}</li>
                     )}
-                    {drink.options.ice.length > 0 && (
+                    {drink.options.ice && drink.options.ice.length > 0 && (
                         <li className="text-gray-600">Đá: {drink.options.ice.join(', ')}</li>
                     )}
                 </ul>
