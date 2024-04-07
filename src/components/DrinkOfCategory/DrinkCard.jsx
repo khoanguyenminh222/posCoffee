@@ -4,11 +4,11 @@ import { faEdit, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 import { ref, getDownloadURL } from 'firebase/storage';
 import { storage } from '@/firebase';
 import EditDrinkFrom from './EditDrinkFrom';
+import { baseURL, drinksRoutes } from '@/api/api';
 
-const DrinkCard = ({ drink: initialDrink }) => {
+const DrinkCard = ({ drink }) => {
     const [imageUrl, setImageUrl] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
-    const [drink, setDrink] = useState(initialDrink);
     useEffect(() => {
         const fetchImageUrl = async () => {
             try {
@@ -28,6 +28,31 @@ const DrinkCard = ({ drink: initialDrink }) => {
     const handleCancelEdit = () => {
         setIsEditing(false);
     };
+
+    const handleSaveEdit = (formdata) => {
+        if(formdata.status==201){
+            alert("Cập nhật thành công");
+        }else{
+            alert("Có lỗi xảy ra");
+        }
+        setIsEditing(false);
+    };
+    const handleDelete = async() => {
+        if (window.confirm(`Bạn có muôn xoá ${drink.name}?`)) {
+            try {
+                // Gửi request POST sử dụng axios
+                const response = await axios.delete(`${baseURL}${drinksRoutes}/${drink._id}`);
+                if(response.status==201){
+                    alert("Xoá thành công")
+                }else{
+                    alert("Có lỗi xảy ra");
+                }
+              } catch (error) {
+                console.error('Error saving category:', error);
+                // Xử lý lỗi nếu có
+              }
+        }
+    }
 
     return (
         <>
@@ -57,13 +82,13 @@ const DrinkCard = ({ drink: initialDrink }) => {
                     <FontAwesomeIcon icon={faEdit} className="mr-1" />
                     Sửa
                 </button>
-                <button onClick={() => onDelete(drink._id)} className="text-sm text-red-600 hover:underline focus:outline-none">
+                <button onClick={handleDelete} className="text-sm text-red-600 hover:underline focus:outline-none">
                     <FontAwesomeIcon icon={faTrashAlt} className="mr-1" />
                     Xoá
                 </button>
             </div>
         </div>
-        {isEditing && <EditDrinkFrom drink={drink} setDrink={setDrink} onCancel={handleCancelEdit}/>}
+        {isEditing && <EditDrinkFrom drink={drink} onCancel={handleCancelEdit} onSave={handleSaveEdit}/>}
         </>
     );
 }

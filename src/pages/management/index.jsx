@@ -62,13 +62,13 @@ function Management() {
   return (
     <>
     <div className="container mx-auto px-4 max-h-full">
-      <h1 className="text-3xl font-semibold my-4">Categories</h1>
+      <h1 className="text-3xl font-semibold my-4">Mặt hàng</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {categories.map(category => (
           <CategoryCard key={category._id} category={category} onSelect={() => handleCategorySelect(category)}/>
         ))}
       </div>
-      <h1 className="text-3xl font-semibold my-4">Drinks</h1>
+      <h1 className="text-3xl font-semibold my-4">Thức uống</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
       {selectedDrinks.map(drink => (
           <DrinkCard key={drink._id} drink={drink} />

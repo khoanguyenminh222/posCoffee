@@ -1,11 +1,22 @@
-import { baseURL, drinksRoutes } from '@/api/api';
+import { baseURL, categoriesRoutes, drinksRoutes } from '@/api/api';
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
-function EditDrinkFrom({ drink, onCancel }) {
+function EditDrinkFrom({ drink, onCancel, onSave }) {
     const [options, setOptions] = useState(drink.options);
     const [checkAllTemperature, setCheckAllTemperature] = useState(false);
     const [checkAllSugar, setCheckAllSugar] = useState(false);
     const [checkAllIce, setCheckAllIce] = useState(false);
+
+    const [categories, setCategories] = useState([]);
+    const [selectedCategory, setSelectedCategory] = useState();
+    const [categoryOfDrink, setCategoryOfDrink] = useState([]);
+
+    const [name, setName] = useState(drink.name);
+    const [priceM, setPriceM] = useState(drink.prices.M)
+    const [priceL, setPriceL] = useState(drink.prices.L)
+    const [imageFile, setImageFile] = useState(null);
+
 
     useEffect(() => {
         // Cập nhật state options khi có sự thay đổi trong state checkAllTemperature
@@ -135,22 +146,88 @@ function EditDrinkFrom({ drink, onCancel }) {
         setImageFile(file);
     };
 
+    useEffect(() => {
+        const fetchCategoriesOfDrink = async () => {
+            try {
+                const response = await axios.get(`${baseURL}${categoriesRoutes}/${drink.categoryId}`);
+                setCategoryOfDrink(response.data);
+            } catch (error) {
+                console.error('Error fetching categories:', error);
+            }
+        };
+
+        fetchCategoriesOfDrink();
+    }, []);
+
+    useEffect(() => {
+        // Call API to get all categories when the component mounts
+        const fetchCategories = async () => {
+            try {
+                const response = await axios.get(`${baseURL}${categoriesRoutes}`);
+                setCategories(response.data);
+            } catch (error) {
+                console.error('Error fetching categories:', error);
+            }
+        };
+
+        fetchCategories();
+    }, []);
+
+    useEffect(() => {
+        // Set selected category based on drink's category when drink changes
+        setSelectedCategory(drink.categoryId);
+    }, [drink]);
+
+    const handleCategoryChange = (event) => {
+        setSelectedCategory(event.target.value);
+    };
+
+    const handleChangeName = (event) => {
+        setName(event.target.value)
+    }
+    const handleChangePriceM = (event) => {
+        setPriceM(event.target.value)
+    }
+    const handleChangePriceL = (event) => {
+        setPriceL(event.target.value)
+    }
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         const formData = new FormData();
-        try {
-          // Gửi request POST sử dụng axios
-          const response = await axios.put(`${baseURL}${drinksRoutes}/${drink._id}`, formData, {
-            headers: {
-              'Content-Type': 'multipart/form-data' // Cần set header 'Content-Type' là 'multipart/form-data' để gửi FormData
-            }
-          });
-          onSave(response.data); // Gọi hàm onSave khi request thành công
-        } catch (error) {
-          console.error('Error saving category:', error);
-          // Xử lý lỗi nếu có
+        formData.append('name', name);
+        formData.append('prices[M]', priceM);
+        formData.append('prices[L]', priceL);
+        formData.append('categoryId', selectedCategory);
+        // Thêm từng phần tử của options vào FormData
+        options.temperature.forEach(temp => {
+            formData.append('options[temperature][]', temp);
+        });
+
+        options.sugar.forEach(sugar => {
+            formData.append('options[sugar][]', sugar);
+        });
+
+        options.ice.forEach(ice => {
+            formData.append('options[ice][]', ice);
+        });
+
+        if (imageFile) {
+            formData.append('image', imageFile);
         }
-      };
+        try {
+            // Gửi request PUT sử dụng axios
+            const response = await axios.put(`${baseURL}${drinksRoutes}/${drink._id}`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data' // Cần set header 'Content-Type' là 'multipart/form-data' để gửi FormData
+                }
+            });
+            onSave(response); // Gọi hàm onSave khi request thành công
+        } catch (error) {
+            console.error('Error saving category:', error);
+            // Xử lý lỗi nếu có
+        }
+    };
 
     return (
         <div className="fixed top-0 left-0 right-0 bottom-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50">
@@ -161,15 +238,24 @@ function EditDrinkFrom({ drink, onCancel }) {
                     {/* Input fields */}
                     <div className="mb-4">
                         <label htmlFor="name" className="block text-sm font-medium text-gray-700">Tên</label>
-                        <input type="text" id="name" defaultValue={drink.name} className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+                        <input type="text" id="name" value={name} onChange={handleChangeName} className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+                    </div>
+                    <div className="mb-4">
+                        <label htmlFor="category" className="block text-sm font-medium text-gray-700">Category</label>
+                        <select id="category" className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" value={selectedCategory} onChange={handleCategoryChange}>
+                            <option key={categoryOfDrink._id} value={categoryOfDrink._id}>{categoryOfDrink.name}</option>
+                            {categories.map(category => (
+                                categoryOfDrink._id != category._id && <option key={category._id} value={category._id}>{category.name}</option>
+                            ))}
+                        </select>
                     </div>
                     <div className="mb-4">
                         <label htmlFor="priceM" className="block text-sm font-medium text-gray-700">Size M</label>
-                        <input type="number" id="priceM" defaultValue={drink.prices.M} className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+                        <input type="number" id="priceM" value={priceM} onChange={handleChangePriceM} className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" required />
                     </div>
                     <div className="mb-4">
                         <label htmlFor="priceL" className="block text-sm font-medium text-gray-700">Size L</label>
-                        <input type="number" id="priceL" defaultValue={drink.prices.L} className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+                        <input type="number" id="priceL" value={priceL} onChange={handleChangePriceL} className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" required />
                     </div>
                     <div className="mb-4">
                         <label className="block text-sm font-medium text-gray-700">Nhiệt độ</label>

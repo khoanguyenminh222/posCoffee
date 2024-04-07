@@ -30,7 +30,7 @@ const CategoryCard = ({ category, onSelect }) => {
     }, [img, storage]);
 
     const handleDelete = async () => {
-        if (window.confirm('Are you sure you want to delete this category?')) {
+        if (window.confirm(`Bạn có muốn xoá ${category.name}?`)) {
             try {
                 // Gửi request POST sử dụng axios
                 const response = await axios.delete(`${baseURL}${categoriesRoutes}/${category._id}`);
@@ -40,7 +40,6 @@ const CategoryCard = ({ category, onSelect }) => {
                 }else{
                     alert("Có lỗi xảy ra");
                 }
-                window.location.reload();
               } catch (error) {
                 console.error('Error saving category:', error);
                 // Xử lý lỗi nếu có
