@@ -3,10 +3,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrashAlt, faEdit } from '@fortawesome/free-solid-svg-icons';
 import { ref, getDownloadURL } from 'firebase/storage';
 import { storage } from '@/firebase';
-import axios from 'axios';
 
 import EditCategoryForm from './EditCategoryForm';
-import { baseURL, categoriesRoutes } from '@/api/api';
 
 const CategoryCard = ({ category, onSelect, onDeleteCategory, onEditCategory }) => {
     const [name,setName] = useState(category.name);

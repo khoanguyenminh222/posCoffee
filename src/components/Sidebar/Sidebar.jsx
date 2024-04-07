@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHome, faBars, faBurger, faHistory, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
+import { faHome, faBars, faBurger, faHistory, faSignOutAlt, faUser } from '@fortawesome/free-solid-svg-icons';
 import Link from 'next/link';
 
 const Sidebar = ({ isOpen, toggleSidebar }) => {
@@ -25,10 +25,18 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                             <span className="text-sm">Quản lý</span>
                         </li>
                     </Link>
+                    <Link href="/user">
+                    <li className="py-4 flex flex-col items-center transition duration-300 ease-in-out transform hover:scale-110 cursor-pointer hover:text-amber-700">
+                        <FontAwesomeIcon icon={faUser} size='2x' />
+                        <span className="text-sm">Nhân viên</span>
+                    </li>
+                    </Link>
+                    <Link href="">
                     <li className="py-4 flex flex-col items-center transition duration-300 ease-in-out transform hover:scale-110 cursor-pointer hover:text-amber-700">
                         <FontAwesomeIcon icon={faHistory} size='2x' />
                         <span className="text-sm">Lịch sử</span>
                     </li>
+                    </Link>
                 </ul>
             </div>
             {/* Logout */}
