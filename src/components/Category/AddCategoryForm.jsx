@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { baseURL, categoriesPost } from '@/api/api';
+import { baseURL, categoriesRoutes } from '@/api/api';
 
 function AddCategoryForm() {
   const [name, setName] = useState('');
@@ -21,7 +21,7 @@ function AddCategoryForm() {
     formData.append('name', name);
     formData.append('img', imageFile);
     try {
-      const response = await axios.post(`${baseURL}${categoriesPost}`, formData, {
+      const response = await axios.post(`${baseURL}${categoriesRoutes}`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCoffee } from '@fortawesome/free-solid-svg-icons';
-import { baseURL, categoriesGet, drinksGet, drinksGetByCategory } from '@/api/api';
+import { baseURL, categoriesRoutes, drinksRoutes } from '@/api/api';
 import CategoryCard from '@/components/Category/CategoryCard';
 import DrinkCard from '@/components/DrinkOfCategory/DrinkCard';
 import AddCategoryForm from '@/components/Category/AddCategoryForm';
@@ -37,7 +37,7 @@ function Management() {
 
   useEffect(() => {
     // Fetch categories from the server
-    axios.get(`${baseURL}${categoriesGet}`)
+    axios.get(`${baseURL}${categoriesRoutes}`)
       .then(response => {
         // Add "All" category
         const allCategory = { _id: 'all', name: 'All', img: 'All' };
@@ -49,7 +49,7 @@ function Management() {
       });
 
     // Fetch drinks from the server
-    axios.get(`${baseURL}${drinksGet}`)
+    axios.get(`${baseURL}${drinksRoutes}`)
       .then(response => {
         setDrinks(response.data);
         setSelectedDrinks(response.data);

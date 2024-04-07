@@ -1,4 +1,4 @@
-import { baseURL, categoriesPost } from '@/api/api';
+import { baseURL, categoriesRoutes } from '@/api/api';
 import React, { useState } from 'react';
 import axios from 'axios';
 
@@ -22,7 +22,7 @@ function EditCategoryForm({ category, onSave, onCancel }) {
     formData.append('img', imageFile);
     try {
       // Gửi request POST sử dụng axios
-      const response = await axios.put(`${baseURL}${categoriesPost}/${category._id}`, formData, {
+      const response = await axios.put(`${baseURL}${categoriesRoutes}/${category._id}`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data' // Cần set header 'Content-Type' là 'multipart/form-data' để gửi FormData
         }

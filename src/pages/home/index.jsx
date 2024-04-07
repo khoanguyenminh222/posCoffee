@@ -5,7 +5,7 @@ import Sidebar from '@/components/Sidebar/Sidebar';
 import Bill from '@/components/Bill/Bill';
 import Category from '@/components/Category/Category';
 import DrinkOfCategory from '@/components/DrinkOfCategory/DrinkOfCategory';
-import { baseURL, categoriesGet, drinksGetByCategory } from '@/api/api';
+import { baseURL, categoriesRoutes, drinksGetByCategory } from '@/api/api';
 import { storage } from '@/firebase';
 
 function Home() {
@@ -30,7 +30,7 @@ function Home() {
     // Fetch categories from API
     const fetchCategories = async () => {
       try {
-        const response = await fetch(`${baseURL}${categoriesGet}`); // Assume the API endpoint is '/api/categories'
+        const response = await fetch(`${baseURL}${categoriesRoutes}`); // Assume the API endpoint is '/api/categories'
         const data = await response.json();
         setCategories(data);
       } catch (error) {

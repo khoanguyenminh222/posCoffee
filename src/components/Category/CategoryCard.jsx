@@ -6,7 +6,7 @@ import { storage } from '@/firebase';
 import axios from 'axios';
 
 import EditCategoryForm from './EditCategoryForm';
-import { baseURL, categoriesPost } from '@/api/api';
+import { baseURL, categoriesRoutes } from '@/api/api';
 
 const CategoryCard = ({ category, onSelect }) => {
     const [name,setName] = useState(category.name);
@@ -33,7 +33,7 @@ const CategoryCard = ({ category, onSelect }) => {
         if (window.confirm('Are you sure you want to delete this category?')) {
             try {
                 // Gửi request POST sử dụng axios
-                const response = await axios.delete(`${baseURL}${categoriesPost}/${category._id}`);
+                const response = await axios.delete(`${baseURL}${categoriesRoutes}/${category._id}`);
                 console.log(response);
                 if(response.status==201){
                     alert("Xoá thành công")

@@ -1,7 +1,17 @@
 const baseURL = 'https://api-pos-coffee.vercel.app';
-const categoriesGet = '/api/categories';
-const categoriesPost = '/api/categories'; // api/categories/id
-const drinksGetByCategory = '/api/drinks/category'; // api/drinks/category/id
-const drinksGet = '/api/drinks';
-const billRoutes = '/api/bills';
-export {baseURL, categoriesGet, categoriesPost, drinksGetByCategory, drinksGet, billRoutes}
+const categoriesRoutes = '/api/categories';
+//get all
+//get by id /:id
+//category post /id, put /id, delete /id
+const drinksGetByCategory = '/api/drinks/category';
+const drinksRoutes = '/api/drinks';
+//get all
+//get by id /:id
+//get by category /category/:idcategory
+//drink post /:id, put /:id, delete /:id
+const billRoutes = '/api/bills'; 
+//get all
+//post /:id, put /:id, delete /:id
+//get bill id: /api/bills/:billid
+//get bill by user /api/bills/user/:userid
+export {baseURL, categoriesRoutes, drinksGetByCategory, drinksRoutes, billRoutes}

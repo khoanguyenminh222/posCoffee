@@ -3,9 +3,12 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEdit, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 import { ref, getDownloadURL } from 'firebase/storage';
 import { storage } from '@/firebase';
+import EditDrinkFrom from './EditDrinkFrom';
 
-const DrinkCard = ({ drink }) => {
+const DrinkCard = ({ drink: initialDrink }) => {
     const [imageUrl, setImageUrl] = useState(null);
+    const [isEditing, setIsEditing] = useState(false);
+    const [drink, setDrink] = useState(initialDrink);
     useEffect(() => {
         const fetchImageUrl = async () => {
             try {
@@ -18,8 +21,16 @@ const DrinkCard = ({ drink }) => {
         };
         fetchImageUrl();
     }, [drink.image, storage]);
+    const handleEditClick = () => {
+        setIsEditing(true);
+    };
+
+    const handleCancelEdit = () => {
+        setIsEditing(false);
+    };
 
     return (
+        <>
         <div className="bg-white shadow-md rounded-md p-4 mb-4 relative cursor-pointer hover:shadow-2xl">
             <img src={imageUrl} alt={drink.name} className="w-full h-32 object-cover mb-4 rounded-md" />
             <h2 className="text-lg font-semibold uppercase">{drink.name}</h2>
@@ -42,7 +53,7 @@ const DrinkCard = ({ drink }) => {
                 </ul>
             </div>
             <div className="absolute bottom-4 right-4">
-                <button onClick={() => onEdit(drink)} className="text-sm text-blue-600 mr-2 hover:underline focus:outline-none">
+                <button onClick={handleEditClick} className="text-sm text-blue-600 mr-2 hover:underline focus:outline-none">
                     <FontAwesomeIcon icon={faEdit} className="mr-1" />
                     Sửa
                 </button>
@@ -52,6 +63,8 @@ const DrinkCard = ({ drink }) => {
                 </button>
             </div>
         </div>
+        {isEditing && <EditDrinkFrom drink={drink} setDrink={setDrink} onCancel={handleCancelEdit}/>}
+        </>
     );
 }
 
