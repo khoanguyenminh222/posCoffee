@@ -79,12 +79,16 @@ function Management() {
         if (response.status === 201) {
           alert("Xoá thành công");
   
+          // Cập nhật state của drinks bằng danh sách mới loại bỏ đồ uống đã xoá
+          const updatedDrinks = drinks.filter(drink => drink._id !== drinkId);
+          setDrinks(updatedDrinks);
+  
           // Cập nhật selectedDrinks dựa trên selectedCategory
           if (selectedCategory && selectedCategory.name !== 'All') {
-            const updatedSelectedDrinks = selectedDrinks.filter(drink => drink._id !== drinkId);
+            const updatedSelectedDrinks = updatedDrinks.filter(drink => drink.categoryId === selectedCategory._id);
             setSelectedDrinks(updatedSelectedDrinks);
           } else {
-            setSelectedDrinks(prevSelectedDrinks => prevSelectedDrinks.filter(drink => drink._id !== drinkId));
+            setSelectedDrinks(updatedDrinks);
           }
         } else {
           alert("Có lỗi xảy ra");
@@ -96,9 +100,15 @@ function Management() {
     }
   };
   
+  
   useEffect(() => {
-    setSelectedDrinks(drinks);
-  }, [drinks]);
+    if (selectedCategory && selectedCategory.name !== 'All') {
+      const filteredDrinks = drinks.filter(drink => drink.categoryId === selectedCategory._id);
+      setSelectedDrinks(filteredDrinks);
+    } else {
+      setSelectedDrinks(drinks);
+    }
+  }, [drinks, selectedCategory]);
 
   const deleteCategoryAndUpdateState = async (categoryId, categoryName) => {
     if (window.confirm(`Bạn có muốn xoá ${categoryName}?`)) {
@@ -113,6 +123,7 @@ function Management() {
         }
       } catch (error) {
         console.error('Error deleting category:', error);
+        alert("Error deleting category");
       }
     }
   };
@@ -124,7 +135,10 @@ function Management() {
       }
       return drink;
     });
-    
+  
+    // Cập nhật state của drinks
+    setDrinks(updatedDrinks);
+  
     // Cập nhật selectedDrinks dựa trên selectedCategory
     if (selectedCategory && selectedCategory.name !== 'All') {
       const filteredDrinks = updatedDrinks.filter(drink => drink.categoryId === selectedCategory._id);
@@ -134,18 +148,19 @@ function Management() {
     }
   };
   
+  
 
   const handleSaveDrink = (newDrinkData) => {
     // Thêm đồ uống mới vào danh sách drinks
     setDrinks(prevDrinks => [...prevDrinks, newDrinkData]);
-
+  
     // Cập nhật selectedDrinks dựa trên selectedCategory
     if (selectedCategory && selectedCategory.name !== 'All') {
       // Nếu selectedCategory đã được chọn, lọc danh sách thức uống theo selectedCategory
       const filteredDrinks = [...selectedDrinks, newDrinkData].filter(drink => drink.categoryId === selectedCategory._id);
       setSelectedDrinks(filteredDrinks);
     } else {
-      setSelectedDrinks(prevDrinks => [...prevDrinks, newDrinkData]);
+      setSelectedDrinks(prevSelectedDrinks => [...prevSelectedDrinks, newDrinkData]);
     }
   };
 
