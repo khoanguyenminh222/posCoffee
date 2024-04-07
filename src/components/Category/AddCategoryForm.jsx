@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { baseURL, categoriesRoutes } from '@/api/api';
 
-function AddCategoryForm({onCancel}) {
+function AddCategoryForm({onSave, onCancel}) {
   const [name, setName] = useState('');
   const [imageFile, setImageFile] = useState(null);
 
@@ -31,13 +31,15 @@ function AddCategoryForm({onCancel}) {
         setName(''); // Đặt lại giá trị của name và imageFile sau khi thêm category thành công
         setImageFile(null);
         alert('Thêm thành công');
-        window.location.reload();
+        onSave(response.data);
+        onCancel();
       } else {
         alert('Có lỗi xảy ra');
       }
 
     } catch (error) {
       console.error('Error adding category:', error);
+      alert('Có lỗi xảy ra khi thêm thức uống');
     }
   };
 

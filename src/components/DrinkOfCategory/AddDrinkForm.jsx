@@ -165,9 +165,16 @@ function AddDrinkForm({ onCancel, onSave }) {
                     'Content-Type': 'multipart/form-data'
                 }
             });
-            onSave(response); // Call the onSave function when request is successful
+            if(response.status==201){
+                alert("Tạo mới thành công");
+                onSave(response.data); // Call the onSave function when request is successful
+                onCancel();
+            }else{
+                alert("Có lỗi");
+            }
         } catch (error) {
             console.error('Error saving drink:', error);
+            alert('Error saving drink');
         }
     };
 

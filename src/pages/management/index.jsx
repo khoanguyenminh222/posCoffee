@@ -66,25 +66,36 @@ function Management() {
       });
   }, []);
 
+  const handleSaveCategory = (newCategoryData) => {
+    setCategories(prevDrinks => [...prevDrinks, newCategoryData]);
+  };
+
   // Hàm xoá đồ uống và cập nhật state
   const deleteDrinkAndUpdateState = async (drinkId, drinkname) => {
-    if (window.confirm(`Bạn có muôn xoá ${drinkname}?`)) {
+    if (window.confirm(`Bạn có muốn xoá ${drinkname}?`)) {
       try {
-        // Gửi request POST sử dụng axios
+        // Gửi request DELETE sử dụng axios
         const response = await axios.delete(`${baseURL}${drinksRoutes}/${drinkId}`);
-        if (response.status == 201) {
-          alert("Xoá thành công")
-          // Cập nhật state drinks bằng danh sách mới
-          setDrinks(prevDrinks => prevDrinks.filter(drink => drink._id !== drinkId));
+        if (response.status === 201) {
+          alert("Xoá thành công");
+  
+          // Cập nhật selectedDrinks dựa trên selectedCategory
+          if (selectedCategory && selectedCategory.name !== 'All') {
+            const updatedSelectedDrinks = selectedDrinks.filter(drink => drink._id !== drinkId);
+            setSelectedDrinks(updatedSelectedDrinks);
+          } else {
+            setSelectedDrinks(prevSelectedDrinks => prevSelectedDrinks.filter(drink => drink._id !== drinkId));
+          }
         } else {
           alert("Có lỗi xảy ra");
         }
       } catch (error) {
         console.error('Error deleting drink:', error);
-        // Xử lý lỗi nếu có
+        alert("Error deleting drink");
       }
     }
   };
+  
   useEffect(() => {
     setSelectedDrinks(drinks);
   }, [drinks]);
@@ -107,13 +118,41 @@ function Management() {
   };
   const editDrinkAndUpdateState = (newDrinkData) => {
     // Cập nhật state của đồ uống sau khi chỉnh sửa
-    const updatedSelectedDrinks = selectedDrinks.map(item => (item._id === newDrinkData._id ? newDrinkData : item));
-    setDrinks(updatedSelectedDrinks);
-};
-  const handleCancelAddCategory = () =>{
+    const updatedDrinks = drinks.map(drink => {
+      if (drink._id === newDrinkData._id) {
+        return newDrinkData;
+      }
+      return drink;
+    });
+    
+    // Cập nhật selectedDrinks dựa trên selectedCategory
+    if (selectedCategory && selectedCategory.name !== 'All') {
+      const filteredDrinks = updatedDrinks.filter(drink => drink.categoryId === selectedCategory._id);
+      setSelectedDrinks(filteredDrinks);
+    } else {
+      setSelectedDrinks(updatedDrinks);
+    }
+  };
+  
+
+  const handleSaveDrink = (newDrinkData) => {
+    // Thêm đồ uống mới vào danh sách drinks
+    setDrinks(prevDrinks => [...prevDrinks, newDrinkData]);
+
+    // Cập nhật selectedDrinks dựa trên selectedCategory
+    if (selectedCategory && selectedCategory.name !== 'All') {
+      // Nếu selectedCategory đã được chọn, lọc danh sách thức uống theo selectedCategory
+      const filteredDrinks = [...selectedDrinks, newDrinkData].filter(drink => drink.categoryId === selectedCategory._id);
+      setSelectedDrinks(filteredDrinks);
+    } else {
+      setSelectedDrinks(prevDrinks => [...prevDrinks, newDrinkData]);
+    }
+  };
+
+  const handleCancelAddCategory = () => {
     setIsAddingCategory(false);
   }
-  const handleCancelAddDrink = () =>{
+  const handleCancelAddDrink = () => {
     setIsAddingDrink(false);
   }
   return (
@@ -141,10 +180,10 @@ function Management() {
         </button>
       </div>
       {isAddingCategory && (
-        <AddCategoryForm onCancel={handleCancelAddCategory}/>
+        <AddCategoryForm onSave={handleSaveCategory} onCancel={handleCancelAddCategory} />
       )}
       {isAddingDrink && (
-        <AddDrinkForm onCancel={handleCancelAddDrink}/>
+        <AddDrinkForm onSave={handleSaveDrink} onCancel={handleCancelAddDrink} />
       )}
     </>
   );
