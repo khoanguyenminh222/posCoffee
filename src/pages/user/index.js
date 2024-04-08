@@ -5,16 +5,41 @@ import { faTrashAlt, faEdit, faUserPlus, faCalendarDay } from '@fortawesome/free
 import { baseURL, userRoutes, weekScheduleRoutes } from '@/api/api';
 import AddScheduleModal from '@/components/User/AddScheduleModel';
 import EditScheduleModel from '@/components/User/EditScheduleModel';
+import AddUserModal from '@/components/User/AddUserModel';
 
 function User() {
     const [users, setUsers] = useState([]);
-    const [showModalAdd, setShowModalAdd] = useState(false);
-    const [showModalEdit, setShowModalEdit] = useState(false);
+    const [showModalAddSchedule, setShowModalAddSchedule] = useState(false);
+    const [showModalEditSchedule, setShowModalEdit] = useState(false);
+    const [showModalAddUser, setShowModalAddUser] = useState(false);
+    const [showModalEditUser, setShowModalEditUser] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
     const [startDate, setStartDate] = useState(null);
     const [endDate, setEndDate] = useState(null);
     const [schedule, setSchedule] = useState(null)
     const [scheduleUpdated, setScheduleUpdated] = useState(false);
+
+
+    const handleAddUser = () => {
+        // Hiển thị modal hoặc form để tạo mới nhân viên
+        setShowModalAddUser(true);
+    };
+    const handleEditUser = () => {
+
+    };
+    const handleCloseAddModelUser = () =>{
+        setShowModalAddUser(false);
+    };
+
+    const handleUserUpdated = async() => {
+        try {
+            const response = await axios.get(`${baseURL}${userRoutes}`);
+            setUsers(response.data);
+        } catch (error) {
+            console.error('Error fetching users:', error);
+        }
+    };
+
 
     const handleScheduleUpdated = () => {
         setScheduleUpdated(true);
@@ -23,7 +48,7 @@ function User() {
     const handleAddSchedule = (user) => {
         if (user) {
             setSelectedUser(user);
-            setShowModalAdd(true);
+            setShowModalAddSchedule(true);
         } else {
             console.error('userId is null');
         }
@@ -38,12 +63,12 @@ function User() {
         }
     };
 
-    const handleCloseAddModal = () => {
-        setShowModalAdd(false);
+    const handleCloseAddModalSchedule = () => {
+        setShowModalAddSchedule(false);
         setSelectedUser(null);
     };
 
-    const handleCloseEditModal = () => {
+    const handleCloseEditModalSchedule = () => {
         setShowModalEdit(false);
         setSelectedUser(null);
     };
@@ -63,10 +88,6 @@ function User() {
                 console.error('Error fetching week schedules for all users:', error);
             }
         }
-    };
-
-    const handleCreateUser = () => {
-        // Hiển thị modal hoặc form để tạo mới nhân viên
     };
 
     useEffect(() => {
@@ -169,7 +190,7 @@ function User() {
                                             if (weekEndDate >= new Date(startDate) && weekStartDate <= new Date(endDate)) {
                                                 return (
                                                     <tr key={`${user._id}_${week.startDate}`}>
-                                                        <td className="sticky left-0 z-10 px-6 py-4 font-medium tracking-wider text-black bg-blue-200 whitespace-nowrap hover:underline hover:decoration-sky-500 cursor-pointer">{user.fullname}</td>
+                                                        <td className="sticky left-0 z-10 px-6 py-4 font-medium tracking-wider text-black bg-blue-200 whitespace-nowrap">{user.fullname}</td>
                                                         {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day, dayIndex) => {
                                                             const dayShifts = week[day.toLowerCase()] || [];
                                                             return (
@@ -211,17 +232,17 @@ function User() {
             {/* hiển thị danh sách nhân viên */}
             <div className="flex-1 bg-gray-100 rounded-lg p-4">
                 <h1 className="text-3xl font-semibold my-4">Danh sách nhân viên</h1>
-                <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 mb-4 rounded" onClick={handleCreateUser}>
+                <button onClick={handleAddUser} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 mb-4 rounded">
                     <FontAwesomeIcon icon={faUserPlus} className="mr-2" />
                     Tạo mới nhân viên
                 </button>
                 <table className="min-w-full divide-y divide-slate-400">
                     <thead className="bg-slate-200">
                         <tr>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tài khoản</th>
                             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Họ tên</th>
                             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Điện thoại</th>
                             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Giới tính</th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tài khoản</th>
                             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vai trò</th>
                             <th></th>
                             <th></th>
@@ -230,10 +251,10 @@ function User() {
                     <tbody className="bg-white divide-y divide-gray-200">
                         {users.map(user => (
                             <tr key={`${user._id}`} className='cursor-pointer'>
-                                <td className="px-6 py-4 whitespace-nowrap">{user.username}</td>
                                 <td className="px-6 py-4 whitespace-nowrap">{user.fullname}</td>
                                 <td className="px-6 py-4 whitespace-nowrap">{user.phoneNumber}</td>
                                 <td className="px-6 py-4 whitespace-nowrap">{user.gender}</td>
+                                <td className="px-6 py-4 whitespace-nowrap">{user.username}</td>
                                 <td className="px-6 py-4 whitespace-nowrap">{user.role}</td>
                                 <td>
                                     <button className="mr-2 focus:outline-none">
@@ -248,14 +269,17 @@ function User() {
                                         <FontAwesomeIcon icon={faCalendarDay} className="mr-2" />
                                         Tạo lịch
                                     </button>
-                                    {showModalAdd && <AddScheduleModal user={selectedUser} onClose={handleCloseAddModal} onScheduleUpdated={handleScheduleUpdated} />}
-                                    {/* Hiển thị modal chỉnh sửa lịch khi đã chọn một người dùng */}
-                                    {showModalEdit && <EditScheduleModel user={selectedUser} onClose={handleCloseEditModal} onScheduleUpdated={handleScheduleUpdated} startDate={startDate} endDate={endDate} />}
                                 </td>
                             </tr>
                         ))}
                     </tbody>
                 </table>
+                {/* Hiển thị model thêm lịch cho nhân viên */}
+                {showModalAddSchedule && <AddScheduleModal user={selectedUser} onClose={handleCloseAddModalSchedule} onScheduleUpdated={handleScheduleUpdated} />}
+                {/* Hiển thị modal chỉnh sửa lịch khi đã chọn một người dùng */}               
+                {showModalEditSchedule && <EditScheduleModel user={selectedUser} onClose={handleCloseEditModalSchedule} onScheduleUpdated={handleScheduleUpdated} startDate={startDate} endDate={endDate} />}
+                {/* Hiển thị model thêm nhân viên */}
+                {showModalAddUser && <AddUserModal onClose={handleCloseAddModelUser} onUpdateUser={handleUserUpdated}/>}
             </div>
         </div>
     );
