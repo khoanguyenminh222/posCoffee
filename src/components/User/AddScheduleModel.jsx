@@ -37,14 +37,18 @@ function AddScheduleModal({ user, onClose }) {
                     sunday: shifts.sunday.map(shift => ({ startTime: shift.startTime, endTime: shift.endTime })),
                 }]
             };
-            console.log(scheduleData)
             // Gửi đối tượng dữ liệu đã tạo lên máy chủ
-            await axios.post(`${baseURL}${weekScheduleRoutes}`, scheduleData);
-    
+            const response = await axios.post(`${baseURL}${weekScheduleRoutes}`, scheduleData);
+            if(response.status==201){
+                alert("Thêm thành công")
+            }else{
+                alert("Lỗi thêm mới")
+            }
             // Đóng modal sau khi lưu thành công
             onClose();
         } catch (error) {
             console.error('Error saving schedule:', error);
+            alert("Error saving schedule")
         }
     };
     
