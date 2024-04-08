@@ -39,11 +39,13 @@ function AddScheduleModal({ user, onClose, onScheduleUpdated }) {
             };
             // Gửi đối tượng dữ liệu đã tạo lên máy chủ
             const response = await axios.post(`${baseURL}${weekScheduleRoutes}`, scheduleData);
+            console.log("response",response)
             if(response.status==201){
                 alert("Thêm thành công")
                 onScheduleUpdated();
                 onClose()
-            }else if(response.status==400){
+            }
+            if(response.status==400){
                 alert("Bạn đã thêm lịch cho người này ở tuần này rồi")
             }else{
                 alert('Lỗi tạo mới lịch')
@@ -82,11 +84,11 @@ function AddScheduleModal({ user, onClose, onScheduleUpdated }) {
                     <div className="flex space-x-4">
                         <div className="flex flex-col">
                             <label htmlFor="startDate" className="mb-1">Ngày bắt đầu:</label>
-                            <input type="date" id="startDate" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+                            <input className='border border-gray-300 rounded-md focus:outline-none' type="date" id="startDate" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
                         </div>
                         <div className="flex flex-col">
                             <label htmlFor="endDate" className="mb-1">Ngày kết thúc:</label>
-                            <input type="date" id="endDate" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+                            <input className='border border-gray-300 rounded-md focus:outline-none' type="date" id="endDate" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
                         </div>
                     </div>
                 </div>

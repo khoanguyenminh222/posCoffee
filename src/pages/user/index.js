@@ -19,6 +19,10 @@ function User() {
     const [endDate, setEndDate] = useState(null);
     const [schedule, setSchedule] = useState(null)
     const [scheduleUpdated, setScheduleUpdated] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize, setPageSize] = useState(6); // Số lượng nhân viên trên mỗi trang
+    const [totalPages, setTotalPages] = useState(0);
+    const [searchTerm, setSearchTerm] = useState('');
 
 
     const handleAddUser = () => {
@@ -33,14 +37,14 @@ function User() {
             console.error('userId is null');
         }
     };
-    const handleCloseEditModelUser = () =>{
+    const handleCloseEditModelUser = () => {
         setShowModalEditUser(false)
     };
-    const handleCloseAddModelUser = () =>{
+    const handleCloseAddModelUser = () => {
         setShowModalAddUser(false);
     };
 
-    const handleDeleteUser = async(user) => {
+    const handleDeleteUser = async (user) => {
         if (window.confirm(`Bạn có muốn xoá ${user.fullname}?`)) {
             try {
                 const response = await axios.delete(`${baseURL}${userRoutes}/${user._id}`);
@@ -56,10 +60,16 @@ function User() {
             }
         }
     };
-    const handleUserUpdated = async() => {
+    const handleUserUpdated = async () => {
         try {
-            const response = await axios.get(`${baseURL}${userRoutes}`);
-            setUsers(response.data);
+            const response = await axios.get(`${baseURL}${userRoutes}`, {
+                params: {
+                    page: currentPage,
+                    pageSize: pageSize
+                }
+            });
+            setUsers(response.data.users);
+            setTotalPages(response.data.totalPages);
         } catch (error) {
             console.error('Error fetching users:', error);
         }
@@ -155,30 +165,87 @@ function User() {
         }
     };
 
+    const handleStartDateChange = (e) => {
+        const newStartDate = e.target.value;
+        setStartDate(newStartDate);
+
+        // Tính toán và cập nhật endDate bằng cách cộng thêm 7 ngày
+        const startDateObj = new Date(newStartDate);
+        const newEndDate = new Date(startDateObj.getTime()); // Copy giá trị của newStartDate
+        newEndDate.setDate(newEndDate.getDate() + 6); // Add 6 days to get end of week
+        setEndDate(newEndDate.toISOString().slice(0, 10));
+    };
+
+    const handleEndDateChange = (e) => {
+        setEndDate(e.target.value);
+    };
+
+
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                const response = await axios.get(`${baseURL}${userRoutes}`);
-                setUsers(response.data);
+                const response = await axios.get(`${baseURL}${userRoutes}`, {
+                    params: {
+                        page: currentPage,
+                        pageSize: pageSize
+                    }
+                });
+                setUsers(response.data.users);
+                setTotalPages(response.data.totalPages);
             } catch (error) {
                 console.error('Error fetching users:', error);
             }
         };
         fetchUsers();
-    }, []);
+    }, [currentPage, pageSize]);
+    const handleNextPage = () => {
+        if (currentPage < totalPages) {
+            setCurrentPage(currentPage + 1);
+        }
+    };
 
+    const handlePreviousPage = () => {
+        if (currentPage > 1) {
+            setCurrentPage(currentPage - 1);
+        }
+    };
+
+    const handleSearch = async () => {
+        try {
+            const response = await axios.get(`${baseURL}${userRoutes}`, {
+                params: {
+                    page: currentPage,
+                    pageSize: pageSize,
+                    searchTerm: searchTerm // Thêm searchTerm vào yêu cầu API
+                }
+            });
+            setUsers(response.data.users);
+            setTotalPages(response.data.totalPages);
+        } catch (error) {
+            console.error('Error searching users:', error);
+        }
+    };
+    const handleSearchChange = (event) => {
+        setSearchTerm(event.target.value);
+    };
+    // Sử dụng useEffect để gọi hàm handleSearch khi searchTerm thay đổi
+    useEffect(() => {
+        handleSearch();
+    }, [searchTerm]);
 
     return (
         <div className="container mx-auto max-h-full bg-white p-6 flex flex-col overflow-x-auto">
             <h1 className="text-3xl font-semibold my-4">Ca làm việc của nhân viên 1 tuần</h1>
             <div className="bg-gray-100 rounded-lg p-4 mb-4">
-                <div>
-                    <label htmlFor="start-date">Start Date:</label>
-                    <input type="date" id="start-date" value={startDate || ''} onChange={(e) => setStartDate(e.target.value)} />
+                <div className='flex mb-4'>
+                <div className="items-center mr-4">
+                    <label className="mr-2" htmlFor="start-date">Từ ngày:</label>
+                    <input className="p-2 border border-gray-300 rounded-md focus:outline-none" type="date" id="start-date" value={startDate ? startDate : ''}  onChange={handleStartDateChange} />
                 </div>
-                <div>
-                    <label htmlFor="end-date">End Date:</label>
-                    <input type="date" id="end-date" value={endDate || ''} onChange={(e) => setEndDate(e.target.value)} />
+                <div className="items-center">
+                    <label className="mr-2" htmlFor="end-date">Đến ngày:</label>
+                    <input className="p-2 border border-gray-300 rounded-md focus:outline-none" type="date" id="end-date" value={endDate ? endDate : ''} onChange={handleEndDateChange} />
+                </div>
                 </div>
                 <div className="flex flex-col overflow-x-auto">
                     {schedule && startDate && endDate && (
@@ -257,10 +324,23 @@ function User() {
             {/* hiển thị danh sách nhân viên */}
             <div className="flex-1 bg-gray-100 rounded-lg p-4">
                 <h1 className="text-3xl font-semibold my-4">Danh sách nhân viên</h1>
-                <button onClick={handleAddUser} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 mb-4 rounded">
-                    <FontAwesomeIcon icon={faUserPlus} className="mr-2" />
-                    Tạo mới nhân viên
-                </button>
+                <div className="flex mb-4">
+                    {/* Thêm thanh tìm kiếm */}
+                    <input
+                        type="text"
+                        placeholder="Tìm kiếm..."
+                        value={searchTerm}
+                        onChange={handleSearchChange}
+                        className="p-2 border border-gray-300 rounded-md mr-2 focus:outline-none"
+                    />
+                    <button
+                        onClick={handleAddUser}
+                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                    >
+                        <FontAwesomeIcon icon={faUserPlus} className="mr-2" />
+                        Tạo mới nhân viên
+                    </button>
+                </div>
                 <table className="min-w-full divide-y divide-slate-400">
                     <thead className="bg-slate-200">
                         <tr>
@@ -283,7 +363,7 @@ function User() {
                                     <button onClick={() => handleDeleteUser(user)} className="mr-2 focus:outline-none">
                                         <FontAwesomeIcon icon={faTrashAlt} className="text-red-500 hover:text-red-600" />
                                     </button>
-                                    <button onClick={()=>handleEditModelUser(user)} className="focus:outline-none">
+                                    <button onClick={() => handleEditModelUser(user)} className="focus:outline-none">
                                         <FontAwesomeIcon icon={faEdit} className="text-blue-500 hover:text-blue-600" />
                                     </button>
                                 </td>
@@ -297,14 +377,19 @@ function User() {
                         ))}
                     </tbody>
                 </table>
+                <div className="flex justify-center mt-4">
+                    <button onClick={handlePreviousPage} disabled={currentPage === 1} className="mr-2 px-3 py-1 bg-gray-200 rounded-md focus:outline-none">Trang trước</button>
+                    <span className="mx-2">Trang {currentPage} / {totalPages}</span>
+                    <button onClick={handleNextPage} disabled={currentPage === totalPages} className="ml-2 px-3 py-1 bg-gray-200 rounded-md focus:outline-none">Trang sau</button>
+                </div>
                 {/* Hiển thị model thêm lịch cho nhân viên */}
                 {showModalAddSchedule && <AddScheduleModal user={selectedUser} onClose={handleCloseAddModalSchedule} onScheduleUpdated={handleScheduleUpdated} />}
-                {/* Hiển thị modal chỉnh sửa lịch khi đã chọn một người dùng */}               
+                {/* Hiển thị modal chỉnh sửa lịch khi đã chọn một người dùng */}
                 {showModalEditSchedule && <EditScheduleModel user={selectedUser} onClose={handleCloseEditModalSchedule} onScheduleUpdated={handleScheduleUpdated} startDate={startDate} endDate={endDate} />}
                 {/* Hiển thị model thêm nhân viên */}
-                {showModalAddUser && <AddUserModal onClose={handleCloseAddModelUser} onUpdateUser={handleUserUpdated}/>}
+                {showModalAddUser && <AddUserModal onClose={handleCloseAddModelUser} onUpdateUser={handleUserUpdated} />}
                 {/* Hiển thị model chỉnh sửa nhân viên */}
-                {showModalEditUser && <EditUserModal user={selectedUser} onClose={handleCloseEditModelUser} onUpdateUser={handleUserUpdated}/>}
+                {showModalEditUser && <EditUserModal user={selectedUser} onClose={handleCloseEditModelUser} onUpdateUser={handleUserUpdated} />}
             </div>
         </div>
     );
