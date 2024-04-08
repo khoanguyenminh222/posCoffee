@@ -4,7 +4,7 @@ import { baseURL, weekScheduleRoutes } from '@/api/api';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash } from '@fortawesome/free-solid-svg-icons';
 
-function EditScheduleModal({ user, onClose, startDate, endDate }) {
+function EditScheduleModal({ user, onClose, onScheduleUpdated, startDate, endDate }) {
     const [shifts, setShifts] = useState({
         monday: [],
         tuesday: [],
@@ -52,10 +52,11 @@ function EditScheduleModal({ user, onClose, startDate, endDate }) {
             const response = await axios.put(`${baseURL}${weekScheduleRoutes}/${user._id}`, scheduleData);
             if(response.status == 201){
                 alert("Cập nhật thành công")
+                onClose();
+                onScheduleUpdated();
             }else{
                 alert("Lỗi cập nhật")
             }
-            onClose();
         } catch (error) {
             console.error('Error saving schedule:', error);
             alert("Error saving schedule")

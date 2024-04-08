@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { baseURL, weekScheduleRoutes } from '@/api/api';
 
-function AddScheduleModal({ user, onClose }) {
+function AddScheduleModal({ user, onClose, onScheduleUpdated }) {
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
     const [shifts, setShifts] = useState({
@@ -24,7 +24,7 @@ function AddScheduleModal({ user, onClose }) {
     
             // Tạo một đối tượng dữ liệu tuân thủ schema đã cung cấp
             const scheduleData = {
-                user: user._id,
+                userId: user._id,
                 weeks: [{
                     startDate: formattedStartDate,
                     endDate: formattedEndDate,
@@ -41,8 +41,12 @@ function AddScheduleModal({ user, onClose }) {
             const response = await axios.post(`${baseURL}${weekScheduleRoutes}`, scheduleData);
             if(response.status==201){
                 alert("Thêm thành công")
+                onScheduleUpdated();
+                onClose()
+            }else if(response.status==400){
+                alert("Bạn đã thêm lịch cho người này ở tuần này rồi")
             }else{
-                alert("Lỗi thêm mới")
+                alert('Lỗi tạo mới lịch')
             }
             // Đóng modal sau khi lưu thành công
             onClose();
