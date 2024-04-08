@@ -7,11 +7,11 @@ function AddUserModal({ onClose, onUpdateUser }) {
         username: '',
         password: '',
         fullname: '',
-        dateOfBirth: '2024-04-08',
+        dateOfBirth: '',
         gender: 'male',
-        address: 'Coffee',
+        address: '',
         phoneNumber: '',
-        email: 'Coffee@gmail.com',
+        email: '',
         role: 'user'
     });
 
