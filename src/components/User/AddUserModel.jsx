@@ -8,7 +8,7 @@ function AddUserModal({ onClose, onUpdateUser }) {
         password: '',
         fullname: '',
         dateOfBirth: '',
-        gender: 'male',
+        gender: 'Male',
         address: '',
         phoneNumber: '',
         email: '',
@@ -37,11 +37,11 @@ function AddUserModal({ onClose, onUpdateUser }) {
             if (phoneError) {
                 return; // Nếu có lỗi nhập liệu số điện thoại, không thực hiện gửi dữ liệu
             }
-            console.log(formData)
             // Thực hiện xử lý gửi dữ liệu
             const response = await axios.post(`${baseURL}${userRoutes}/register`, formData);
             if (response.status === 201) {
                 alert("Tạo mới nhân viên thành công");
+                onUpdateUser();
                 onClose();
             } else {
                 alert("Có lỗi tạo mới nhân viên");
@@ -90,9 +90,9 @@ function AddUserModal({ onClose, onUpdateUser }) {
                             <div className="mb-4">
                                 <label htmlFor="gender" className="block text-gray-700 text-sm font-bold mb-2">Giới tính:</label>
                                 <select id="gender" name="gender" value={formData.gender} onChange={handleChange} className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                                    <option value="male">Nam</option>
-                                    <option value="female">Nữ</option>
-                                    <option value="other">Khác</option>
+                                    <option value="Male">Nam</option>
+                                    <option value="Female">Nữ</option>
+                                    <option value="Other">Khác</option>
                                 </select>
                             </div>
                             <div className="mb-4">

@@ -24,6 +24,22 @@ function User() {
         // Hiển thị modal hoặc form để tạo mới nhân viên
         setShowModalAddUser(true);
     };
+    const handleDeleteUser = async(user) => {
+        if (window.confirm(`Bạn có muốn xoá ${user.fullname}?`)) {
+            try {
+                const response = await axios.delete(`${baseURL}${userRoutes}/${user._id}`);
+                if (response.status == 201) {
+                    alert("Xóa nhân viên thành công");
+                    handleUserUpdated();
+                } else {
+                    alert("Có lỗi khi xoá")
+                }
+
+            } catch (error) {
+                console.error('Error delete for user:', error);
+            }
+        }
+    }
     const handleEditUser = () => {
 
     };
@@ -85,7 +101,7 @@ function User() {
                 }
 
             } catch (error) {
-                console.error('Error fetching week schedules for all users:', error);
+                console.error('Error delete schedules for user:', error);
             }
         }
     };
@@ -242,7 +258,6 @@ function User() {
                             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Họ tên</th>
                             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Điện thoại</th>
                             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Giới tính</th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tài khoản</th>
                             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vai trò</th>
                             <th></th>
                             <th></th>
@@ -254,10 +269,9 @@ function User() {
                                 <td className="px-6 py-4 whitespace-nowrap">{user.fullname}</td>
                                 <td className="px-6 py-4 whitespace-nowrap">{user.phoneNumber}</td>
                                 <td className="px-6 py-4 whitespace-nowrap">{user.gender}</td>
-                                <td className="px-6 py-4 whitespace-nowrap">{user.username}</td>
                                 <td className="px-6 py-4 whitespace-nowrap">{user.role}</td>
                                 <td>
-                                    <button className="mr-2 focus:outline-none">
+                                    <button onClick={() => handleDeleteUser(user)} className="mr-2 focus:outline-none">
                                         <FontAwesomeIcon icon={faTrashAlt} className="text-red-500 hover:text-red-600" />
                                     </button>
                                     <button className="focus:outline-none">
