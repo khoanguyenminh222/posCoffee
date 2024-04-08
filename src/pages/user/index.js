@@ -6,11 +6,12 @@ import { baseURL, userRoutes, weekScheduleRoutes } from '@/api/api';
 import AddScheduleModal from '@/components/User/AddScheduleModel';
 import EditScheduleModel from '@/components/User/EditScheduleModel';
 import AddUserModal from '@/components/User/AddUserModel';
+import EditUserModal from '@/components/User/EditUserModel';
 
 function User() {
     const [users, setUsers] = useState([]);
     const [showModalAddSchedule, setShowModalAddSchedule] = useState(false);
-    const [showModalEditSchedule, setShowModalEdit] = useState(false);
+    const [showModalEditSchedule, setShowModalEditSchedule] = useState(false);
     const [showModalAddUser, setShowModalAddUser] = useState(false);
     const [showModalEditUser, setShowModalEditUser] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
@@ -24,6 +25,21 @@ function User() {
         // Hiển thị modal hoặc form để tạo mới nhân viên
         setShowModalAddUser(true);
     };
+    const handleEditModelUser = (user) => {
+        if (user) {
+            setSelectedUser(user);
+            setShowModalEditUser(true)
+        } else {
+            console.error('userId is null');
+        }
+    };
+    const handleCloseEditModelUser = () =>{
+        setShowModalEditUser(false)
+    };
+    const handleCloseAddModelUser = () =>{
+        setShowModalAddUser(false);
+    };
+
     const handleDeleteUser = async(user) => {
         if (window.confirm(`Bạn có muốn xoá ${user.fullname}?`)) {
             try {
@@ -39,14 +55,7 @@ function User() {
                 console.error('Error delete for user:', error);
             }
         }
-    }
-    const handleEditUser = () => {
-
     };
-    const handleCloseAddModelUser = () =>{
-        setShowModalAddUser(false);
-    };
-
     const handleUserUpdated = async() => {
         try {
             const response = await axios.get(`${baseURL}${userRoutes}`);
@@ -73,7 +82,7 @@ function User() {
     const handleEditSchedule = (user) => {
         if (user) {
             setSelectedUser(user);
-            setShowModalEdit(true);
+            setShowModalEditSchedule(true);
         } else {
             console.error('userId is null');
         }
@@ -85,7 +94,7 @@ function User() {
     };
 
     const handleCloseEditModalSchedule = () => {
-        setShowModalEdit(false);
+        setShowModalEditSchedule(false);
         setSelectedUser(null);
     };
 
@@ -274,7 +283,7 @@ function User() {
                                     <button onClick={() => handleDeleteUser(user)} className="mr-2 focus:outline-none">
                                         <FontAwesomeIcon icon={faTrashAlt} className="text-red-500 hover:text-red-600" />
                                     </button>
-                                    <button className="focus:outline-none">
+                                    <button onClick={()=>handleEditModelUser(user)} className="focus:outline-none">
                                         <FontAwesomeIcon icon={faEdit} className="text-blue-500 hover:text-blue-600" />
                                     </button>
                                 </td>
@@ -294,6 +303,8 @@ function User() {
                 {showModalEditSchedule && <EditScheduleModel user={selectedUser} onClose={handleCloseEditModalSchedule} onScheduleUpdated={handleScheduleUpdated} startDate={startDate} endDate={endDate} />}
                 {/* Hiển thị model thêm nhân viên */}
                 {showModalAddUser && <AddUserModal onClose={handleCloseAddModelUser} onUpdateUser={handleUserUpdated}/>}
+                {/* Hiển thị model chỉnh sửa nhân viên */}
+                {showModalEditUser && <EditUserModal user={selectedUser} onClose={handleCloseEditModelUser} onUpdateUser={handleUserUpdated}/>}
             </div>
         </div>
     );
