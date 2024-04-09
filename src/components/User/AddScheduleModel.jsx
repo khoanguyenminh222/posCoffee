@@ -45,16 +45,18 @@ function AddScheduleModal({ user, onClose, onScheduleUpdated }) {
                 onScheduleUpdated();
                 onClose()
             }
-            if(response.status==400){
-                alert("Bạn đã thêm lịch cho người này ở tuần này rồi")
-            }else{
+            else{
                 alert('Lỗi tạo mới lịch')
             }
             // Đóng modal sau khi lưu thành công
             onClose();
         } catch (error) {
-            console.error('Error saving schedule:', error);
-            alert("Error saving schedule")
+            if(error.response.status==400){
+                alert("Bạn đã thêm lịch cho người này ở tuần này rồi")
+            }else{
+                console.error('Error saving schedule:', error);
+                alert("Error saving schedule")
+            }
         }
     };
     
