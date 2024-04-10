@@ -185,11 +185,11 @@ function AddDrinkForm({ onCancel, onSave }) {
                 <form onSubmit={handleSubmit}>
                     <div className="mb-4">
                         <label htmlFor="name" className="block text-sm font-medium text-gray-700">Tên</label>
-                        <input required type="text" id="name" value={name} onChange={handleChangeName} className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+                        <input required type="text" id="name" value={name} onChange={handleChangeName} className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:outline-none" />
                     </div>
                     <div className="mb-4">
                         <label htmlFor="category" className="block text-sm font-medium text-gray-700">Category</label>
-                        <select id="category" value={categoryId} onChange={handleCategoryChange} className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        <select id="category" value={categoryId} onChange={handleCategoryChange} className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:outline-none">
                             {categories.map(category => (
                                 <option key={category._id} value={category._id}>{category.name}</option>
                             ))}
@@ -197,11 +197,11 @@ function AddDrinkForm({ onCancel, onSave }) {
                     </div>
                     <div className="mb-4">
                         <label htmlFor="priceM" className="block text-sm font-medium text-gray-700">Giá (Size M)</label>
-                        <input type="number" id="priceM" value={priceM} onChange={handleChangePriceM} className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" required />
+                        <input type="number" id="priceM" value={priceM} onChange={handleChangePriceM} className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:outline-none" required />
                     </div>
                     <div className="mb-4">
                         <label htmlFor="priceL" className="block text-sm font-medium text-gray-700">Giá (Size L)</label>
-                        <input type="number" id="priceL" value={priceL} onChange={handleChangePriceL} className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" required />
+                        <input type="number" id="priceL" value={priceL} onChange={handleChangePriceL} className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm focus:outline-none" required />
                     </div>
                     <div className="mb-4">
                         <label className="block text-sm font-medium text-gray-700">Nhiệt độ</label>

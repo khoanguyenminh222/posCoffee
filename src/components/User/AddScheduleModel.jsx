@@ -78,6 +78,21 @@ function AddScheduleModal({ user, onClose, onScheduleUpdated }) {
         }
     };
 
+    const handleStartDateChange = (e) => {
+        const newStartDate = e.target.value;
+        setStartDate(newStartDate);
+
+        // Tính toán và cập nhật endDate bằng cách cộng thêm 7 ngày
+        const startDateObj = new Date(newStartDate);
+        const newEndDate = new Date(startDateObj.getTime()); // Copy giá trị của newStartDate
+        newEndDate.setDate(newEndDate.getDate() + 6); // Add 6 days to get end of week
+        setEndDate(newEndDate.toISOString().slice(0, 10));
+    };
+
+    const handleEndDateChange = (e) => {
+        setEndDate(e.target.value);
+    };
+
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-10 overflow-auto">
             <div className="bg-white p-4 rounded-lg max-w-6xl w-full max-h-full overflow-auto">
@@ -86,11 +101,11 @@ function AddScheduleModal({ user, onClose, onScheduleUpdated }) {
                     <div className="flex space-x-4">
                         <div className="flex flex-col">
                             <label htmlFor="startDate" className="mb-1">Ngày bắt đầu:</label>
-                            <input className='border border-gray-300 rounded-md focus:outline-none' type="date" id="startDate" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+                            <input className='border border-gray-300 rounded-md focus:outline-none' type="date" id="startDate" value={startDate} onChange={handleStartDateChange} />
                         </div>
                         <div className="flex flex-col">
                             <label htmlFor="endDate" className="mb-1">Ngày kết thúc:</label>
-                            <input className='border border-gray-300 rounded-md focus:outline-none' type="date" id="endDate" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+                            <input className='border border-gray-300 rounded-md focus:outline-none' type="date" id="endDate" value={endDate} onChange={handleEndDateChange} />
                         </div>
                     </div>
                 </div>
