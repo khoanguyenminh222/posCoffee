@@ -175,4 +175,30 @@ function History() {
     );
 }
 
+import { parseCookies } from 'nookies';
+export async function getServerSideProps(context) {
+    // Sử dụng parseCookies để lấy cookies từ context
+    const cookies = parseCookies(context);
+    // Kiểm tra xem có cookie userId trong yêu cầu không
+    if (!cookies.userId) {
+      // Nếu không có, điều hướng người dùng đến trang đăng nhập
+      return {
+        redirect: {
+          destination: '/login',
+          permanent: false,
+        },
+      };
+    }
+    // Lấy userId từ cookies
+    const userId = cookies.userId;
+  
+    // Pass userId vào props của trang
+    return {
+      props: {
+        userId: userId || null,
+      },
+    };
+  }
+
+
 export default History;

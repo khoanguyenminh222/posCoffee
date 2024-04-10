@@ -2,20 +2,34 @@ import React, { useEffect, useRef, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPrint } from '@fortawesome/free-solid-svg-icons';
 import DrinkBill from '../DrinkBill/DrinkBill';
-import { baseURL, billRoutes } from '@/api/api';
+import { baseURL, billRoutes, userRoutes } from '@/api/api';
 import axios from 'axios';
 import { useReactToPrint } from 'react-to-print';
 import BillToPrint from './BillToPrint';
+import { jwtDecode } from 'jwt-decode';
 
-function Bill({ billItems, onDeleteAll, onDeleteItem, onIncrementItem, onDecrementItem }) {
+function Bill({ userId, billItems, onDeleteAll, onDeleteItem, onIncrementItem, onDecrementItem }) {
     const [isPrinted, setIsPrinted] = useState(false);
     const [bill, setBill] = useState([]);
-    const user = {
-        "_id": "660f55ff0437f3e3fe1d9ba2",
-        "username": "nhanvien1",
-        "fullname": "Nguyễn Văn B",
-        "role": "user",
-    };
+    const [user, setUser] = useState([]); 
+
+    useEffect(()=>{
+        const fetchUser = async() =>{
+            try {
+                const response = await axios.get(`${baseURL}${userRoutes}/userId/${userId}`);
+                setUser(response.data);
+            } catch (error) {
+                console.log(error)
+            }
+        }
+        fetchUser(); 
+    },[]);
+    // const user = {
+    //     "_id": "660f55ff0437f3e3fe1d9ba2",
+    //     "username": "nhanvien1",
+    //     "fullname": "Nguyễn Văn B",
+    //     "role": "user",
+    // };
     const totalAmount = billItems.reduce((total, item) => total + item.price * item.quantity, 0);
 
     const componentRef = useRef();
@@ -30,7 +44,7 @@ function Bill({ billItems, onDeleteAll, onDeleteItem, onIncrementItem, onDecreme
                 return; // Không có đồ uống, không thực hiện lưu
             }
             const data = {
-                userId: user._id,
+                userId: userId,
                 drinks: billItems,
                 totalAmount: totalAmount,
             };

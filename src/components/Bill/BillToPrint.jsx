@@ -16,7 +16,7 @@ const BillToPrint = forwardRef(({ billItems, bill, user, totalAmount }, ref) => 
         }
     }, [bill]);
     return (
-        <div ref={ref} className="billContainer hidden max-w-md mx-auto p-4 rounded-md overflow-y-auto">
+        <div ref={ref} className="hidden max-w-md mx-auto p-4 rounded-md overflow-y-auto">
             <h1 className="text-center mb-4 text-lg font-semibold">The Coffee Ryo</h1>
             <p className="text-center text-gray-600 mb-2">55A Ngô Đức Kế, P7, TP-Vũng Tàu</p>
             {bill && bill._id && (

@@ -1,18 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch, faBars } from '@fortawesome/free-solid-svg-icons';
-import Sidebar from '@/components/Sidebar/Sidebar';
 import Bill from '@/components/Bill/Bill';
 import Category from '@/components/Category/Category';
 import DrinkOfCategory from '@/components/DrinkOfCategory/DrinkOfCategory';
 import { baseURL, categoriesRoutes, drinksGetByCategory } from '@/api/api';
+import { parseCookies } from 'nookies';
 import { storage } from '@/firebase';
 
-function Home() {
+function Home({userId}) {
   const [drinks, setDrinks] = useState([]);
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
-  const [isOpen, setIsOpen] = useState(false);
   const [selectedOptions, setSelectedOptions] = useState({
     temperature: null,
     sugar: null,
@@ -20,11 +17,6 @@ function Home() {
     size: null
   });
   const [billItems, setBillItems] = useState([]);
-
-  const toggleSidebar = () => {
-    setIsOpen(!isOpen);
-    document.body.style.overflowX = isOpen ? "auto" : "hidden";
-  };
 
   useEffect(() => {
     // Fetch categories from API
@@ -161,7 +153,9 @@ function Home() {
 
       {/* Component Bill */}
       <div className="w-1/4 h-full bg-white p-4 shadow-md rounded-md relative">
-        <Bill billItems={billItems}
+        <Bill
+          userId={userId}
+          billItems={billItems}
           onDeleteAll={onDeleteAll}
           onDeleteItem={onDeleteItem}
           onIncrementItem={onIncrementItem}
@@ -169,6 +163,30 @@ function Home() {
       </div>
     </>
   );
+}
+
+export async function getServerSideProps(context) {
+  // Sử dụng parseCookies để lấy cookies từ context
+  const cookies = parseCookies(context);
+  // Kiểm tra xem có cookie userId trong yêu cầu không
+  if (!cookies.userId) {
+    // Nếu không có, điều hướng người dùng đến trang đăng nhập
+    return {
+      redirect: {
+        destination: '/login',
+        permanent: false,
+      },
+    };
+  }
+  // Lấy userId từ cookies
+  const userId = cookies.userId;
+
+  // Pass userId vào props của trang
+  return {
+    props: {
+      userId: userId || null,
+    },
+  };
 }
 
 export default Home;

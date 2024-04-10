@@ -84,13 +84,13 @@ function Management() {
   const editCategoryAndUpdateState = (newCategoryData) => {
     // Cập nhật state của categories bằng cách thay đổi thông tin category đã chỉnh sửa trong danh sách categories
     const updatedCategories = categories.map(category => {
-        if (category._id === newCategoryData._id) {
-            return { ...category, name: newCategoryData.name, img: newCategoryData.img };
-        }
-        return category;
+      if (category._id === newCategoryData._id) {
+        return { ...category, name: newCategoryData.name, img: newCategoryData.img };
+      }
+      return category;
     });
     setCategories(updatedCategories);
-};
+  };
   //cập nhật lại state category sau khi xoá
   const deleteCategoryAndUpdateState = async (categoryId, categoryName) => {
     if (window.confirm(`Bạn có muốn xoá ${categoryName}?`)) {
@@ -109,7 +109,7 @@ function Management() {
       }
     }
   };
- 
+
   //DRINK
   //cập nhật lại state drink sau khi xoá
   const deleteDrinkAndUpdateState = async (drinkId, drinkname) => {
@@ -119,11 +119,11 @@ function Management() {
         const response = await axios.delete(`${baseURL}${drinksRoutes}/${drinkId}`);
         if (response.status === 201) {
           alert("Xoá thành công");
-  
+
           // Cập nhật state của drinks bằng danh sách mới loại bỏ đồ uống đã xoá
           const updatedDrinks = drinks.filter(drink => drink._id !== drinkId);
           setDrinks(updatedDrinks);
-  
+
           // Cập nhật selectedDrinks dựa trên selectedCategory
           if (selectedCategory && selectedCategory.name !== 'All') {
             const updatedSelectedDrinks = updatedDrinks.filter(drink => drink.categoryId === selectedCategory._id);
@@ -149,10 +149,10 @@ function Management() {
       }
       return drink;
     });
-  
+
     // Cập nhật state của drinks
     setDrinks(updatedDrinks);
-  
+
     // Cập nhật selectedDrinks dựa trên selectedCategory
     if (selectedCategory && selectedCategory.name !== 'All') {
       const filteredDrinks = updatedDrinks.filter(drink => drink.categoryId === selectedCategory._id);
@@ -165,7 +165,7 @@ function Management() {
   const handleSaveDrink = (newDrinkData) => {
     // Thêm đồ uống mới vào danh sách drinks
     setDrinks(prevDrinks => [...prevDrinks, newDrinkData]);
-  
+
     // Cập nhật selectedDrinks dựa trên selectedCategory
     if (selectedCategory && selectedCategory.name !== 'All') {
       // Nếu selectedCategory đã được chọn, lọc danh sách thức uống theo selectedCategory
@@ -185,27 +185,31 @@ function Management() {
   }
   return (
     <>
-      <div className="container mx-auto px-4 max-h-full">
-        <h1 className="text-3xl font-semibold my-4">Mặt hàng</h1>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {categories.map(category => (
-            <CategoryCard key={category._id} category={category} onSelect={handleCategorySelect} onDeleteCategory={deleteCategoryAndUpdateState} onEditCategory={editCategoryAndUpdateState}/>
-          ))}
+      <div className="w-full">
+        <Navbar />
+        <div className='container mx-auto px-4 max-h-full'>
+          <h1 className="text-3xl font-semibold my-4">Mặt hàng</h1>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {categories.map(category => (
+              <CategoryCard key={category._id} category={category} onSelect={handleCategorySelect} onDeleteCategory={deleteCategoryAndUpdateState} onEditCategory={editCategoryAndUpdateState} />
+            ))}
+          </div>
+          <h1 className="text-3xl font-semibold my-4">Thức uống</h1>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {selectedCategory && selectedDrinks.map(drink => (
+              <DrinkCard key={drink._id} drink={drink} editCard={editDrinkAndUpdateState} deleteDrink={deleteDrinkAndUpdateState} />
+            ))}
+          </div>
+          <button className="fixed bottom-16 right-4 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-full shadow-md focus:outline-none z-10" onClick={handleAddCategory}>
+            <FontAwesomeIcon icon={faCoffee} className="mr-2" />
+            Add Category
+          </button>
+          <button className="fixed bottom-4 right-4 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-full shadow-md focus:outline-none z-10" onClick={handleAddDrink}>
+            <FontAwesomeIcon icon={faCoffee} className="mr-2" />
+            Add Drink
+          </button>
         </div>
-        <h1 className="text-3xl font-semibold my-4">Thức uống</h1>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {selectedCategory && selectedDrinks.map(drink => (
-            <DrinkCard key={drink._id} drink={drink} editCard={editDrinkAndUpdateState} deleteDrink={deleteDrinkAndUpdateState} />
-          ))}
-        </div>
-        <button className="fixed bottom-16 right-4 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-full shadow-md focus:outline-none z-10" onClick={handleAddCategory}>
-          <FontAwesomeIcon icon={faCoffee} className="mr-2" />
-          Add Category
-        </button>
-        <button className="fixed bottom-4 right-4 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-full shadow-md focus:outline-none z-10" onClick={handleAddDrink}>
-          <FontAwesomeIcon icon={faCoffee} className="mr-2" />
-          Add Drink
-        </button>
+
       </div>
       {isAddingCategory && (
         <AddCategoryForm onSave={handleSaveCategory} onCancel={handleCancelAddCategory} />
@@ -216,5 +220,32 @@ function Management() {
     </>
   );
 }
+
+import { parseCookies } from 'nookies';
+import Navbar from '@/components/Navbar/Navbar';
+export async function getServerSideProps(context) {
+  // Sử dụng parseCookies để lấy cookies từ context
+  const cookies = parseCookies(context);
+  // Kiểm tra xem có cookie userId trong yêu cầu không
+  if (!cookies.userId) {
+    // Nếu không có, điều hướng người dùng đến trang đăng nhập
+    return {
+      redirect: {
+        destination: '/login',
+        permanent: false,
+      },
+    };
+  }
+  // Lấy userId từ cookies
+  const userId = cookies.userId;
+
+  // Pass userId vào props của trang
+  return {
+    props: {
+      userId: userId || null,
+    },
+  };
+}
+
 
 export default Management;

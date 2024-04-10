@@ -5,6 +5,7 @@ import { faSearch, faBars } from '@fortawesome/free-solid-svg-icons';
 import { useRouter } from 'next/router';
 import Sidebar from '@/components/Sidebar/Sidebar';
 import Login from './login';
+import Navbar from '@/components/Navbar/Navbar';
 export default function App({ Component, pageProps }) {
   const [isOpen, setIsOpen] = useState(false);
   const toggleSidebar = () => {
@@ -15,7 +16,7 @@ export default function App({ Component, pageProps }) {
   // Sử dụng hook useRouter để lấy thông tin về route hiện tại
   const router = useRouter();
   const { pathname } = router;
-  
+
 
   return (
     <>
@@ -34,6 +35,7 @@ export default function App({ Component, pageProps }) {
             <Component {...pageProps} />
           </div>
         </div>
+
       }
     </>
   )
