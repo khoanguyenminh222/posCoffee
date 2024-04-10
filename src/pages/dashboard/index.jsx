@@ -16,55 +16,16 @@ function Dashboard() {
     useEffect(() => {
         fetchData();
     }, [period, selectedDate]);
-    const data = [
-        {
-            "_id": "trà sữa truyền thống",
-            "totalQuantity": 6
-        },
-        {
-            "_id": "cà phê sữa",
-            "totalQuantity": 4
-        },
-        {
-            "_id": "choco đá xay",
-            "totalQuantity": 3
-        },
-        {
-            "_id": "trà ô long sữa",
-            "totalQuantity": 3
-        },
-        {
-            "_id": "matcha đá xay",
-            "totalQuantity": 2
-        },
-        {
-            "_id": "oreo đá xay",
-            "totalQuantity": 2
-        },
-        {
-            "_id": "cà phê đen1",
-            "totalQuantity": 1
-        },
-        {
-            "_id": "cà phê đen",
-            "totalQuantity": 1
-        }
-    ];
-    
-    // Lấy labels và data từ dữ liệu
-    const labels = data.map(item => item._id);
-    const dataValues = data.map(item => item.totalQuantity);
-    
-    
+  
     const fetchData = async () => {
         try {
-            const response1 = await axios.post(`${baseURL}${reportRoutes}/popular-items/${period}`, { date: selectedDate });
+            const response1 = await axios.get(`${baseURL}${reportRoutes}/popular-items/${period}?date=${date}`);
             setPopularItems(response1.data);
 
-            const response2 = await axios.post(`${baseURL}${reportRoutes}/revenue/${period}`, { date: selectedDate });
+            const response2 = await axios.get(`${baseURL}${reportRoutes}/revenue/${period}?date=${date}`);
             setRevenue(response2.data);
 
-            const response3 = await axios.post(`${baseURL}${reportRoutes}/items-sold/${period}`, { date: selectedDate });
+            const response3 = await axios.get(`${baseURL}${reportRoutes}/items-sold/${period}?date=${date}`);
             setItemsSold(response3.data);
             console.log("re", response2)
         } catch (error) {
@@ -132,7 +93,7 @@ function Dashboard() {
 
                 <div className="mb-4">
                     <label htmlFor="date" className="mr-2">Date:</label>
-                    <DatePicker id="date" selected={selectedDate} onChange={handleDateChange} />
+                    <DatePicker className="border rounded px-2 py-1" id="date" selected={selectedDate} onChange={handleDateChange} />
                 </div>
             </div>
 

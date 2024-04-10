@@ -6,7 +6,7 @@ import { storage } from '@/firebase';
 
 function DrinkOfCategory({ drink, addToBill, setSelectedOptions  }) {
   const { temperature, sugar, ice } = drink.options;
-  const [selectedTemperature, setSelectedTemperature] = useState('cold');
+  const [selectedTemperature, setSelectedTemperature] = useState('');
   const [selectedSugar, setSelectedSugar] = useState(null);
   const [selectedIce, setSelectedIce] = useState(null);
   const [selectedSize, setSelectedSize] = useState('M');
@@ -60,7 +60,7 @@ function DrinkOfCategory({ drink, addToBill, setSelectedOptions  }) {
           <div className='flex flex-col'>
             <div className="font-semibold text-lg uppercase text-nowrap">{drink.name}</div>
             <div className='flex justify-between'>
-              <div className="text-gray-600 text-sm mt-2">{selectedSize === 'M' ? drink.prices.M : drink.prices.L}đ</div>
+              <div className="text-gray-600 text-sm mt-2">{selectedSize === 'M' ? drink.prices.M.toLocaleString('vi-VN') : drink.prices.L.toLocaleString('vi-VN')}đ</div>
               <div className="flex items-center">
                 {['M', 'L'].map((option, index) => (
                   <div key={index} className={`w-6 h-6 rounded-full flex items-center justify-center cursor-pointer mr-2 ${selectedSize === option ? 'bg-amber-500 text-white rounded-full' : 'bg-gray-200'}`} onClick={() => {setSelectedSize((prevOption) => prevOption === option ? null : option); updateSelectedOptions('size', option);}}>

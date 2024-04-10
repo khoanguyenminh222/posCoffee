@@ -17,4 +17,5 @@ const billRoutes = '/api/bills';
 const userRoutes = '/api/users';
 const weekScheduleRoutes = '/api/weekSchedule';
 const reportRoutes = '/api/report';
-export {baseURL, categoriesRoutes, drinksGetByCategory, drinksRoutes, billRoutes, userRoutes, weekScheduleRoutes, reportRoutes}
+const historyRoutes = '/api/history';
+export {baseURL, categoriesRoutes, drinksGetByCategory, drinksRoutes, billRoutes, userRoutes, weekScheduleRoutes, reportRoutes, historyRoutes}

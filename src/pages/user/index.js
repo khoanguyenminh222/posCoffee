@@ -235,8 +235,8 @@ function User() {
 
     return (
         <div className="container mx-auto max-h-full p-6 flex flex-col overflow-x-auto">
-            <h1 className="text-3xl font-semibold my-4">Ca làm việc của nhân viên 1 tuần</h1>
             <div className="bg-white rounded-lg p-4 mb-4">
+            <h1 className="text-3xl font-semibold my-4">Ca làm việc của nhân viên 1 tuần</h1>
                 <div className='flex mb-4'>
                 <div className="items-center mr-4">
                     <label className="mr-2" htmlFor="start-date">Từ ngày:</label>

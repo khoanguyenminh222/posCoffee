@@ -16,6 +16,7 @@
     "@react-pdf/renderer": "^3.4.2",
     "axios": "^1.6.8",
     "chart.js": "^4.4.2",
+    "date-fns": "^3.6.0",
     "firebase": "^10.10.0",
     "html2canvas": "^1.4.1",
     "next": "14.1.4",

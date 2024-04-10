@@ -17,7 +17,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                     <Link href="/home">
                         <li className="py-4 flex flex-col items-center transition duration-300 ease-in-out transform hover:scale-110 cursor-pointer hover:text-amber-700">
                             <FontAwesomeIcon icon={faHome} size='2x' />
-                            <span className="text-sm">Trang chủ</span>
+                            <span className="text-sm">Bán hàng</span>
                         </li>
                     </Link>
                     <Link href="/management">
@@ -38,7 +38,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                             <span className="text-sm">Dashboard</span>
                         </li>
                     </Link>
-                    <Link href="">
+                    <Link href="/history">
                         <li className="py-4 flex flex-col items-center transition duration-300 ease-in-out transform hover:scale-110 cursor-pointer hover:text-amber-700">
                             <FontAwesomeIcon icon={faHistory} size='2x' />
                             <span className="text-sm">Lịch sử</span>
