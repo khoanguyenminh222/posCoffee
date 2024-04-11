@@ -34,7 +34,7 @@ function Login() {
             if (response.status==201) {
                 console.log(response)
                 alert(response.data.message)
-                Cookies.set('userId', response.data.userId);
+                Cookies.set('token', response.data.token, { secure: true });
                 router.push('/home');
             }else{
                 console.error('Login failed with status:', response.status);

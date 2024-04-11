@@ -5,8 +5,10 @@ import DrinkOfCategory from '@/components/DrinkOfCategory/DrinkOfCategory';
 import { baseURL, categoriesRoutes, drinksGetByCategory } from '@/api/api';
 import { parseCookies } from 'nookies';
 import { storage } from '@/firebase';
+import jwt from 'jsonwebtoken';
+import axios from 'axios';
 
-function Home({userId}) {
+function Home({token}) {
   const [drinks, setDrinks] = useState([]);
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -17,14 +19,37 @@ function Home({userId}) {
     size: null
   });
   const [billItems, setBillItems] = useState([]);
+  const [isBillRendered, setIsBillRendered] = useState(false);
+
+  const [userId, setUserId] = useState();
+  useEffect(()=>{
+    const decoded = jwt.decode(token);
+    if (decoded) {
+        // Dữ liệu được nhúng trong token là thuộc tính payload
+        console.log('Decoded payload:', decoded);
+        // Lấy dữ liệu cụ thể từ decoded payload
+        const useridfromtoken = decoded.userId;
+        console.log('User ID:', useridfromtoken);
+        setUserId(useridfromtoken)
+        setIsBillRendered(true);
+    } else {
+        console.error('Invalid JWT token');
+    }
+  },[token])
+  
+
 
   useEffect(() => {
     // Fetch categories from API
     const fetchCategories = async () => {
       try {
-        const response = await fetch(`${baseURL}${categoriesRoutes}`); // Assume the API endpoint is '/api/categories'
-        const data = await response.json();
-        setCategories(data);
+        const response = await axios.get(`${baseURL}${categoriesRoutes}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+         // Assume the API endpoint is '/api/categories'
+        //const data = await response.json();
+        console.log(response.data)
+        setCategories(response.data);
       } catch (error) {
         console.error('Error fetching categories:', error);
       }
@@ -152,7 +177,8 @@ function Home({userId}) {
       </div>
 
       {/* Component Bill */}
-      <div className="w-1/4 h-full bg-white p-4 shadow-md rounded-md relative">
+      {isBillRendered && (
+        <div className="w-1/4 h-full bg-white p-4 shadow-md rounded-md relative">
         <Bill
           userId={userId}
           billItems={billItems}
@@ -161,6 +187,8 @@ function Home({userId}) {
           onIncrementItem={onIncrementItem}
           onDecrementItem={onDecrementItem} />
       </div>
+      )}
+      
     </>
   );
 }
@@ -169,7 +197,7 @@ export async function getServerSideProps(context) {
   // Sử dụng parseCookies để lấy cookies từ context
   const cookies = parseCookies(context);
   // Kiểm tra xem có cookie userId trong yêu cầu không
-  if (!cookies.userId) {
+  if (!cookies.token) {
     // Nếu không có, điều hướng người dùng đến trang đăng nhập
     return {
       redirect: {
@@ -179,12 +207,12 @@ export async function getServerSideProps(context) {
     };
   }
   // Lấy userId từ cookies
-  const userId = cookies.userId;
+  const token = cookies.token;
 
   // Pass userId vào props của trang
   return {
     props: {
-      userId: userId || null,
+      token: token || null,
     },
   };
 }
