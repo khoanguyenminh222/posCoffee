@@ -7,8 +7,10 @@ import CategoryCard from '@/components/Category/CategoryCard';
 import DrinkCard from '@/components/DrinkOfCategory/DrinkCard';
 import AddCategoryForm from '@/components/Category/AddCategoryForm';
 import AddDrinkForm from '@/components/DrinkOfCategory/AddDrinkForm';
+import { getServerSideProps } from '@/helpers/cookieHelper';
+import { getUserIdFromToken } from '@/helpers/getUserIdFromToken';
 
-function Management() {
+function Management({token}) {
   const [categories, setCategories] = useState([]);
   const [drinks, setDrinks] = useState([]);
   const [selectedDrinks, setSelectedDrinks] = useState();
@@ -45,7 +47,9 @@ function Management() {
 
   useEffect(() => {
     // Fetch categories from the server
-    axios.get(`${baseURL}${categoriesRoutes}`)
+    axios.get(`${baseURL}${categoriesRoutes}`,{
+      headers: { Authorization: `Bearer ${token}` }
+    })
       .then(response => {
         // Add "All" category
         const allCategory = { _id: 'all', name: 'All', img: 'All' };
@@ -57,7 +61,9 @@ function Management() {
       });
 
     // Fetch drinks from the server
-    axios.get(`${baseURL}${drinksRoutes}`)
+    axios.get(`${baseURL}${drinksRoutes}`,{
+      headers: { Authorization: `Bearer ${token}` }
+    })
       .then(response => {
         setDrinks(response.data);
         setSelectedDrinks(response.data);
@@ -95,7 +101,9 @@ function Management() {
   const deleteCategoryAndUpdateState = async (categoryId, categoryName) => {
     if (window.confirm(`Bạn có muốn xoá ${categoryName}?`)) {
       try {
-        const response = await axios.delete(`${baseURL}${categoriesRoutes}/${categoryId}`);
+        const response = await axios.delete(`${baseURL}${categoriesRoutes}/${categoryId}`,{
+          headers: { Authorization: `Bearer ${token}` }
+        });
         if (response.status === 201) {
           alert("Xoá thành công");
           const updatedCategories = categories.filter(category => category._id !== categoryId);
@@ -116,7 +124,9 @@ function Management() {
     if (window.confirm(`Bạn có muốn xoá ${drinkname}?`)) {
       try {
         // Gửi request DELETE sử dụng axios
-        const response = await axios.delete(`${baseURL}${drinksRoutes}/${drinkId}`);
+        const response = await axios.delete(`${baseURL}${drinksRoutes}/${drinkId}`,{
+          headers: { Authorization: `Bearer ${token}` }
+        });
         if (response.status === 201) {
           alert("Xoá thành công");
 
@@ -186,7 +196,6 @@ function Management() {
   return (
     <>
       <div className="w-full">
-        <Navbar />
         <div className='container mx-auto px-4 max-h-full'>
           <h1 className="text-3xl font-semibold my-4">Mặt hàng</h1>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -221,31 +230,5 @@ function Management() {
   );
 }
 
-import { parseCookies } from 'nookies';
-import Navbar from '@/components/Navbar/Navbar';
-export async function getServerSideProps(context) {
-  // Sử dụng parseCookies để lấy cookies từ context
-  const cookies = parseCookies(context);
-  // Kiểm tra xem có cookie userId trong yêu cầu không
-  if (!cookies.userId) {
-    // Nếu không có, điều hướng người dùng đến trang đăng nhập
-    return {
-      redirect: {
-        destination: '/login',
-        permanent: false,
-      },
-    };
-  }
-  // Lấy userId từ cookies
-  const userId = cookies.userId;
-
-  // Pass userId vào props của trang
-  return {
-    props: {
-      userId: userId || null,
-    },
-  };
-}
-
-
+export { getServerSideProps };
 export default Management;
