@@ -32,7 +32,6 @@ function Login() {
         try {
             const response = await axios.post(`${baseURL}${userRoutes}/login`, userData)
             if (response.status==201) {
-                console.log(response)
                 alert(response.data.message)
                 Cookies.set('token', response.data.token, { secure: true });
                 router.push('/home');

@@ -3,10 +3,10 @@ import Bill from '@/components/Bill/Bill';
 import Category from '@/components/Category/Category';
 import DrinkOfCategory from '@/components/DrinkOfCategory/DrinkOfCategory';
 import { baseURL, categoriesRoutes, drinksGetByCategory } from '@/api/api';
-import { parseCookies } from 'nookies';
 import { storage } from '@/firebase';
-import jwt from 'jsonwebtoken';
 import axios from 'axios';
+import { getServerSideProps } from '@/helpers/cookieHelper';
+import { getUserIdFromToken } from '@/helpers/getUserIdFromToken';
 
 function Home({token}) {
   const [drinks, setDrinks] = useState([]);
@@ -23,17 +23,13 @@ function Home({token}) {
 
   const [userId, setUserId] = useState();
   useEffect(()=>{
-    const decoded = jwt.decode(token);
-    if (decoded) {
-        // Dữ liệu được nhúng trong token là thuộc tính payload
-        console.log('Decoded payload:', decoded);
-        // Lấy dữ liệu cụ thể từ decoded payload
-        const useridfromtoken = decoded.userId;
-        console.log('User ID:', useridfromtoken);
-        setUserId(useridfromtoken)
+    if (token) {
+      
+      const useridfromtoken = getUserIdFromToken(token);
+      if (useridfromtoken) {
+        setUserId(useridfromtoken);
         setIsBillRendered(true);
-    } else {
-        console.error('Invalid JWT token');
+      }
     }
   },[token])
   
@@ -46,9 +42,6 @@ function Home({token}) {
         const response = await axios.get(`${baseURL}${categoriesRoutes}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-         // Assume the API endpoint is '/api/categories'
-        //const data = await response.json();
-        console.log(response.data)
         setCategories(response.data);
       } catch (error) {
         console.error('Error fetching categories:', error);
@@ -61,9 +54,10 @@ function Home({token}) {
   const handleCategoryClick = async (category) => {
     setSelectedCategory(category);
     try {
-      const response = await fetch(`${baseURL}${drinksGetByCategory}/${category._id}`);
-      const data = await response.json();
-      setDrinks(data);
+      const response = await axios.get(`${baseURL}${drinksGetByCategory}/${category._id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setDrinks(response.data);
     } catch (error) {
       console.error('Error fetching drinks by category:', error);
     }
@@ -180,6 +174,7 @@ function Home({token}) {
       {isBillRendered && (
         <div className="w-1/4 h-full bg-white p-4 shadow-md rounded-md relative">
         <Bill
+          token={token}
           userId={userId}
           billItems={billItems}
           onDeleteAll={onDeleteAll}
@@ -193,28 +188,5 @@ function Home({token}) {
   );
 }
 
-export async function getServerSideProps(context) {
-  // Sử dụng parseCookies để lấy cookies từ context
-  const cookies = parseCookies(context);
-  // Kiểm tra xem có cookie userId trong yêu cầu không
-  if (!cookies.token) {
-    // Nếu không có, điều hướng người dùng đến trang đăng nhập
-    return {
-      redirect: {
-        destination: '/login',
-        permanent: false,
-      },
-    };
-  }
-  // Lấy userId từ cookies
-  const token = cookies.token;
-
-  // Pass userId vào props của trang
-  return {
-    props: {
-      token: token || null,
-    },
-  };
-}
-
+export { getServerSideProps };
 export default Home;
