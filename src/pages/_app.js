@@ -31,7 +31,7 @@ export default function App({ Component, pageProps }) {
           </button>
           <Sidebar isOpen={isOpen} toggleSidebar={toggleSidebar} />
 
-          <div className={`w-screen flex-grow h-full bg-gray-200 flex ${isOpen ? 'ml-20' : 'ml-0'} transition-all duration-300 ease-in-out`}>
+          <div className={`w-screen flex-grow h-full bg-gray-200 flex ${isOpen ? 'lg:ml-20 ml-0' : 'ml-0'} transition-all duration-300 ease-in-out`}>
             <Component {...pageProps} />
           </div>
         </div>

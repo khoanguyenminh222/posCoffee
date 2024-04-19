@@ -202,7 +202,7 @@ function Home({ token }) {
       <div className="flex-grow flex flex-col w-screen h-screen">
         <div className="flex-grow px-4 flex relative">
           {/* Phần category */}
-          <div className={`flex flex-col overflow-auto mr-4 max-h-screen transition-width duration-300`} style={{ width: isCategoryOpen ? 'auto' : 0, scrollbarWidth: 'thin', scrollbarColor: 'gray', scrollbarTrackColor: 'rgba(0, 0, 0, 0.1)' }}>
+          <div className={`flex flex-col overflow-auto lg:mr-4 max-h-screen transition-width duration-300`} style={{ width: isCategoryOpen ? 'auto' : 0, scrollbarWidth: 'thin', scrollbarColor: 'gray', scrollbarTrackColor: 'rgba(0, 0, 0, 0.1)' }}>
 
             {categories.map(category => (
               <Category key={category._id} category={category} storage={storage} onClick={handleCategoryClick} />

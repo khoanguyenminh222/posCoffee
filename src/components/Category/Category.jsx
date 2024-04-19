@@ -18,8 +18,8 @@ function Category({category, storage, onClick }) {
   return (
     <div onClick={() => onClick(category)} className="pr-2 py-2 cursor-pointer">
       <div className="border rounded-md p-2 text-center bg-white hover:bg-gray-100 transition duration-300">
-        <img src={imageUrl} alt="cat" className="w-full h-16 object-cover rounded-md mb-2" />
-        <span className="text-sm font-semibold">{category.name}</span>
+        <img src={imageUrl} alt="cat" className="lg:w-full w-20 h-16 object-cover rounded-md mb-2" />
+        <span className="text-xs lg:text-sm font-semibold">{category.name}</span>
       </div>
     </div>
   );

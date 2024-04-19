@@ -118,19 +118,19 @@ function DrinkOfCategory({ drink, addToBill, setSelectedOptions  }) {
               <div className="relative">
                 <button
                   onClick={() => setQuantity((prevQuantity) => Math.max(1, prevQuantity - 1))}
-                  className="absolute inset-y-0 left-0 px-3 bg-gray-200 text-gray-600 focus:outline-none"
+                  className="absolute inset-y-0 left-0 lg:px-3 px-2 bg-gray-200 text-gray-600 focus:outline-none"
                 >
                   -
                 </button>
                 <input
                   type="number"
-                  className="w-20 pl-6 pr-2 text-center bg-gray-200 focus:outline-none"
+                  className="w-20 lg:pl-6 lg:pr-2 pl-4 pr-4 text-center bg-gray-200 focus:outline-none"
                   value={quantity}
                   onChange={(e) => setQuantity(parseInt(e.target.value))}
                 />
                 <button
                   onClick={() => setQuantity((prevQuantity) => prevQuantity + 1)}
-                  className="absolute inset-y-0 right-0 px-3 bg-gray-200 text-gray-600 focus:outline-none"
+                  className="absolute inset-y-0 right-0 lg:px-3 px-2 bg-gray-200 text-gray-600 focus:outline-none"
                 >
                   +
                 </button>
