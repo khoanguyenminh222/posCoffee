@@ -84,7 +84,7 @@ function Bill({ userId, billItems, onDeleteAll, onDeleteItem, onIncrementItem, o
                 {/* Hiển thị tổng tiền */}
                 <div className="text-lg font-semibold mb-2 flex justify-between">
                     <span>Tổng tiền:</span> {/* Thay số này bằng biến hoặc tính toán thực tế */}
-                    <span>{totalAmount}đ</span>
+                    <span>{totalAmount.toLocaleString('vi-VN')} đ</span>
                 </div>
 
                 {/* Nút in hoá đơn */}

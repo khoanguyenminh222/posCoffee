@@ -7,7 +7,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
 
 
     return (
-        <div className={`overflow-x-auto fixed inset-y-0 left-0 z-50 bg-white text-gray-500 w-20 flex flex-col justify-between transform transition-all duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
+        <div className={`overflow-x-auto fixed inset-y-0 left-0 z-50 bg-white text-gray-500 w-20 outline-none focus:outline-none flex flex-col justify-between transform transition-all duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
             style={{ scrollbarWidth: 'thin', scrollbarColor: 'gray', scrollbarTrackColor: 'rgba(0, 0, 0, 0.1)' }}>
             {/* Logo và các menu */}
             <div className="py-4 flex-grow flex flex-col items-center">

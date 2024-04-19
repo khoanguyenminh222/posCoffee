@@ -53,10 +53,10 @@ function DrinkOfCategory({ drink, addToBill, setSelectedOptions  }) {
   };
 
   return (
-    <div className="flex flex-col items-center max-w-xs mx-auto my-6">
-      <div className="bg-white rounded-lg shadow-md w-64">
-        <img src={imageUrl} alt="Drink" className="rounded-t-lg w-full h-48 object-cover" />
-        <div className="p-6">
+    <div className="flex flex-col items-center mx-auto my-6">
+      <div className="bg-white rounded-lg shadow-md">
+        <img src={imageUrl} alt="Drink" className="rounded-t-lg w-64 h-48 object-cover" />
+        <div className="lg:p-6 md:p-4 p-2">
           <div className='flex flex-col'>
             <div className="font-semibold text-lg uppercase text-nowrap">{drink.name}</div>
             <div className='flex justify-between'>

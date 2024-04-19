@@ -31,7 +31,7 @@ function DrinkBill({item, onDelete, onIncrement, onDecrement}) {
                         </div>
                     </div>
                 </div>
-                <div className="text-sm ml-auto">{item.price}đ</div>
+                <div className="text-sm ml-auto">{item.price.toLocaleString('vi-VN')}</div>
                 <button onClick={() => onDelete(item)} className="text-sm ml-4 text-red-500 focus:outline-none"><FontAwesomeIcon icon={faTrash} /></button>
             </div>
             {showNoteInput && (

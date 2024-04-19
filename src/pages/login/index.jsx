@@ -33,7 +33,11 @@ function Login() {
             const response = await axios.post(`${baseURL}${userRoutes}/login`, userData)
             if (response.status==201) {
                 alert(response.data.message)
-                Cookies.set('token', response.data.token, { secure: true });
+                // Xác định thời điểm hiện tại
+                const now = new Date();
+                // Đặt thời gian hết hạn của cookie là một thời điểm trong quá khứ
+                const expireTime = new Date(now.getTime() + (1 * 24 * 60 * 60 * 1000));
+                Cookies.set('token', response.data.token, { expires: expireTime, secure: true });
                 router.push('/home');
             }else{
                 console.error('Login failed with status:', response.status);
