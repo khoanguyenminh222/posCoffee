@@ -5,8 +5,9 @@ import 'react-datepicker/dist/react-datepicker.css';
 import { Chart as ChartJS } from 'chart.js/auto';
 import { Bar, Line } from 'react-chartjs-2';
 import { baseURL, reportRoutes } from '@/api/api';
+import { getServerSideProps } from '@/helpers/cookieHelper';
 
-function Dashboard() {
+function Dashboard({token}) {
     const [period, setPeriod] = useState('all');
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [popularItems, setPopularItems] = useState([]);
@@ -19,15 +20,20 @@ function Dashboard() {
   
     const fetchData = async () => {
         try {
-            const response1 = await axios.get(`${baseURL}${reportRoutes}/popular-items/${period}?date=${date}`);
+            const response1 = await axios.get(`${baseURL}${reportRoutes}/popular-items/${period}?date=${date}`,{
+                headers: { Authorization: `Bearer ${token}` }
+            });
             setPopularItems(response1.data);
 
-            const response2 = await axios.get(`${baseURL}${reportRoutes}/revenue/${period}?date=${date}`);
+            const response2 = await axios.get(`${baseURL}${reportRoutes}/revenue/${period}?date=${date}`,{
+                headers: { Authorization: `Bearer ${token}` }
+            });
             setRevenue(response2.data);
 
-            const response3 = await axios.get(`${baseURL}${reportRoutes}/items-sold/${period}?date=${date}`);
+            const response3 = await axios.get(`${baseURL}${reportRoutes}/items-sold/${period}?date=${date}`,{
+                headers: { Authorization: `Bearer ${token}` }
+            });
             setItemsSold(response3.data);
-            console.log("re", response2)
         } catch (error) {
             console.error('Error fetching dashboard data:', error);
         }
@@ -97,8 +103,8 @@ function Dashboard() {
                 </div>
             </div>
 
-            <div className="flex flex-wrap mx-4">
-                <div className="w-full px-4 mb-8">
+            <div className="flex flex-wrap">
+                <div className="w-full mb-8">
                     <div className="bg-white shadow-md rounded-md p-6 mb-4">
                         <h2 className="text-xl font-semibold mb-4">Popular Items</h2>
                         <Bar data={popularItemsData} />
@@ -124,29 +130,6 @@ function Dashboard() {
         </div>
     );
 }
-import { parseCookies } from 'nookies';
-export async function getServerSideProps(context) {
-    // Sử dụng parseCookies để lấy cookies từ context
-    const cookies = parseCookies(context);
-    // Kiểm tra xem có cookie userId trong yêu cầu không
-    if (!cookies.userId) {
-      // Nếu không có, điều hướng người dùng đến trang đăng nhập
-      return {
-        redirect: {
-          destination: '/login',
-          permanent: false,
-        },
-      };
-    }
-    // Lấy userId từ cookies
-    const userId = cookies.userId;
-  
-    // Pass userId vào props của trang
-    return {
-      props: {
-        userId: userId || null,
-      },
-    };
-  }
 
+export { getServerSideProps };
 export default Dashboard;

@@ -10,7 +10,7 @@ import EditUserModal from '@/components/User/EditUserModel';
 import { getServerSideProps } from '@/helpers/cookieHelper';
 import { getUserIdFromToken } from '@/helpers/getUserIdFromToken';
 
-function User({token}) {
+function User({ token }) {
     const [users, setUsers] = useState([]);
     const [showModalAddSchedule, setShowModalAddSchedule] = useState(false);
     const [showModalEditSchedule, setShowModalEditSchedule] = useState(false);
@@ -49,7 +49,7 @@ function User({token}) {
     const handleDeleteUser = async (user) => {
         if (window.confirm(`Bạn có muốn xoá ${user.fullname}?`)) {
             try {
-                const response = await axios.delete(`${baseURL}${userRoutes}/${user._id}`,{
+                const response = await axios.delete(`${baseURL}${userRoutes}/${user._id}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 if (response.status == 201) {
@@ -116,7 +116,7 @@ function User({token}) {
     const handelDeleteSchedule = async (user) => {
         if (window.confirm(`Bạn có muốn xoá lịch ${startDate}-${endDate} của ${user.fullname}?`)) {
             try {
-                const response = await axios.delete(`${baseURL}${weekScheduleRoutes}/${user._id}?startDate=${startDate}&endDate=${endDate}`,{
+                const response = await axios.delete(`${baseURL}${weekScheduleRoutes}/${user._id}?startDate=${startDate}&endDate=${endDate}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 if (response.status == 201) {
@@ -151,12 +151,12 @@ function User({token}) {
         setEndDate(endDateString);
 
         fetchWeekScheduleForAllUsers(startDateString, endDateString);
-        
+
     }, []);
 
     const fetchWeekScheduleForAllUsers = async (start, end) => {
         try {
-            const response = await axios.get(`${baseURL}${weekScheduleRoutes}?startDate=${start}&endDate=${end}`,{
+            const response = await axios.get(`${baseURL}${weekScheduleRoutes}?startDate=${start}&endDate=${end}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setSchedule(response.data);
@@ -241,27 +241,27 @@ function User({token}) {
     return (
         <div className="container mx-auto max-h-full p-6 flex flex-col overflow-x-auto">
             <div className="bg-white rounded-lg p-4 mb-4">
-            <h1 className="text-3xl font-semibold my-4">Ca làm việc của nhân viên 1 tuần</h1>
+                <h1 className="text-3xl font-semibold my-4">Ca làm việc của nhân viên 1 tuần</h1>
                 <div className='flex mb-4'>
-                <div className="items-center mr-4">
-                    <label className="mr-2" htmlFor="start-date">Từ ngày:</label>
-                    <input className="w-32 lg:w-full p-2 border border-gray-300 rounded-md focus:outline-none" type="date" id="start-date" value={startDate ? startDate : ''}  onChange={handleStartDateChange} />
-                </div>
-                <div className="items-center">
-                    <label className="mr-2" htmlFor="end-date">Đến ngày:</label>
-                    <input className="w-32 lg:w-full p-2 border border-gray-300 rounded-md focus:outline-none" type="date" id="end-date" value={endDate ? endDate : ''} onChange={handleEndDateChange} />
-                </div>
+                    <div className="items-center mr-4">
+                        <label className="mr-2" htmlFor="start-date">Từ ngày:</label>
+                        <input className="w-32 lg:w-full p-2 border border-gray-300 rounded-md focus:outline-none" type="date" id="start-date" value={startDate ? startDate : ''} onChange={handleStartDateChange} />
+                    </div>
+                    <div className="items-center">
+                        <label className="mr-2" htmlFor="end-date">Đến ngày:</label>
+                        <input className="w-32 lg:w-full p-2 border border-gray-300 rounded-md focus:outline-none" type="date" id="end-date" value={endDate ? endDate : ''} onChange={handleEndDateChange} />
+                    </div>
                 </div>
                 <div className="flex flex-col overflow-x-auto">
                     {schedule && startDate && endDate && (
-                        <div className="flex-1 mr-4">
+                        <div className="flex-1 mr-4 block max-h-96">
                             <h2 className="text-lg font-semibold">Lịch làm việc của nhân viên</h2>
                             <table className="min-w-full divide-y divide-slate-400">
-                                <thead className="bg-slate-200">
+                                <thead className="bg-slate-200 sticky top-0">
                                     <tr>
                                         <th scope="col" className="sticky left-0 z-1 px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider bg-blue-600">Nhân viên</th>
                                         {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day, index) => (
-                                            <th key={index} scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            <th key={index} scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                                                 {day === 'Monday' && 'Thứ Hai'}
                                                 {day === 'Tuesday' && 'Thứ Ba'}
                                                 {day === 'Wednesday' && 'Thứ Tư'}
@@ -274,7 +274,7 @@ function User({token}) {
                                         <th></th>
                                     </tr>
                                 </thead>
-                                <tbody className="bg-white divide-y divide-gray-200">
+                                <tbody className="bg-white divide-y divide-gray-200 overflow-y-auto">
                                     {users.map((user, index) => {
                                         const userSchedule = schedule.find(item => item.user._id === user._id);
                                         if (!userSchedule) return null; // Không có lịch làm việc cho người dùng này
@@ -329,60 +329,60 @@ function User({token}) {
             {/* hiển thị danh sách nhân viên */}
             <div className="flex-1 bg-white rounded-lg p-4">
                 <h1 className="text-3xl font-semibold my-4">Danh sách nhân viên</h1>
-                <div className="flex mb-4">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
                     {/* Thêm thanh tìm kiếm */}
                     <input
                         type="text"
                         placeholder="Tìm kiếm..."
                         value={searchTerm}
                         onChange={handleSearchChange}
-                        className="p-2 border border-gray-300 rounded-md mr-2 focus:outline-none"
+                        className="p-2 border border-gray-300 rounded-md mb-2 sm:mb-0 sm:mr-2 focus:outline-none"
                     />
                     <button
                         onClick={handleAddUser}
-                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded whitespace-nowrap"
                     >
                         <FontAwesomeIcon icon={faUserPlus} className="mr-2" />
                         Tạo mới nhân viên
                     </button>
                 </div>
-                <div className="overflow-auto w-full relative">
-                <table className="min-w-full divide-y divide-slate-400">
-                    <thead className="bg-slate-200">
-                        <tr className='sticky top-0'>
-                            <th scope="col" className="sticky left-0 z-1 px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider bg-blue-600">Họ tên</th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Điện thoại</th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Giới tính</th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vai trò</th>
-                            <th></th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                        {users.map(user => (
-                            <tr key={`${user._id}`} className='cursor-pointer'>
-                                <td className="sticky left-0 z-1 px-6 py-4 font-medium tracking-wider text-black bg-blue-200 whitespace-nowrap">{user.fullname}</td>
-                                <td className="px-6 py-4 whitespace-nowrap">{user.phoneNumber}</td>
-                                <td className="px-6 py-4 whitespace-nowrap">{user.gender}</td>
-                                <td className="px-6 py-4 whitespace-nowrap">{user.role}</td>
-                                <td>
-                                    <button onClick={() => handleDeleteUser(user)} className="mr-2 focus:outline-none">
-                                        <FontAwesomeIcon icon={faTrashAlt} className="text-red-500 hover:text-red-600" />
-                                    </button>
-                                    <button onClick={() => handleEditModelUser(user)} className="focus:outline-none">
-                                        <FontAwesomeIcon icon={faEdit} className="text-blue-500 hover:text-blue-600" />
-                                    </button>
-                                </td>
-                                <td>
-                                    <button className="bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded" onClick={() => handleAddSchedule(user)}>
-                                        <FontAwesomeIcon icon={faCalendarDay} className="mr-2" />
-                                        Tạo lịch
-                                    </button>
-                                </td>
+                <div className="overflow-auto block max-h-96">
+                    <table className="min-w-full divide-y divide-slate-400">
+                        <thead className="bg-slate-200 sticky top-0 z-10">
+                            <tr>
+                                <th scope="col" className="sticky left-0 z-1 px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider bg-blue-600 whitespace-nowrap">Họ tên</th>
+                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Điện thoại</th>
+                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Giới tính</th>
+                                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">Vai trò</th>
+                                <th></th>
+                                <th></th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200 overflow-y-auto">
+                            {users.map(user => (
+                                <tr key={`${user._id}`} className='cursor-pointer'>
+                                    <td className="sticky left-0 z-1 px-6 py-4 font-medium tracking-wider text-black bg-blue-200 whitespace-nowrap">{user.fullname}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap">{user.phoneNumber}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap">{user.gender}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap">{user.role}</td>
+                                    <td>
+                                        <button onClick={() => handleDeleteUser(user)} className="mr-2 focus:outline-none">
+                                            <FontAwesomeIcon icon={faTrashAlt} className="text-red-500 hover:text-red-600" />
+                                        </button>
+                                        <button onClick={() => handleEditModelUser(user)} className="focus:outline-none">
+                                            <FontAwesomeIcon icon={faEdit} className="text-blue-500 hover:text-blue-600" />
+                                        </button>
+                                    </td>
+                                    <td>
+                                        <button className="bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded whitespace-nowrap" onClick={() => handleAddSchedule(user)}>
+                                            <FontAwesomeIcon icon={faCalendarDay} className="mr-2" />
+                                            Tạo lịch
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
                 </div>
                 <div className="flex justify-center mt-4">
                     <button onClick={handlePreviousPage} disabled={currentPage === 1} className="mr-2 px-3 py-1 bg-gray-200 rounded-md focus:outline-none">Trang trước</button>

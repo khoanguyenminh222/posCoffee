@@ -6,8 +6,9 @@ import { format } from 'date-fns';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { baseURL, historyRoutes, userRoutes } from '@/api/api';
+import { getServerSideProps } from '@/helpers/cookieHelper';
 
-function History() {
+function History({ token }) {
     const [period, setPeriod] = useState("day");
     const [userId, setUserId] = useState("");
     const [users, setUsers] = useState([]);
@@ -40,7 +41,9 @@ function History() {
             }
             apiURL += `?date=${date}&page=${page}&pageSize=${pageSize}&billCode=${billCode}`;
 
-            const response = await axios.get(apiURL);
+            const response = await axios.get(apiURL, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
             const { transactions, totalAmountSum, totalPages, currentPage } = response.data;
             setTransactions(transactions);
             setTotalAmountSum(totalAmountSum);
@@ -53,7 +56,9 @@ function History() {
 
     const fetchUsers = async () => {
         try {
-            const response = await axios.get(`${baseURL}${userRoutes}/getAll`);
+            const response = await axios.get(`${baseURL}${userRoutes}/getAll`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
             setUsers(response.data);
         } catch (error) {
             console.log('Error fetching users:', error);
@@ -96,10 +101,10 @@ function History() {
     };
 
     return (
-        <div className="container mx-auto px-4 py-8 mb-6">
+        <div className="container mx-auto px-4 py-8 h-full">
             <div className="bg-white rounded-lg shadow-md p-6">
                 <h1 className="text-3xl font-bold mb-4">Lịch sửa giao dịch</h1>
-                <div className="mb-4 flex items-center">
+                <div className="mb-4 flex items-center lg:justify-start justify-between">
                     <label htmlFor="period" className="mr-2">Lọc:</label>
                     <select id="period" className="border rounded px-2 py-1" value={period} onChange={handlePeriodChange}>
                         <option value="day">Ngày</option>
@@ -109,7 +114,7 @@ function History() {
                         <option value="all">All</option>
                     </select>
                 </div>
-                <div className="mb-4 flex items-center"> {/* Add select for user */}
+                <div className="mb-4 flex items-center lg:justify-start justify-between"> {/* Add select for user */}
                     <label htmlFor="user" className="mr-2">Nhân viên:</label>
                     <select id="user" className="border rounded px-2 py-1" value={userId} onChange={handleUserChange}>
                         <option value="">Chọn nhân viên</option>
@@ -118,14 +123,14 @@ function History() {
                         ))}
                     </select>
                 </div>
-                <div className="mb-4 flex justify-between items-center">
-                    <div className="flex items-center">
+                <div className="mb-4 flex flex-col sm:flex-row lg:justify-between">
+                    <div className="flex items-center mb-2 sm:mb-0 lg:justify-start justify-between">
                         <label htmlFor="date" className="mr-2">Ngày:</label>
                         <div className="border rounded px-2 py-1">
                             <DatePicker className='hover:outline-none focus:outline-none' id="date" selected={selectedDate} onChange={handleDateChange} />
                         </div>
                     </div>
-                    <div className="relative w-3/12">
+                    <div className="relative w-full sm:w-auto">
                         <label htmlFor="billCode" className="sr-only">Mã hóa đơn:</label>
                         <div className="flex items-center border rounded px-3 py-1">
                             <input
@@ -139,13 +144,13 @@ function History() {
                             <FontAwesomeIcon icon={faSearch} className="text-gray-500 cursor-pointer ml-2" />
                         </div>
                     </div>
-                    <div className="text-lg font-bold">
+                    <div className="text-lg font-bold mt-2 sm:mt-0">
                         Tổng tiền: {totalAmountSum.toLocaleString('vi-VN')} đ
                     </div>
                 </div>
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto block max-h-96">
                     <table className="min-w-full divide-y divide-slate-400 text-center">
-                        <thead className='bg-slate-200'>
+                        <thead className='bg-slate-200 sticky top-0'>
                             <tr>
                                 <th className="px-4 py-2">Mã hoá đơn</th>
                                 <th className="px-4 py-2">Nhân viên</th>
@@ -153,7 +158,7 @@ function History() {
                                 <th className="px-4 py-2">Ngày lập</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody className='overflow-y-auto'>
                             {transactions.map(transaction => (
                                 <tr key={transaction._id} className="border cursor-pointer hover:bg-slate-100">
                                     <td className="px-4 py-2" onClick={toggleShowFullId}>{shortenId(transaction._id)}</td>
@@ -164,41 +169,16 @@ function History() {
                             ))}
                         </tbody>
                     </table>
-                    <div className="flex justify-center mt-4">
-                        <button onClick={handlePreviousPage} disabled={currentPage === 1} className="mr-2 px-3 py-1 bg-gray-200 rounded-md focus:outline-none">Trang trước</button>
-                        <span className="mx-2">Trang {currentPage} / {totalPages}</span>
-                        <button onClick={handleNextPage} disabled={currentPage === totalPages} className="ml-2 px-3 py-1 bg-gray-200 rounded-md focus:outline-none">Trang sau</button>
-                    </div>
+                </div>
+                <div className="flex justify-center items-center mt-4">
+                    <button onClick={handlePreviousPage} disabled={currentPage === 1} className="text-sm mr-2 px-3 py-1 bg-gray-200 rounded-md focus:outline-none">Trang trước</button>
+                    <span className="mx-2 text-sm">Trang {currentPage} / {totalPages}</span>
+                    <button onClick={handleNextPage} disabled={currentPage === totalPages} className="text-sm ml-2 px-3 py-1 bg-gray-200 rounded-md focus:outline-none">Trang sau</button>
                 </div>
             </div>
         </div>
     );
 }
 
-import { parseCookies } from 'nookies';
-export async function getServerSideProps(context) {
-    // Sử dụng parseCookies để lấy cookies từ context
-    const cookies = parseCookies(context);
-    // Kiểm tra xem có cookie userId trong yêu cầu không
-    if (!cookies.userId) {
-      // Nếu không có, điều hướng người dùng đến trang đăng nhập
-      return {
-        redirect: {
-          destination: '/login',
-          permanent: false,
-        },
-      };
-    }
-    // Lấy userId từ cookies
-    const userId = cookies.userId;
-  
-    // Pass userId vào props của trang
-    return {
-      props: {
-        userId: userId || null,
-      },
-    };
-  }
-
-
+export { getServerSideProps };
 export default History;
