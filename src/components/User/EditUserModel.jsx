@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { baseURL, userRoutes } from '@/api/api';
 
-function EditUserModal({ user, onClose, onUpdateUser }) {
+function EditUserModal({ token, user, onClose, onUpdateUser }) {
     const [formData, setFormData] = useState({
         username: user.username,
         fullname: user.fullname,
@@ -49,7 +49,9 @@ function EditUserModal({ user, onClose, onUpdateUser }) {
                 return; // Nếu có lỗi nhập liệu số điện thoại, không thực hiện gửi dữ liệu
             }
             // Thực hiện xử lý gửi dữ liệu
-            const response = await axios.put(`${baseURL}${userRoutes}/${user._id}`, formData);
+            const response = await axios.put(`${baseURL}${userRoutes}/${user._id}`, formData,{
+                headers: { Authorization: `Bearer ${token}` }
+            });
             if (response.status == 201) {
                 alert("Cập nhật thông tin người dùng thành công");
                 onUpdateUser();

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { baseURL, weekScheduleRoutes } from '@/api/api';
 
-function AddScheduleModal({ user, onClose, onScheduleUpdated }) {
+function AddScheduleModal({ token, user, onClose, onScheduleUpdated }) {
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
     const [shifts, setShifts] = useState({
@@ -38,8 +38,9 @@ function AddScheduleModal({ user, onClose, onScheduleUpdated }) {
                 }]
             };
             // Gửi đối tượng dữ liệu đã tạo lên máy chủ
-            const response = await axios.post(`${baseURL}${weekScheduleRoutes}`, scheduleData);
-            console.log("response",response)
+            const response = await axios.post(`${baseURL}${weekScheduleRoutes}`, scheduleData, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
             if(response.status==201){
                 alert("Thêm thành công")
                 onScheduleUpdated();

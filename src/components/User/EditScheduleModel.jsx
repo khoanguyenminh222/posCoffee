@@ -4,7 +4,7 @@ import { baseURL, weekScheduleRoutes } from '@/api/api';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash } from '@fortawesome/free-solid-svg-icons';
 
-function EditScheduleModal({ user, onClose, onScheduleUpdated, startDate, endDate }) {
+function EditScheduleModal({ token, user, onClose, onScheduleUpdated, startDate, endDate }) {
     const [shifts, setShifts] = useState({
         monday: [],
         tuesday: [],
@@ -18,7 +18,9 @@ function EditScheduleModal({ user, onClose, onScheduleUpdated, startDate, endDat
     useEffect(() => {
         const fetchWeekScheduleForUser = async (startDate, endDate) => {
             try {
-                const response = await axios.get(`${baseURL}${weekScheduleRoutes}/${user._id}?startDate=${startDate}&endDate=${endDate}`);
+                const response = await axios.get(`${baseURL}${weekScheduleRoutes}/${user._id}?startDate=${startDate}&endDate=${endDate}`,{
+                    headers: { Authorization: `Bearer ${token}` }
+                });
                 const schedule = response.data;
                 // Lấy thông tin lịch làm việc hiện tại của người dùng và cập nhật state
                 if (schedule.weeks.length > 0) {
@@ -49,7 +51,9 @@ function EditScheduleModal({ user, onClose, onScheduleUpdated, startDate, endDat
                     sunday: shifts.sunday,
                 }
             };
-            const response = await axios.put(`${baseURL}${weekScheduleRoutes}/${user._id}`, scheduleData);
+            const response = await axios.put(`${baseURL}${weekScheduleRoutes}/${user._id}`, scheduleData,{
+                headers: { Authorization: `Bearer ${token}` }
+            });
             if(response.status == 201){
                 alert("Cập nhật thành công")
                 onClose();

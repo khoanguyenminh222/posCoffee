@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { baseURL, userRoutes } from '@/api/api';
 
-function AddUserModal({ onClose, onUpdateUser }) {
+function AddUserModal({ token, onClose, onUpdateUser }) {
     const [formData, setFormData] = useState({
         username: '',
         password: '',
@@ -38,7 +38,9 @@ function AddUserModal({ onClose, onUpdateUser }) {
                 return; // Nếu có lỗi nhập liệu số điện thoại, không thực hiện gửi dữ liệu
             }
             // Thực hiện xử lý gửi dữ liệu
-            const response = await axios.post(`${baseURL}${userRoutes}/register`, formData);
+            const response = await axios.post(`${baseURL}${userRoutes}/register`, formData, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
             if (response.status === 201) {
                 alert("Tạo mới nhân viên thành công");
                 onUpdateUser();
