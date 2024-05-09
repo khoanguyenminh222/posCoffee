@@ -2,7 +2,7 @@ import { baseURL, categoriesRoutes } from '@/api/api';
 import React, { useState } from 'react';
 import axios from 'axios';
 
-function EditCategoryForm({ category, onSave, onCancel }) {
+function EditCategoryForm({ token, category, onSave, onCancel }) {
   const [name, setName] = useState(category.name);
   const [imageFile, setImageFile] = useState(null);
 
@@ -24,7 +24,8 @@ function EditCategoryForm({ category, onSave, onCancel }) {
       // Gửi request POST sử dụng axios
       const response = await axios.put(`${baseURL}${categoriesRoutes}/${category._id}`, formData, {
         headers: {
-          'Content-Type': 'multipart/form-data' // Cần set header 'Content-Type' là 'multipart/form-data' để gửi FormData
+          'Content-Type': 'multipart/form-data', // Cần set header 'Content-Type' là 'multipart/form-data' để gửi FormData
+          'Authorization': `Bearer ${token}`
         }
       });
       onSave(response.data); // Gọi hàm onSave khi request thành công

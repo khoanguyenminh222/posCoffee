@@ -200,13 +200,13 @@ function Management({token}) {
           <h1 className="text-3xl font-semibold my-4">Mặt hàng</h1>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {categories.map(category => (
-              <CategoryCard key={category._id} category={category} onSelect={handleCategorySelect} onDeleteCategory={deleteCategoryAndUpdateState} onEditCategory={editCategoryAndUpdateState} />
+              <CategoryCard token={token} key={category._id} category={category} onSelect={handleCategorySelect} onDeleteCategory={deleteCategoryAndUpdateState} onEditCategory={editCategoryAndUpdateState} />
             ))}
           </div>
           <h1 className="text-3xl font-semibold my-4">Thức uống</h1>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {selectedCategory && selectedDrinks.map(drink => (
-              <DrinkCard key={drink._id} drink={drink} editCard={editDrinkAndUpdateState} deleteDrink={deleteDrinkAndUpdateState} />
+              <DrinkCard token={token} key={drink._id} drink={drink} editCard={editDrinkAndUpdateState} deleteDrink={deleteDrinkAndUpdateState} />
             ))}
           </div>
           <button className="fixed bottom-16 right-4 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-full shadow-md focus:outline-none z-10" onClick={handleAddCategory}>
@@ -221,10 +221,10 @@ function Management({token}) {
 
       </div>
       {isAddingCategory && (
-        <AddCategoryForm onSave={handleSaveCategory} onCancel={handleCancelAddCategory} />
+        <AddCategoryForm token={token} onSave={handleSaveCategory} onCancel={handleCancelAddCategory} />
       )}
       {isAddingDrink && (
-        <AddDrinkForm onSave={handleSaveDrink} onCancel={handleCancelAddDrink} />
+        <AddDrinkForm token={token} onSave={handleSaveDrink} onCancel={handleCancelAddDrink} />
       )}
     </>
   );

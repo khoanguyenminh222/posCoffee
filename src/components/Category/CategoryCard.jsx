@@ -6,7 +6,7 @@ import { storage } from '@/firebase';
 
 import EditCategoryForm from './EditCategoryForm';
 
-const CategoryCard = ({ category, onSelect, onDeleteCategory, onEditCategory }) => {
+const CategoryCard = ({ token, category, onSelect, onDeleteCategory, onEditCategory }) => {
     const [name,setName] = useState(category.name);
     const [img, setImg] = useState(category.img);
     const [imageUrl, setImageUrl] = useState(null);
@@ -74,7 +74,7 @@ const CategoryCard = ({ category, onSelect, onDeleteCategory, onEditCategory }) 
 
             </div>
             {isEditing && (
-                <EditCategoryForm category={category}
+                <EditCategoryForm token={token} category={category}
                     onSave={handleSaveEdit}
                     onCancel={handleCancelEdit} />
             )}

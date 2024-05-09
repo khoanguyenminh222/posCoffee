@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHome, faBars, faBurger, faHistory, faSignOutAlt, faUser, faChartSimple } from '@fortawesome/free-solid-svg-icons';
+import { faHome, faBars, faBurger, faHistory, faSignOutAlt, faUser, faChartSimple, faWarehouse } from '@fortawesome/free-solid-svg-icons';
 import Link from 'next/link';
 
 const Sidebar = ({ isOpen, toggleSidebar }) => {
@@ -36,6 +36,12 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                         <li className="py-4 flex flex-col items-center transition duration-300 ease-in-out transform hover:scale-110 cursor-pointer hover:text-amber-700">
                             <FontAwesomeIcon icon={faChartSimple} size='2x' />
                             <span className="text-sm">Dashboard</span>
+                        </li>
+                    </Link>
+                    <Link href="/warehouse">
+                        <li className="py-4 flex flex-col items-center transition duration-300 ease-in-out transform hover:scale-110 cursor-pointer hover:text-amber-700">
+                            <FontAwesomeIcon icon={faWarehouse} size='2x' />
+                            <span className="text-sm">Kho</span>
                         </li>
                     </Link>
                     <Link href="/history">

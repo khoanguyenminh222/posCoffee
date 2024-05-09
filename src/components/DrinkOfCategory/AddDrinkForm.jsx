@@ -2,7 +2,7 @@ import { baseURL, categoriesRoutes, drinksRoutes } from '@/api/api';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-function AddDrinkForm({ onCancel, onSave }) {
+function AddDrinkForm({ token, onCancel, onSave }) {
     const [name, setName] = useState('');
     const [priceM, setPriceM] = useState('');
     const [priceL, setPriceL] = useState('');
@@ -22,7 +22,9 @@ function AddDrinkForm({ onCancel, onSave }) {
         // Call API to get all categories when the component mounts
         const fetchCategories = async () => {
             try {
-                const response = await axios.get(`${baseURL}${categoriesRoutes}`);
+                const response = await axios.get(`${baseURL}${categoriesRoutes}`,{
+                    headers: { Authorization: `Bearer ${token}` }
+                });
                 setCategories(response.data);
                 // Set the default category to the first one
                 if (response.data.length > 0) {
@@ -162,7 +164,8 @@ function AddDrinkForm({ onCancel, onSave }) {
         try {
             const response = await axios.post(`${baseURL}${drinksRoutes}`, formData, {
                 headers: {
-                    'Content-Type': 'multipart/form-data'
+                    'Content-Type': 'multipart/form-data',
+                    'Authorization': `Bearer ${token}`
                 }
             });
             if(response.status==201){

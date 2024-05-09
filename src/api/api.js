@@ -1,4 +1,4 @@
-const baseURL = 'https://api-pos-coffee.vercel.app';
+const baseURL = 'http://localhost:10000' || 'https://api-pos-coffee.vercel.app';
 const categoriesRoutes = '/api/categories';
 //get all
 //get by id /:id
@@ -18,4 +18,5 @@ const userRoutes = '/api/users';
 const weekScheduleRoutes = '/api/weekSchedule';
 const reportRoutes = '/api/report';
 const historyRoutes = '/api/history';
-export {baseURL, categoriesRoutes, drinksGetByCategory, drinksRoutes, billRoutes, userRoutes, weekScheduleRoutes, reportRoutes, historyRoutes}
+const ingredientRoutes = '/api/ingredient';
+export {baseURL, categoriesRoutes, drinksGetByCategory, drinksRoutes, billRoutes, userRoutes, weekScheduleRoutes, reportRoutes, historyRoutes, ingredientRoutes}

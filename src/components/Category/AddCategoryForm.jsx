@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { baseURL, categoriesRoutes } from '@/api/api';
 
-function AddCategoryForm({onSave, onCancel}) {
+function AddCategoryForm({token, onSave, onCancel}) {
   const [name, setName] = useState('');
   const [imageFile, setImageFile] = useState(null);
 
@@ -23,7 +23,8 @@ function AddCategoryForm({onSave, onCancel}) {
     try {
       const response = await axios.post(`${baseURL}${categoriesRoutes}`, formData, {
         headers: {
-          'Content-Type': 'multipart/form-data'
+          'Content-Type': 'multipart/form-data',
+          'Authorization': `Bearer ${token}`
         }
       });
       console.log(response)

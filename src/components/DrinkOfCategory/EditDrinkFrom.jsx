@@ -2,7 +2,7 @@ import { baseURL, categoriesRoutes, drinksRoutes } from '@/api/api';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-function EditDrinkFrom({ drink, onCancel, onSave }) {
+function EditDrinkFrom({ token, drink, onCancel, onSave }) {
     const [options, setOptions] = useState(drink.options);
     const [checkAllTemperature, setCheckAllTemperature] = useState(false);
     const [checkAllSugar, setCheckAllSugar] = useState(false);
@@ -149,7 +149,9 @@ function EditDrinkFrom({ drink, onCancel, onSave }) {
     useEffect(() => {
         const fetchCategoriesOfDrink = async () => {
             try {
-                const response = await axios.get(`${baseURL}${categoriesRoutes}/${drink.categoryId}`);
+                const response = await axios.get(`${baseURL}${categoriesRoutes}/${drink.categoryId}`,{
+                    headers: { Authorization: `Bearer ${token}` }
+                });
                 setCategoryOfDrink(response.data);
             } catch (error) {
                 console.error('Error fetching categories:', error);
@@ -163,7 +165,9 @@ function EditDrinkFrom({ drink, onCancel, onSave }) {
         // Call API to get all categories when the component mounts
         const fetchCategories = async () => {
             try {
-                const response = await axios.get(`${baseURL}${categoriesRoutes}`);
+                const response = await axios.get(`${baseURL}${categoriesRoutes}`,{
+                    headers: { Authorization: `Bearer ${token}` }
+                });
                 setCategories(response.data);
             } catch (error) {
                 console.error('Error fetching categories:', error);
@@ -219,7 +223,8 @@ function EditDrinkFrom({ drink, onCancel, onSave }) {
             // Gửi request PUT sử dụng axios
             const response = await axios.put(`${baseURL}${drinksRoutes}/${drink._id}`, formData, {
                 headers: {
-                    'Content-Type': 'multipart/form-data' // Cần set header 'Content-Type' là 'multipart/form-data' để gửi FormData
+                    'Content-Type': 'multipart/form-data', // Cần set header 'Content-Type' là 'multipart/form-data' để gửi FormData
+                    'Authorization': `Bearer ${token}`  
                 }
             });
             onSave(response); // Gọi hàm onSave khi request thành công

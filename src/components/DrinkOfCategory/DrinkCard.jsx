@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEdit, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
+import { faEdit, faTrashAlt, fain } from '@fortawesome/free-solid-svg-icons';
 import { ref, getDownloadURL } from 'firebase/storage';
 import { storage } from '@/firebase';
 import EditDrinkFrom from './EditDrinkFrom';
 import { baseURL, drinksRoutes } from '@/api/api';
+import IngredentForm from './IngredentForm';
 
-const DrinkCard = ({ drink, deleteDrink, editCard }) => {
+const DrinkCard = ({ token, drink, deleteDrink, editCard }) => {
     const [imageUrl, setImageUrl] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
+    const [isEditIngredients, setIsEditIngredients] = useState(false);
     useEffect(() => {
         const fetchImageUrl = async () => {
             try {
@@ -42,7 +44,21 @@ const DrinkCard = ({ drink, deleteDrink, editCard }) => {
     const handleDelete = async() => {
         deleteDrink(drink._id,drink.name)
     }
-
+    const handleEditIngredients = async() => {
+        setIsEditIngredients(true);
+    }
+    const handleCancelIngredients = () => {
+        setIsEditIngredients(false);
+    };
+    const handleSaveIngredients = (formdata) => {
+        if(formdata.status==201){
+            alert("Cập nhật thành công");
+            editCard(formdata.data)
+            setIsEditing(false);
+        }else{
+            alert("Có lỗi xảy ra");
+        }
+    };
     return (
         <>
         <div className="bg-white shadow-md rounded-md p-4 mb-4 relative cursor-pointer hover:shadow-2xl">
@@ -66,6 +82,11 @@ const DrinkCard = ({ drink, deleteDrink, editCard }) => {
                     )}
                 </ul>
             </div>
+            <div className=' justify-end bottom-0'>
+                <button onClick={handleEditIngredients} className="text-sm text-blue-600 mr-2 hover:underline focus:outline-none">
+                    Sửa nguyên liệu
+                </button>
+            </div>
             <div className="absolute bottom-4 right-4">
                 <button onClick={handleEditClick} className="text-sm text-blue-600 mr-2 hover:underline focus:outline-none">
                     <FontAwesomeIcon icon={faEdit} className="mr-1" />
@@ -77,7 +98,8 @@ const DrinkCard = ({ drink, deleteDrink, editCard }) => {
                 </button>
             </div>
         </div>
-        {isEditing && <EditDrinkFrom drink={drink} onCancel={handleCancelEdit} onSave={handleSaveEdit}/>}
+        {isEditing && <EditDrinkFrom token={token} drink={drink} onCancel={handleCancelEdit} onSave={handleSaveEdit}/>}
+        {isEditIngredients && <IngredentForm token={token} drink={drink} onCancel={handleCancelIngredients} onSave={handleSaveIngredients}/>}
         </>
     );
 }

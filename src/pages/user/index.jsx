@@ -8,7 +8,6 @@ import EditScheduleModel from '@/components/User/EditScheduleModel';
 import AddUserModal from '@/components/User/AddUserModel';
 import EditUserModal from '@/components/User/EditUserModel';
 import { getServerSideProps } from '@/helpers/cookieHelper';
-import { getUserIdFromToken } from '@/helpers/getUserIdFromToken';
 
 function User({ token }) {
     const [users, setUsers] = useState([]);
