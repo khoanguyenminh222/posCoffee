@@ -10,7 +10,8 @@ function Warehouse({ token }) {
     id: '',
     name: '',
     quantity: '',
-    unit: ''
+    unit: '',
+    totalPrice: ''
   });
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -34,7 +35,8 @@ function Warehouse({ token }) {
       const response = await axios.post(`${baseURL}${ingredientRoutes}`, {
         name: editIngredient.name,
         quantity: editIngredient.quantity,
-        unit: editIngredient.unit
+        unit: editIngredient.unit,
+        totalPrice: editIngredient.totalPrice
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -42,7 +44,8 @@ function Warehouse({ token }) {
       setEditIngredient({
         name: '',
         quantity: '',
-        unit: ''
+        unit: '',
+        totalPrice: ''
       });
     } catch (error) {
       console.error('Lỗi khi thêm thành phần:', error);
@@ -68,7 +71,8 @@ function Warehouse({ token }) {
       const response = await axios.patch(`${baseURL}${ingredientRoutes}/${editIngredient.id}`, {
         name: editIngredient.name,
         quantity: editIngredient.quantity,
-        unit: editIngredient.unit
+        unit: editIngredient.unit,
+        totalPrice: editIngredient.totalPrice
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -77,7 +81,8 @@ function Warehouse({ token }) {
         id: '',
         name: '',
         quantity: '',
-        unit: ''
+        unit: '',
+        totalPrice: '',
       });
     } catch (error) {
       console.error('Lỗi khi sửa thành phần:', error);
@@ -89,7 +94,8 @@ function Warehouse({ token }) {
       id: ingredient._id,
       name: ingredient.name,
       quantity: ingredient.quantity,
-      unit: ingredient.unit
+      unit: ingredient.unit,
+      totalPrice: ingredient.totalPrice
     });
   };
 
@@ -106,26 +112,33 @@ function Warehouse({ token }) {
     ingredient.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const handleAddStock = () => {
+
+  }
+
   return (
     <div className="container mx-auto max-h-full p-6 flex flex-col overflow-x-auto">
       <h1 className="text-3xl font-semibold mb-4">Quản lý Thành Phần</h1>
       <div className="mb-4">
         <h2 className="text-xl font-semibold mb-2">Thêm Thành Phần</h2>
-        <input type="text" name="name" placeholder="Tên Thành Phần" value={editIngredient.name} onChange={handleEditInputChange} className="border border-gray-300 rounded px-4 py-2 mb-2 lg:w-80 w-full" />
-        <input type="number" name="quantity" placeholder="Số Lượng" value={editIngredient.quantity} onChange={handleEditInputChange} className="border border-gray-300 rounded px-4 py-2 mb-2 lg:w-80 w-full" />
-        <input type="text" name="unit" placeholder="Đơn Vị" value={editIngredient.unit} onChange={handleEditInputChange} className="border border-gray-300 rounded px-4 py-2 mb-2 lg:w-80 w-full" />
-        <button onClick={handleAddIngredient} className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">Thêm</button>
+        <input type="text" name="name" placeholder="Tên Thành Phần" value={editIngredient.name} onChange={handleEditInputChange} className="border border-gray-300 rounded px-4 py-2 mb-2 lg:w-60 w-full" />
+        <input type="number" name="quantity" placeholder="Số Lượng" value={editIngredient.quantity} onChange={handleEditInputChange} className="border border-gray-300 rounded px-4 py-2 mb-2 lg:w-60 w-full" />
+        <input type="text" name="unit" placeholder="Đơn Vị" value={editIngredient.unit} onChange={handleEditInputChange} className="border border-gray-300 rounded px-4 py-2 mb-2 lg:w-60 w-full" />
+        <input type="number" name="totalPrice" placeholder="Giá" value={editIngredient.totalPrice} onChange={handleEditInputChange} className="border border-gray-300 rounded px-4 py-2 mb-2 lg:w-60 w-full" />
+        <button onClick={handleAddIngredient} className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 ml-2">Thêm</button>
       </div>
       <div className="mb-4">
         <h2 className="text-xl font-semibold mb-2">Sửa Thành Phần</h2>
-        <input type="text" name="name" value={editIngredient.name} onChange={handleEditInputChange} className="border border-gray-300 rounded px-4 py-2 mb-2 lg:w-80 w-full" />
-        <input type="number" name="quantity" value={editIngredient.quantity} onChange={handleEditInputChange} className="border border-gray-300 rounded px-4 py-2 mb-2 lg:w-80 w-full" />
-        <input type="text" name="unit" value={editIngredient.unit} onChange={handleEditInputChange} className="border border-gray-300 rounded px-4 py-2 mb-2 lg:w-80 w-full" />
-        <button onClick={handleEditIngredient} className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">Lưu</button>
+        <input type="text" name="name" value={editIngredient.name} onChange={handleEditInputChange} className="border border-gray-300 rounded px-4 py-2 mb-2 lg:w-60 w-full" />
+        <input type="number" name="quantity" value={editIngredient.quantity} onChange={handleEditInputChange} className="border border-gray-300 rounded px-4 py-2 mb-2 lg:w-60 w-full" />
+        <input type="text" name="unit" value={editIngredient.unit} onChange={handleEditInputChange} className="border border-gray-300 rounded px-4 py-2 mb-2 lg:w-60 w-full" />
+        <input type="number" name="totalPrice" value={editIngredient.totalPrice} onChange={handleEditInputChange} className="border border-gray-300 rounded px-4 py-2 mb-2 lg:w-60 w-full" />
+        <button onClick={handleEditIngredient} className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 ml-2">Lưu</button>
       </div>
       <div>
         <h2 className="text-xl font-semibold mb-2">Danh sách Thành Phần</h2>
         <input type="text" placeholder="Nhập từ khóa tìm kiếm" onChange={handleSearch} className="border border-gray-300 rounded px-4 py-2 mb-2 lg:w-80 w-full" />
+        <button onClick={handleAddStock} className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 lg:ml-2 mb-2">Nhập hàng</button>
         <div className='overflow-x-auto block max-h-96'>
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
@@ -133,6 +146,8 @@ function Warehouse({ token }) {
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tên</th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Số Lượng</th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Đơn Vị</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Giá/đơn vị</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Giá</th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ngày cập nhật</th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hành Động</th>
               </tr>
@@ -143,6 +158,8 @@ function Warehouse({ token }) {
                   <td className="px-6 py-4 whitespace-nowrap">{ingredient.name}</td>
                   <td className="px-6 py-4 whitespace-nowrap">{ingredient.quantity}</td>
                   <td className="px-6 py-4 whitespace-nowrap">{ingredient.unit}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">{ingredient.priceOfUnit.toLocaleString('vi-VN')} đ</td>
+                  <td className="px-6 py-4 whitespace-nowrap">{ingredient.totalPrice.toLocaleString('vi-VN')} đ</td>
                   <td className="px-6 py-4 whitespace-nowrap">{format(new Date(ingredient.updatedAt), 'dd/MM/yyyy HH:mm:ss')}</td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <button className="text-blue-500 mr-2" onClick={() => handleSelectEditIngredient(ingredient)}>Sửa</button>

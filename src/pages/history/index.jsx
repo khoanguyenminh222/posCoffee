@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch } from '@fortawesome/free-solid-svg-icons';
+import { faCircleInfo, faSearch } from '@fortawesome/free-solid-svg-icons';
 import { format } from 'date-fns';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import { baseURL, historyRoutes, userRoutes } from '@/api/api';
+import { baseURL, historyRoutes, transactionIngredientRoutes, userRoutes } from '@/api/api';
 import { getServerSideProps } from '@/helpers/cookieHelper';
+import Detail from '@/components/History/Detail';
 
 function History({ token }) {
     const [period, setPeriod] = useState("day");
@@ -20,6 +21,8 @@ function History({ token }) {
     const [selectedDate, setSelectedDate] = useState(format(new Date(), 'yyyy-MM-dd'));
     const [showFullId, setShowFullId] = useState(false);
     const [billCode, setBillCode] = useState('');
+    const [isDetail, setIsDetail] = useState(false);
+    const [historyDetail, setHistoryDetail] = useState('');
 
     const handleBillCodeChange = (e) => {
         setBillCode(e.target.value);
@@ -100,6 +103,42 @@ function History({ token }) {
         }
     };
 
+    const viewDetail = (id) => {
+        setIsDetail(true)
+        setHistoryDetail(id);
+    };
+    const handleCancelHistoryDetail = () => {
+        setIsDetail(false)
+        setHistoryDetail('');
+    }
+
+    //table lịch sử nguyên liệu
+    const [transactionsIngredient, setTransactionsIngredient] = useState([]);
+    const [priceIngredient, setPriceIngredient] = useState('');
+    const [searchTerm, setSearchTerm] = useState('');
+
+    useEffect(() => {
+        const fetchTransactionIngredient = async () => {
+            try {
+                const response = await axios.get(`${baseURL}${transactionIngredientRoutes}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                setTransactionsIngredient(response.data.transactions);
+                setPriceIngredient(response.data.totalPrices)
+                console.log(response.data)
+            } catch (error) {
+                console.log('Error fetching transaction ingredient:', error);
+            }
+        }
+        fetchTransactionIngredient();
+    },[])
+    const handleSearch = (e) => {
+        setSearchTerm(e.target.value);
+    };
+    const filteredHistoryIngredient = transactionsIngredient.filter(t =>
+        t.ingredient.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+
     return (
         <div className="container mx-auto px-4 py-8 h-full">
             <div className="bg-white rounded-lg shadow-md p-6">
@@ -156,6 +195,7 @@ function History({ token }) {
                                 <th className="px-4 py-2">Nhân viên</th>
                                 <th className="px-4 py-2">Tổng tiền</th>
                                 <th className="px-4 py-2">Ngày lập</th>
+                                <th className="px-4 py-2">Hành động</th>
                             </tr>
                         </thead>
                         <tbody className='overflow-y-auto'>
@@ -165,6 +205,9 @@ function History({ token }) {
                                     <td className="px-4 py-2">{transaction.userId.fullname}</td>
                                     <td className="px-4 py-2">{transaction.totalAmount.toLocaleString('vi-VN')} đ</td>
                                     <td className="px-4 py-2">{format(new Date(transaction.createdAt), 'dd/MM/yyyy HH:mm:ss')}</td>
+                                    <td className="px-4 py-2" onClick={() => viewDetail(transaction._id)}>
+                                        <FontAwesomeIcon icon={faCircleInfo} className="text-gray-500 cursor-pointer ml-2" />
+                                    </td>
                                 </tr>
                             ))}
                         </tbody>
@@ -174,6 +217,43 @@ function History({ token }) {
                     <button onClick={handlePreviousPage} disabled={currentPage === 1} className="text-sm mr-2 px-3 py-1 bg-gray-200 rounded-md focus:outline-none">Trang trước</button>
                     <span className="mx-2 text-sm">Trang {currentPage} / {totalPages}</span>
                     <button onClick={handleNextPage} disabled={currentPage === totalPages} className="text-sm ml-2 px-3 py-1 bg-gray-200 rounded-md focus:outline-none">Trang sau</button>
+                </div>
+                {isDetail && <Detail token={token} historyDetail={historyDetail} onCancel={handleCancelHistoryDetail}/>}
+            </div>
+            <div className="bg-white rounded-lg shadow-md p-6 mt-4">
+                <h1 className="text-3xl font-bold mb-4">Lịch sửa nguyên liệu</h1>
+                <div className='flex flex-col sm:flex-row justify-start md:justify-between lg:justify-between items-center w-full mb-2'>
+                    <input type="text" placeholder="Nhập nguyên liệu tìm kiếm" onChange={handleSearch} className="border border-gray-300 rounded px-4 py-2 lg:w-80 md:w-48 w-full" />
+                    <p className="text-lg font-bold mt-2 sm:mt-0 text-red-500">Tổng tiền {priceIngredient.toLocaleString('vi-VN')} đ</p>
+                </div>
+                
+                <div className="overflow-x-auto block max-h-96">
+                    <table className="min-w-full divide-y divide-slate-400 text-center">
+                        <thead className='bg-slate-200 sticky top-0'>
+                            <tr>
+                                <th className="px-4 py-2">Đồ uống</th>
+                                <th className="px-4 py-2">Nguyên liệu</th>
+                                <th className="px-4 py-2">Số lượng giao dịch</th>
+                                <th className="px-4 py-2">Đơn giá</th>
+                                <th className="px-4 py-2">Thành tiền</th>
+                                <th className="px-4 py-2">Số lượng trước đó</th>
+                                <th className="px-4 py-2">Ngày giao dịch</th>
+                            </tr>
+                        </thead>
+                        <tbody className='overflow-y-auto'>
+                            {filteredHistoryIngredient.map(transaction => (
+                                <tr key={transaction._id} className="border cursor-pointer hover:bg-slate-100">
+                                    <td className="px-4 py-2">{transaction.drink.name}</td>
+                                    <td className="px-4 py-2">{transaction.ingredient.name}</td>
+                                    <td className="px-4 py-2">{transaction.quantity_transaction}</td>
+                                    <td className="px-4 py-2">{transaction.priceOfUnit.toLocaleString('vi-VN')} đ</td>
+                                    <td className="px-4 py-2">{transaction.price.toLocaleString('vi-VN')} đ</td>
+                                    <td className="px-4 py-2">{transaction.quantity_prevTransaction}</td>
+                                    <td className="px-4 py-2">{format(new Date(transaction.createdAt), 'dd/MM/yyyy HH:mm:ss')}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>

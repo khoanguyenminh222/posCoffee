@@ -157,11 +157,12 @@ function Home({ token }) {
     return filteredDrinks;
   };
 
-  useEffect(() => {
-    // Call searchDrinks whenever selected options change
-    const filteredDrinks = searchDrinks();
-    setDrinks(filteredDrinks);
-  }, [selectedOptions]);
+  // useEffect(() => {
+  //   // Call searchDrinks whenever selected options change
+  //   const filteredDrinks = searchDrinks();
+  //   setDrinks(filteredDrinks);
+  //   console.log(filteredDrinks)
+  // }, [selectedOptions]);
 
 
   const onDeleteAll = () => {

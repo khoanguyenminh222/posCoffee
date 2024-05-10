@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPrint } from '@fortawesome/free-solid-svg-icons';
 import DrinkBill from '../DrinkBill/DrinkBill';
-import { baseURL, billRoutes, userRoutes } from '@/api/api';
+import { baseURL, billRoutes, drinksRoutes, userRoutes } from '@/api/api';
 import axios from 'axios';
 import { useReactToPrint } from 'react-to-print';
 import BillToPrint from './BillToPrint';
@@ -38,13 +38,25 @@ function Bill({ userId, billItems, onDeleteAll, onDeleteItem, onIncrementItem, o
                 alert("Không có đồ uống trong hóa đơn để lưu.");
                 return; // Không có đồ uống, không thực hiện lưu
             }
+
+            const updatedBillItems = [];
+            // Lặp qua từng đồ uống trong danh sách billItems và gửi yêu cầu API để lấy thông tin
+            for (const item of billItems) {
+                const response = await axios.get(`${baseURL}${drinksRoutes}/${item.id}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                updatedBillItems.push({...item, ingredients: response.data.ingredients});
+            }
+            console.log(updatedBillItems)
             const data = {
                 userId: userId,
-                drinks: billItems,
+                drinks: updatedBillItems,
                 totalAmount: totalAmount,
             };
             // Gửi yêu cầu POST đến API
-            const response = await axios.post(`${baseURL}${billRoutes}`, data);
+            const response = await axios.post(`${baseURL}${billRoutes}`, data,{
+                headers: { Authorization: `Bearer ${token}` }
+            });
             setBill(response.data)
             setIsPrinted(true);
         } catch (error) {

@@ -19,4 +19,5 @@ const weekScheduleRoutes = '/api/weekSchedule';
 const reportRoutes = '/api/report';
 const historyRoutes = '/api/history';
 const ingredientRoutes = '/api/ingredient';
-export {baseURL, categoriesRoutes, drinksGetByCategory, drinksRoutes, billRoutes, userRoutes, weekScheduleRoutes, reportRoutes, historyRoutes, ingredientRoutes}
+const transactionIngredientRoutes = '/api/transactionIngredient';
+export {baseURL, categoriesRoutes, drinksGetByCategory, drinksRoutes, billRoutes, userRoutes, weekScheduleRoutes, reportRoutes, historyRoutes, ingredientRoutes, transactionIngredientRoutes}

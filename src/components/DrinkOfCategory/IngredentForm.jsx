@@ -52,7 +52,6 @@ function IngredientForm({ token, drink, onCancel, onSave }) {
             }
             setSelectedIngredient('');
             setQuantity('');
-            onCancel();
         }
     };
 
@@ -66,6 +65,7 @@ function IngredientForm({ token, drink, onCancel, onSave }) {
                 headers: { Authorization: `Bearer ${token}` }
             });
             onSave(response);
+            onCancel();
         } catch (error) {
             console.error('Lỗi khi thêm danh sách thành phần:', error);
         }
