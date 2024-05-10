@@ -5,7 +5,7 @@ import { faCircleInfo, faSearch } from '@fortawesome/free-solid-svg-icons';
 import { format } from 'date-fns';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import { baseURL, historyRoutes, transactionIngredientRoutes, userRoutes } from '@/api/api';
+import { baseURL, historyRoutes, ingredientExpenseRoutes, transactionIngredientRoutes, userRoutes } from '@/api/api';
 import { getServerSideProps } from '@/helpers/cookieHelper';
 import Detail from '@/components/History/Detail';
 
@@ -125,7 +125,6 @@ function History({ token }) {
                 });
                 setTransactionsIngredient(response.data.transactions);
                 setPriceIngredient(response.data.totalPrices)
-                console.log(response.data)
             } catch (error) {
                 console.log('Error fetching transaction ingredient:', error);
             }
@@ -137,12 +136,66 @@ function History({ token }) {
     };
     const filteredHistoryIngredient = transactionsIngredient.filter(t =>
         t.ingredient.name.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+    );
 
+    // table lịch sử nhập kho
+    const [ingredientExpense, setIngredientExpense] = useState([]);
+    const [ingredientExpenseTotalAmount, setIngredientExpenseTotalAmount] = useState('');
+    const [searchIngredientExpense, setSearchIngredientExpense] = useState('');
+    const [selectedDateIngredientExpense, setSelectedDateIngredientExpense] = useState(new Date().toISOString().slice(0, 10));
+    const [selectedPeriodIngredientExpense, setSelectedPeriodIngredientExpense] = useState('day'); // Mặc định là ngày
+    const [currentPageIngredientExpense, setCurrentPageIngredientExpense] = useState(1);
+    const [totalPagesIngredientExpense, setTotalPagesIngredientExpense] = useState(1);
+    const [pageSizeIngredientExpense, setPageSizeIngredientExpense] = useState(10);
+
+    useEffect(() => {
+        const fetchIngredientExpense = async () => {
+            try {
+                const response = await axios.get(`${baseURL}${ingredientExpenseRoutes}/${selectedPeriodIngredientExpense}`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                    params: { date: selectedDateIngredientExpense, page: currentPageIngredientExpense, pageSize: pageSizeIngredientExpense }
+                });
+                setIngredientExpense(response.data.expenses);
+                setIngredientExpenseTotalAmount(response.data.totalAmount);
+                setTotalPagesIngredientExpense(response.data.totalPages);
+            } catch (error) {
+                console.log('Error fetching ingredient expense:', error);
+            }
+        }
+        fetchIngredientExpense();
+    }, [selectedDateIngredientExpense, selectedPeriodIngredientExpense, currentPageIngredientExpense, pageSizeIngredientExpense]);
+
+    const handleSearchExpense = (e) => {
+        setSearchIngredientExpense(e.target.value);
+    };
+
+    const filteredIngredientExpense = ingredientExpense.filter(t =>
+        t.ingredient.name.toLowerCase().includes(searchIngredientExpense.toLowerCase())
+    );
+
+    const handleDateChangeIngredientExpense = (e) => {
+        setSelectedDateIngredientExpense(e.target.value);
+    };
+
+    const handlePeriodChangeIngredientExpense = (e) => {
+        setSelectedPeriodIngredientExpense(e.target.value);
+    };
+    const handleNextPageIngredientExpense = () => {
+        if (currentPageIngredientExpense < totalPagesIngredientExpense) {
+            setCurrentPageIngredientExpense(currentPageIngredientExpense + 1);
+        }
+    };
+    
+    const handlePreviousPageIngredientExpense = () => {
+        if (currentPageIngredientExpense > 1) {
+            setCurrentPageIngredientExpense(currentPageIngredientExpense - 1);
+        }
+    };
+    
     return (
         <div className="container mx-auto px-4 py-8 h-full">
             <div className="bg-white rounded-lg shadow-md p-6">
-                <h1 className="text-3xl font-bold mb-4">Lịch sửa giao dịch</h1>
+                <h1 className="text-3xl font-bold mb-4">Lịch sử giao dịch</h1>
                 <div className="mb-4 flex items-center lg:justify-start justify-between">
                     <label htmlFor="period" className="mr-2">Lọc:</label>
                     <select id="period" className="border rounded px-2 py-1" value={period} onChange={handlePeriodChange}>
@@ -221,9 +274,9 @@ function History({ token }) {
                 {isDetail && <Detail token={token} historyDetail={historyDetail} onCancel={handleCancelHistoryDetail}/>}
             </div>
             <div className="bg-white rounded-lg shadow-md p-6 mt-4">
-                <h1 className="text-3xl font-bold mb-4">Lịch sửa nguyên liệu</h1>
+                <h1 className="text-3xl font-bold mb-4">Lịch sử nguyên liệu</h1>
                 <div className='flex flex-col sm:flex-row justify-start md:justify-between lg:justify-between items-center w-full mb-2'>
-                    <input type="text" placeholder="Nhập nguyên liệu tìm kiếm" onChange={handleSearch} className="border border-gray-300 rounded px-4 py-2 lg:w-80 md:w-48 w-full" />
+                    <input type="text" placeholder="Nhập nguyên liệu tìm kiếm" onChange={handleSearch} className="border border-gray-300 rounded px-4 py-2 lg:w-80 md:w-48 w-full outline-none" />
                     <p className="text-lg font-bold mt-2 sm:mt-0 text-red-500">Tổng tiền {priceIngredient.toLocaleString('vi-VN')} đ</p>
                 </div>
                 
@@ -234,6 +287,7 @@ function History({ token }) {
                                 <th className="px-4 py-2">Đồ uống</th>
                                 <th className="px-4 py-2">Nguyên liệu</th>
                                 <th className="px-4 py-2">Số lượng giao dịch</th>
+                                <th className="px-4 py-2">Đơn vị</th>
                                 <th className="px-4 py-2">Đơn giá</th>
                                 <th className="px-4 py-2">Thành tiền</th>
                                 <th className="px-4 py-2">Số lượng trước đó</th>
@@ -246,6 +300,7 @@ function History({ token }) {
                                     <td className="px-4 py-2">{transaction.drink.name}</td>
                                     <td className="px-4 py-2">{transaction.ingredient.name}</td>
                                     <td className="px-4 py-2">{transaction.quantity_transaction}</td>
+                                    <td className="px-4 py-2">{transaction.ingredient.unit}</td>
                                     <td className="px-4 py-2">{transaction.priceOfUnit.toLocaleString('vi-VN')} đ</td>
                                     <td className="px-4 py-2">{transaction.price.toLocaleString('vi-VN')} đ</td>
                                     <td className="px-4 py-2">{transaction.quantity_prevTransaction}</td>
@@ -254,6 +309,51 @@ function History({ token }) {
                             ))}
                         </tbody>
                     </table>
+                </div>
+            </div>
+            <div className="bg-white rounded-lg shadow-md p-6 mt-4">
+                <h1 className="text-3xl font-bold mb-4">Lịch sử nhập nguyên liệu</h1>
+                <div className='flex flex-col sm:flex-row justify-start md:justify-between lg:justify-between items-center w-full mb-2'>
+                    <input type="text" placeholder="Nhập nguyên liệu tìm kiếm" onChange={handleSearchExpense} className="border border-gray-300 rounded px-4 py-2 lg:w-80 md:w-48 w-full outline-none" />
+                    <input type="date" value={selectedDateIngredientExpense} onChange={handleDateChangeIngredientExpense} className="border border-gray-300 rounded px-4 py-2 lg:w-40 md:w-32 w-full mt-2 sm:mt-0 outline-none" />
+                    <select value={selectedPeriodIngredientExpense} onChange={handlePeriodChangeIngredientExpense} className="border border-gray-300 rounded px-4 py-2 lg:w-40 md:w-32 w-full mt-2 sm:mt-0 outline-none">
+                        <option value="day">Ngày</option>
+                        <option value="week">Tuần</option>
+                        <option value="month">Tháng</option>
+                        <option value="year">Năm</option>
+                    </select>
+                    <p className="text-lg font-bold mt-2 sm:mt-0 text-red-500">Tiền đã chi: {ingredientExpenseTotalAmount.toLocaleString('vi-VN')} đ</p>
+                </div>
+                <div className="overflow-x-auto block max-h-96">
+                    <table className="min-w-full divide-y divide-slate-400 text-center">
+                        <thead className='bg-slate-200 sticky top-0'>
+                            <tr>
+                                <th className="px-4 py-2">Nguyên liệu</th>
+                                <th className="px-4 py-2">Số lượng</th>
+                                <th className="px-4 py-2">Đơn vị</th>
+                                <th className="px-4 py-2">Đơn giá</th>
+                                <th className="px-4 py-2">Thành tiền</th>
+                                <th className="px-4 py-2">Ngày giao dịch</th>
+                            </tr>
+                        </thead>
+                        <tbody className='overflow-y-auto'>
+                            {filteredIngredientExpense.map(ex => (
+                                <tr key={ex._id} className="border cursor-pointer hover:bg-slate-100">
+                                    <td className="px-4 py-2">{ex.ingredient.name}</td>
+                                    <td className="px-4 py-2">{ex.quantity}</td>
+                                    <td className="px-4 py-2">{ex.unit}</td>
+                                    <td className="px-4 py-2">{ex.unitPrice.toLocaleString('vi-VN')} đ</td>
+                                    <td className="px-4 py-2">{ex.totalAmount.toLocaleString('vi-VN')} đ</td>
+                                    <td className="px-4 py-2">{format(new Date(ex.createdAt), 'dd/MM/yyyy HH:mm:ss')}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+                <div className="flex justify-center items-center mt-4">
+                    <button onClick={handlePreviousPageIngredientExpense} disabled={currentPageIngredientExpense === 1} className="text-sm mr-2 px-3 py-1 bg-gray-200 rounded-md focus:outline-none">Trang trước</button>
+                    <span className="mx-2 text-sm">Trang {currentPageIngredientExpense} / {totalPagesIngredientExpense}</span>
+                    <button onClick={handleNextPageIngredientExpense} disabled={currentPageIngredientExpense === totalPagesIngredientExpense} className="text-sm ml-2 px-3 py-1 bg-gray-200 rounded-md focus:outline-none">Trang sau</button>
                 </div>
             </div>
         </div>
