@@ -72,8 +72,8 @@ function IngredientForm({ token, drink, onCancel, onSave }) {
     };
 
     return (
-        <div className="fixed top-0 left-0 right-0 bottom-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white p-4 rounded-lg">
+        <div className="fixed top-0 left-0 right-0 bottom-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50 overflow-auto">
+            <div className="bg-white p-4 rounded-lg max-h-full overflow-auto">
                 <h2 className=' mb-2 font-bold uppercase'>{drink.name}</h2>
                 {addedIngredients.map((ingredient) => (
                     <div key={ingredient._id} className="mb-2">

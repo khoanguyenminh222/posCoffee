@@ -20,4 +20,5 @@ const reportRoutes = '/api/report';
 const historyRoutes = '/api/history';
 const ingredientRoutes = '/api/ingredient';
 const transactionIngredientRoutes = '/api/transactionIngredient';
-export {baseURL, categoriesRoutes, drinksGetByCategory, drinksRoutes, billRoutes, userRoutes, weekScheduleRoutes, reportRoutes, historyRoutes, ingredientRoutes, transactionIngredientRoutes}
+const ingredientExpenseRoutes = '/api/ingredientExpense';
+export {baseURL, categoriesRoutes, drinksGetByCategory, drinksRoutes, billRoutes, userRoutes, weekScheduleRoutes, reportRoutes, historyRoutes, ingredientRoutes, transactionIngredientRoutes, ingredientExpenseRoutes}

@@ -3,6 +3,7 @@ import axios from 'axios';
 import { getServerSideProps } from '@/helpers/cookieHelper';
 import { format } from 'date-fns';
 import { baseURL, ingredientRoutes } from '@/api/api';
+import AddStock from '@/components/Warehouse/AddStock';
 
 function Warehouse({ token }) {
   const [ingredients, setIngredients] = useState([]);
@@ -112,8 +113,12 @@ function Warehouse({ token }) {
     ingredient.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const [isAddStock, setIsAddStock] = useState(false)
   const handleAddStock = () => {
-
+    setIsAddStock(true);
+  }
+  const handleCancelAddStock = () => {
+    setIsAddStock(false);
   }
 
   return (
@@ -170,7 +175,7 @@ function Warehouse({ token }) {
             </tbody>
           </table>
         </div>
-        
+        {isAddStock && <AddStock token={token} onCancel={handleCancelAddStock} />}
       </div>
     </div>
   );
