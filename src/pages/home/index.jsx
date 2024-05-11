@@ -4,7 +4,7 @@ import Category from '@/components/Category/Category';
 import DrinkOfCategory from '@/components/DrinkOfCategory/DrinkOfCategory';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronLeft, faChevronRight, faMoneyBill, faClose } from '@fortawesome/free-solid-svg-icons';
-import { baseURL, categoriesRoutes, drinksGetByCategory } from '@/api/api';
+import { baseURL, categoriesRoutes, drinksGetByCategory, drinksRoutes } from '@/api/api';
 import { storage } from '@/firebase';
 import axios from 'axios';
 import { getServerSideProps } from '@/helpers/cookieHelper';
@@ -24,6 +24,11 @@ function Home({ token }) {
   const [isBillRendered, setIsBillRendered] = useState(false);
   const [isCategoryOpen, setIsCategoryOpen] = useState(true);
   const [isBillOpen, setIsBillOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const handleSearch = (e) => {
+    setSearchTerm(e.target.value);
+  };
 
   // State để lưu trạng thái của thiết bị là điện thoại hay không
   const [isMobile, setIsMobile] = useState(false);
@@ -92,22 +97,44 @@ function Home({ token }) {
         const response = await axios.get(`${baseURL}${categoriesRoutes}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        setCategories(response.data);
+        const allCategory = { _id: 'all', name: 'All' };
+        setCategories([allCategory, ...response.data]);
       } catch (error) {
         console.error('Error fetching categories:', error);
       }
     };
-
+    // Fetch categories from API
+    const fetchDrinks = async () => {
+      try {
+        const response = await axios.get(`${baseURL}${drinksRoutes}`, {
+          headers: { Authorization: `Bearer ${token}` },
+          params: {search: searchTerm}
+        });
+        setDrinks(response.data);
+      } catch (error) {
+        console.error('Error fetching drinks:', error);
+      }
+    };
+    setSelectedCategory("all");
     fetchCategories();
-  }, []);
+    fetchDrinks();
+  }, [searchTerm]);
 
   const handleCategoryClick = async (category) => {
     setSelectedCategory(category);
+    
     try {
-      const response = await axios.get(`${baseURL}${drinksGetByCategory}/${category._id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setDrinks(response.data);
+      if(category._id==='all'){
+        const response = await axios.get(`${baseURL}${drinksRoutes}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setDrinks(response.data);
+      }else{
+        const response = await axios.get(`${baseURL}${drinksGetByCategory}/${category._id}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setDrinks(response.data);
+      }
     } catch (error) {
       console.error('Error fetching drinks by category:', error);
     }
@@ -211,12 +238,17 @@ function Home({ token }) {
           </div>
 
           {/* Phần drink */}
-          <div className={`flex flex-wrap overflow-y-auto h-full w-${isCategoryOpen ? 'full' : 'full'} justify-center max-h-screen`} style={{ scrollbarWidth: 'thin', scrollbarColor: 'gray', scrollbarTrackColor: 'rgba(0, 0, 0, 0.1)' }}>
-
-            {selectedCategory &&
-              drinks.map(drink => (
-                <DrinkOfCategory key={drink._id} drink={drink} addToBill={addToBill} setSelectedOptions={setSelectedOptions} />
-              ))}
+          
+          <div className={`flex flex-col items-center max-h-screen overflow-y-auto w-${isCategoryOpen ? 'full' : 'full'}`}>
+            {/* Thanh input */}
+            <input type="text" placeholder="Nhập đồ uống tìm kiếm" value={searchTerm} onChange={handleSearch} className="border border-gray-300 rounded px-4 py-2 outline-none mb-4 w-48 lg:w-64 mt-2" />
+            {/* Danh sách đồ uống */}
+            <div className={`flex flex-wrap overflow-y-auto h-full w-${isCategoryOpen ? 'full' : 'full'} justify-center max-h-screen`} style={{ scrollbarWidth: 'thin', scrollbarColor: 'gray', scrollbarTrackColor: 'rgba(0, 0, 0, 0.1)' }}>
+              {selectedCategory &&
+                drinks.map(drink => (
+                  <DrinkOfCategory key={drink._id} drink={drink} addToBill={addToBill} setSelectedOptions={setSelectedOptions} />
+                ))}
+            </div>
           </div>
           {/* Toggle button */}
           

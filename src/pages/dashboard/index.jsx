@@ -6,6 +6,7 @@ import { Chart as ChartJS } from 'chart.js/auto';
 import { Bar, Line } from 'react-chartjs-2';
 import { baseURL, reportRoutes } from '@/api/api';
 import { getServerSideProps } from '@/helpers/cookieHelper';
+import RevenueChart from '@/components/Report/RevenueChart ';
 
 function Dashboard({token}) {
     const [period, setPeriod] = useState('all');
@@ -84,7 +85,7 @@ function Dashboard({token}) {
     return (
         <div className="container mx-auto mt-8 px-4">
             <h1 className="text-3xl font-semibold mb-8">Dashboard</h1>
-
+            <RevenueChart/>
             <div className="flex flex-wrap mb-4">
                 <div className="mb-4 mr-4">
                     <label htmlFor="period" className="mr-2">Period:</label>

@@ -46,31 +46,33 @@ function Management({token}) {
   };
 
   useEffect(() => {
-    // Fetch categories from the server
-    axios.get(`${baseURL}${categoriesRoutes}`,{
-      headers: { Authorization: `Bearer ${token}` }
-    })
-      .then(response => {
+    setSelectedCategory({ _id: 'all', name: 'All', img: 'All' });
+    const fetchCategories = async () => {
+      try {
+        const response = await axios.get(`${baseURL}${categoriesRoutes}`,{
+          headers: { Authorization: `Bearer ${token}` }
+        })
         // Add "All" category
         const allCategory = { _id: 'all', name: 'All', img: 'All' };
         const sortedCategories = response.data.sort((a, b) => a._id.localeCompare(b._id)); // Sắp xếp categories theo id
         setCategories([allCategory, ...sortedCategories]);
-      })
-      .catch(error => {
+      } catch (error) {
         console.error('Error fetching categories:', error);
-      });
-
-    // Fetch drinks from the server
-    axios.get(`${baseURL}${drinksRoutes}`,{
-      headers: { Authorization: `Bearer ${token}` }
-    })
-      .then(response => {
+      }
+    }
+    const fetchDrinks = async () => {
+      try {
+        const response = await axios.get(`${baseURL}${drinksRoutes}`,{
+          headers: { Authorization: `Bearer ${token}` }
+        })
         setDrinks(response.data);
         setSelectedDrinks(response.data);
-      })
-      .catch(error => {
+      } catch (error) {
         console.error('Error fetching drinks:', error);
-      });
+      }
+    }
+    fetchCategories();
+    fetchDrinks();
   }, []);
 
   useEffect(() => {

@@ -15,6 +15,7 @@ function Detail({ token, historyDetail, onCancel }) {
                 const response = await axios.get(`${baseURL}${billRoutes}/${historyDetail}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
+                console.log(response.data)
                 setHistory(response.data);
                 setLoading(false);
             } catch (error) {
@@ -31,6 +32,7 @@ function Detail({ token, historyDetail, onCancel }) {
                 {loading && <p className="text-center">Loading...</p>}
                 {!loading && history && (
                     <>
+                        <p className="mb-2 text-sm">Mã hoá đơn: {history.billCode}</p>
                         <p className="mb-2"><strong>Tổng số tiền:</strong> {history.totalAmount.toLocaleString('vi-VN')} đ</p>
                         <p className="mb-2 text-sm">Ngày tạo: {format(new Date(history.createdAt), 'dd/MM/yyyy HH:mm:ss')}</p>
                         <ul>

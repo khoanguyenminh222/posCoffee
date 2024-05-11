@@ -48,6 +48,7 @@ function History({ token }) {
                 headers: { Authorization: `Bearer ${token}` }
             });
             const { transactions, totalAmountSum, totalPages, currentPage } = response.data;
+            console.log(response.data)
             setTransactions(transactions);
             setTotalAmountSum(totalAmountSum);
             setTotalPages(totalPages);
@@ -114,33 +115,56 @@ function History({ token }) {
 
     //table lịch sử nguyên liệu
     const [transactionsIngredient, setTransactionsIngredient] = useState([]);
-    const [priceIngredient, setPriceIngredient] = useState('');
+    const [priceIngredient, setPriceIngredient] = useState(0);
     const [searchTerm, setSearchTerm] = useState('');
+    const [selectedDateTransactionsIngredient, setSelectedDateTransactionsIngredient] = useState(new Date().toISOString().slice(0, 10));
+    const [selectedPeriodTransactionsIngredient, setSelectedPeriodTransactionsIngredient] = useState('day'); // Mặc định là ngày
+    const [currentPageTransactionsIngredient, setCurrentPageTransactionsIngredient] = useState(1);
+    const [totalPagesTransactionsIngredient, setTotalPagesTransactionsIngredient] = useState(1);
+    const [pageSizeTransactionsIngredient, setPageSizeTransactionsIngredient] = useState(10);
 
     useEffect(() => {
         const fetchTransactionIngredient = async () => {
             try {
-                const response = await axios.get(`${baseURL}${transactionIngredientRoutes}`, {
-                    headers: { Authorization: `Bearer ${token}` }
+                const response = await axios.get(`${baseURL}${transactionIngredientRoutes}/${selectedPeriodTransactionsIngredient}`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                    params: { date: selectedDateTransactionsIngredient, page: currentPageTransactionsIngredient, pageSize: pageSizeTransactionsIngredient, search: searchTerm }
                 });
                 setTransactionsIngredient(response.data.transactions);
                 setPriceIngredient(response.data.totalPrices)
+                setTotalPagesTransactionsIngredient(response.data.totalPages);
             } catch (error) {
                 console.log('Error fetching transaction ingredient:', error);
             }
         }
         fetchTransactionIngredient();
-    },[])
+    },[selectedDateTransactionsIngredient, selectedPeriodTransactionsIngredient, currentPageTransactionsIngredient, pageSizeTransactionsIngredient, searchTerm])
     const handleSearch = (e) => {
         setSearchTerm(e.target.value);
     };
-    const filteredHistoryIngredient = transactionsIngredient.filter(t =>
-        t.ingredient.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+
+    const handleDateChangeTransactionIngredient = (e) => {
+        setSelectedDateTransactionsIngredient(e.target.value);
+    };
+
+    const handlePeriodChangeTransactionIngredient = (e) => {
+        setSelectedPeriodTransactionsIngredient(e.target.value);
+    };
+    const handleNextPageTransactionIngredient = () => {
+        if (currentPageTransactionsIngredient < totalPagesTransactionsIngredient) {
+            setCurrentPageTransactionsIngredient(currentPageTransactionsIngredient + 1);
+        }
+    };
+    
+    const handlePreviousPageTransactionIngredient = () => {
+        if (currentPageTransactionsIngredient > 1) {
+            setCurrentPageTransactionsIngredient(currentPageTransactionsIngredient - 1);
+        }
+    };
 
     // table lịch sử nhập kho
     const [ingredientExpense, setIngredientExpense] = useState([]);
-    const [ingredientExpenseTotalAmount, setIngredientExpenseTotalAmount] = useState('');
+    const [ingredientExpenseTotalAmount, setIngredientExpenseTotalAmount] = useState(0);
     const [searchIngredientExpense, setSearchIngredientExpense] = useState('');
     const [selectedDateIngredientExpense, setSelectedDateIngredientExpense] = useState(new Date().toISOString().slice(0, 10));
     const [selectedPeriodIngredientExpense, setSelectedPeriodIngredientExpense] = useState('day'); // Mặc định là ngày
@@ -153,7 +177,7 @@ function History({ token }) {
             try {
                 const response = await axios.get(`${baseURL}${ingredientExpenseRoutes}/${selectedPeriodIngredientExpense}`, {
                     headers: { Authorization: `Bearer ${token}` },
-                    params: { date: selectedDateIngredientExpense, page: currentPageIngredientExpense, pageSize: pageSizeIngredientExpense }
+                    params: { date: selectedDateIngredientExpense, page: currentPageIngredientExpense, pageSize: pageSizeIngredientExpense, search: searchIngredientExpense }
                 });
                 setIngredientExpense(response.data.expenses);
                 setIngredientExpenseTotalAmount(response.data.totalAmount);
@@ -163,15 +187,11 @@ function History({ token }) {
             }
         }
         fetchIngredientExpense();
-    }, [selectedDateIngredientExpense, selectedPeriodIngredientExpense, currentPageIngredientExpense, pageSizeIngredientExpense]);
+    }, [selectedDateIngredientExpense, selectedPeriodIngredientExpense, currentPageIngredientExpense, pageSizeIngredientExpense, searchIngredientExpense]);
 
     const handleSearchExpense = (e) => {
         setSearchIngredientExpense(e.target.value);
     };
-
-    const filteredIngredientExpense = ingredientExpense.filter(t =>
-        t.ingredient.name.toLowerCase().includes(searchIngredientExpense.toLowerCase())
-    );
 
     const handleDateChangeIngredientExpense = (e) => {
         setSelectedDateIngredientExpense(e.target.value);
@@ -254,7 +274,7 @@ function History({ token }) {
                         <tbody className='overflow-y-auto'>
                             {transactions.map(transaction => (
                                 <tr key={transaction._id} className="border cursor-pointer hover:bg-slate-100">
-                                    <td className="px-4 py-2" onClick={toggleShowFullId}>{shortenId(transaction._id)}</td>
+                                    <td className="px-4 py-2" onClick={toggleShowFullId}>{shortenId(transaction.billCode)}</td>
                                     <td className="px-4 py-2">{transaction.userId.fullname}</td>
                                     <td className="px-4 py-2">{transaction.totalAmount.toLocaleString('vi-VN')} đ</td>
                                     <td className="px-4 py-2">{format(new Date(transaction.createdAt), 'dd/MM/yyyy HH:mm:ss')}</td>
@@ -276,8 +296,16 @@ function History({ token }) {
             <div className="bg-white rounded-lg shadow-md p-6 mt-4">
                 <h1 className="text-3xl font-bold mb-4">Lịch sử nguyên liệu</h1>
                 <div className='flex flex-col sm:flex-row justify-start md:justify-between lg:justify-between items-center w-full mb-2'>
-                    <input type="text" placeholder="Nhập nguyên liệu tìm kiếm" onChange={handleSearch} className="border border-gray-300 rounded px-4 py-2 lg:w-80 md:w-48 w-full outline-none" />
-                    <p className="text-lg font-bold mt-2 sm:mt-0 text-red-500">Tổng tiền {priceIngredient.toLocaleString('vi-VN')} đ</p>
+                    <input type="text" placeholder="Nhập nguyên liệu tìm kiếm" value={searchTerm} onChange={handleSearch} className="border border-gray-300 rounded px-4 py-2 lg:w-80 md:w-48 w-full outline-none" />
+                    <input type="date" value={selectedDateTransactionsIngredient} onChange={handleDateChangeTransactionIngredient} className="border border-gray-300 rounded px-4 py-2 lg:w-40 md:w-32 w-full mt-2 sm:mt-0 outline-none" />
+                    <select value={selectedPeriodTransactionsIngredient} onChange={handlePeriodChangeTransactionIngredient} className="border border-gray-300 rounded px-4 py-2 lg:w-40 md:w-32 w-full mt-2 sm:mt-0 outline-none">
+                        <option value="day">Ngày</option>
+                        <option value="week">Tuần</option>
+                        <option value="month">Tháng</option>
+                        <option value="year">Năm</option>
+                        <option value="all">All</option>
+                    </select>
+                    <p className="text-lg font-bold mt-2 sm:mt-0 text-red-500">Tổng tiền: {priceIngredient.toLocaleString('vi-VN')} đ</p>
                 </div>
                 
                 <div className="overflow-x-auto block max-h-96">
@@ -295,7 +323,7 @@ function History({ token }) {
                             </tr>
                         </thead>
                         <tbody className='overflow-y-auto'>
-                            {filteredHistoryIngredient.map(transaction => (
+                            {transactionsIngredient.map(transaction => (
                                 <tr key={transaction._id} className="border cursor-pointer hover:bg-slate-100">
                                     <td className="px-4 py-2">{transaction.drink.name}</td>
                                     <td className="px-4 py-2">{transaction.ingredient.name}</td>
@@ -310,17 +338,23 @@ function History({ token }) {
                         </tbody>
                     </table>
                 </div>
+                <div className="flex justify-center items-center mt-4">
+                    <button onClick={handlePreviousPageTransactionIngredient} disabled={currentPageTransactionsIngredient === 1} className="text-sm mr-2 px-3 py-1 bg-gray-200 rounded-md focus:outline-none">Trang trước</button>
+                    <span className="mx-2 text-sm">Trang {currentPageTransactionsIngredient} / {totalPagesTransactionsIngredient}</span>
+                    <button onClick={handleNextPageTransactionIngredient} disabled={currentPageTransactionsIngredient === totalPagesTransactionsIngredient} className="text-sm ml-2 px-3 py-1 bg-gray-200 rounded-md focus:outline-none">Trang sau</button>
+                </div>
             </div>
             <div className="bg-white rounded-lg shadow-md p-6 mt-4">
                 <h1 className="text-3xl font-bold mb-4">Lịch sử nhập nguyên liệu</h1>
                 <div className='flex flex-col sm:flex-row justify-start md:justify-between lg:justify-between items-center w-full mb-2'>
-                    <input type="text" placeholder="Nhập nguyên liệu tìm kiếm" onChange={handleSearchExpense} className="border border-gray-300 rounded px-4 py-2 lg:w-80 md:w-48 w-full outline-none" />
+                    <input type="text" placeholder="Nhập nguyên liệu tìm kiếm" value={searchIngredientExpense} onChange={handleSearchExpense} className="border border-gray-300 rounded px-4 py-2 lg:w-80 md:w-48 w-full outline-none" />
                     <input type="date" value={selectedDateIngredientExpense} onChange={handleDateChangeIngredientExpense} className="border border-gray-300 rounded px-4 py-2 lg:w-40 md:w-32 w-full mt-2 sm:mt-0 outline-none" />
                     <select value={selectedPeriodIngredientExpense} onChange={handlePeriodChangeIngredientExpense} className="border border-gray-300 rounded px-4 py-2 lg:w-40 md:w-32 w-full mt-2 sm:mt-0 outline-none">
                         <option value="day">Ngày</option>
                         <option value="week">Tuần</option>
                         <option value="month">Tháng</option>
                         <option value="year">Năm</option>
+                        <option value="all">All</option>
                     </select>
                     <p className="text-lg font-bold mt-2 sm:mt-0 text-red-500">Tiền đã chi: {ingredientExpenseTotalAmount.toLocaleString('vi-VN')} đ</p>
                 </div>
@@ -337,7 +371,7 @@ function History({ token }) {
                             </tr>
                         </thead>
                         <tbody className='overflow-y-auto'>
-                            {filteredIngredientExpense.map(ex => (
+                            {ingredientExpense.map(ex => (
                                 <tr key={ex._id} className="border cursor-pointer hover:bg-slate-100">
                                     <td className="px-4 py-2">{ex.ingredient.name}</td>
                                     <td className="px-4 py-2">{ex.quantity}</td>
