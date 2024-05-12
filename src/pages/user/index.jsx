@@ -238,7 +238,7 @@ function User({ token }) {
     }, [searchTerm]);
 
     return (
-        <div className="container mx-auto max-h-full p-6 flex flex-col overflow-x-auto">
+        <div className="container mx-auto max-h-full px-4 py-8 flex flex-col overflow-x-auto">
             <div className="bg-white rounded-lg p-4 mb-4">
                 <h1 className="text-3xl font-semibold my-4">Ca làm việc của nhân viên 1 tuần</h1>
                 <div className='flex mb-4'>

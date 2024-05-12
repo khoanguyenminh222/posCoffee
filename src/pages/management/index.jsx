@@ -198,7 +198,7 @@ function Management({token}) {
   return (
     <>
       <div className="w-full">
-        <div className='container mx-auto px-4 max-h-full'>
+        <div className='container mx-auto px-4 py-8 max-h-full'>
           <h1 className="text-3xl font-semibold my-4">Mặt hàng</h1>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {categories.map(category => (
