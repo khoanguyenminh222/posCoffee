@@ -11,7 +11,7 @@ function IngredientForm({ token, drink, onCancel, onSave }) {
     useEffect(() => {
         const fetchIngredients = async () => {
             try {
-                const response = await axios.get(`${baseURL}${ingredientRoutes}`, {
+                const response = await axios.get(`${baseURL}${ingredientRoutes}/getAll`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 setIngredients(response.data);

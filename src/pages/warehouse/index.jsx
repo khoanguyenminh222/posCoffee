@@ -206,8 +206,8 @@ function Warehouse({ token }) {
                     <td className="px-6 py-4 whitespace-nowrap">{ingredient.totalPrice.toLocaleString('vi-VN')} đ</td>
                     <td className="px-6 py-4 whitespace-nowrap">{format(new Date(ingredient.updatedAt), 'dd/MM/yyyy HH:mm:ss')}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <button className="text-blue-500 mr-2" onClick={() => handleSelectEditIngredient(ingredient)}>Sửa</button>
-                      <button className="text-red-500" onClick={() => handleDeleteIngredient(ingredient)}>Xoá</button>
+                      <button className="text-blue-500 mr-2 hover:underline" onClick={() => handleSelectEditIngredient(ingredient)}>Sửa</button>
+                      <button className="text-red-500 hover:underline" onClick={() => handleDeleteIngredient(ingredient)}>Xoá</button>
                       <button className="ml-2 bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600" onClick={() => handleAddStock(ingredient)}>Nhập hàng</button>
                     </td>
                   </tr>
