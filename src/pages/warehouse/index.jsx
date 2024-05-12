@@ -122,7 +122,7 @@ function Warehouse({ token }) {
   }
 
   return (
-    <div className="container mx-auto max-h-full px-4 py-8 flex flex-col overflow-x-auto">
+    <div className="container mx-auto max-h-full px-4 py-8 flex flex-col overflow-x-auto mt-5">
       <h1 className="text-3xl font-semibold mb-4">Quản lý Thành Phần</h1>
       <div className="mb-4">
         <h2 className="text-xl font-semibold mb-2">Thêm Thành Phần</h2>
