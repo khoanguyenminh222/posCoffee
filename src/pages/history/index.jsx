@@ -18,7 +18,7 @@ function History({ token }) {
     const [totalPages, setTotalPages] = useState(0);
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize] = useState(10);
-    const [selectedDate, setSelectedDate] = useState(format(new Date(), 'yyyy-MM-dd'));
+    const [selectedDate, setSelectedDate] = useState(new Date().toISOString().slice(0,10));
     const [showFullId, setShowFullId] = useState(false);
     const [billCode, setBillCode] = useState('');
     const [isDetail, setIsDetail] = useState(false);
@@ -48,7 +48,6 @@ function History({ token }) {
                 headers: { Authorization: `Bearer ${token}` }
             });
             const { transactions, totalAmountSum, totalPages, currentPage } = response.data;
-            console.log(response.data)
             setTransactions(transactions);
             setTotalAmountSum(totalAmountSum);
             setTotalPages(totalPages);
@@ -88,8 +87,8 @@ function History({ token }) {
         setCurrentPage(1); // Reset page when user changes
     };
 
-    const handleDateChange = (date) => {
-        setSelectedDate(date);
+    const handleDateChange = (e) => {
+        setSelectedDate(e.target.value);
     };
 
     const handleNextPage = () => {
@@ -239,7 +238,7 @@ function History({ token }) {
                     <div className="flex items-center mb-2 sm:mb-0 lg:justify-start justify-between">
                         <label htmlFor="date" className="mr-2">Ngày:</label>
                         <div className="border rounded px-2 py-1">
-                            <DatePicker className='hover:outline-none focus:outline-none' id="date" selected={selectedDate} onChange={handleDateChange} />
+                            <input type='date' className='hover:outline-none focus:outline-none' id="date" value={selectedDate} onChange={handleDateChange} />
                         </div>
                     </div>
                     <div className="relative w-full sm:w-auto">
