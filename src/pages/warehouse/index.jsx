@@ -4,58 +4,99 @@ import { getServerSideProps } from '@/helpers/cookieHelper';
 import { format } from 'date-fns';
 import { baseURL, ingredientRoutes } from '@/api/api';
 import AddStock from '@/components/Warehouse/AddStock';
+import AddIngredientForm from '@/components/Warehouse/AddIngredientForm';
+import EditIngredientForm from '@/components/Warehouse/EditIngredientForm';
 
 function Warehouse({ token }) {
   const [ingredients, setIngredients] = useState([]);
+  const [addIngredient, setAddIngredient] = useState({
+    id: '',
+    name: '',
+    quantity: '',
+    unit: '',
+    priceOfUnit: '',
+    totalPrice: ''
+  });
   const [editIngredient, setEditIngredient] = useState({
     id: '',
     name: '',
     quantity: '',
     unit: '',
+    priceOfUnit: '',
     totalPrice: ''
   });
   const [searchTerm, setSearchTerm] = useState('');
+  const [totalPages, setTotalPages] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(10);
 
+  const fetchIngredients = async () => {
+    try {
+      const response = await axios.get(`${baseURL}${ingredientRoutes}`, {
+        headers: { Authorization: `Bearer ${token}` },
+        params: { page: currentPage, pageSize: pageSize, search: searchTerm }
+      });
+      setIngredients(response.data.ingredients);
+      setTotalPages(response.data.totalPages)
+      setCurrentPage(currentPage);
+    } catch (error) {
+      console.error('Lỗi khi fetch danh sách thành phần:', error);
+    }
+  };
   useEffect(() => {
-    const fetchIngredients = async () => {
-      try {
-        const response = await axios.get(`${baseURL}${ingredientRoutes}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setIngredients(response.data);
-      } catch (error) {
-        console.error('Lỗi khi fetch danh sách thành phần:', error);
-      }
-    };
     fetchIngredients();
-  }, []);
+    console.log(searchTerm)
+  }, [currentPage, searchTerm]);
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+        setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const handlePreviousPage = () => {
+      if (currentPage > 1) {
+          setCurrentPage(currentPage - 1);
+      }
+  };
 
   const handleAddIngredient = async () => {
-    console.log(editIngredient)
+    if (!addIngredient.name || !addIngredient.quantity || !addIngredient.unit || !addIngredient.totalPrice) {
+      // Nếu bất kỳ trường nào cũng không được điền vào, ngăn việc gửi dữ liệu và hiển thị thông báo lỗi
+      alert('Vui lòng điền đầy đủ thông tin cho tất cả các trường');
+      return;
+    }
     try {
       const response = await axios.post(`${baseURL}${ingredientRoutes}`, {
-        name: editIngredient.name,
-        quantity: editIngredient.quantity,
-        unit: editIngredient.unit,
-        totalPrice: editIngredient.totalPrice
+        name: addIngredient.name,
+        quantity: addIngredient.quantity,
+        unit: addIngredient.unit,
+        priceOfUnit: addIngredient.priceOfUnit,
+        totalPrice: addIngredient.totalPrice
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
+      console.log(response)
+
       setIngredients([...ingredients, response.data]);
-      setEditIngredient({
+      setAddIngredient({
         name: '',
         quantity: '',
         unit: '',
+        priceOfUnit: '',
         totalPrice: ''
       });
     } catch (error) {
       console.error('Lỗi khi thêm thành phần:', error);
+      if (error.response.status == 409) {
+        alert("Đã có thành phần '" + addIngredient.name + "' tồn tại")
+      }
     }
   };
 
   const handleDeleteIngredient = async (ingredient) => {
-    console.log(ingredient.name)
-    if (window.confirm(`Bạn có muốn xoá?`)){
+
+    if (window.confirm(`Bạn có muốn xoá?`)) {
       try {
         await axios.delete(`${baseURL}${ingredientRoutes}/${ingredient._id}`, {
           headers: { Authorization: `Bearer ${token}` }
@@ -68,11 +109,17 @@ function Warehouse({ token }) {
   };
 
   const handleEditIngredient = async () => {
+    if (!editIngredient.name || !editIngredient.quantity || !editIngredient.unit || !editIngredient.totalPrice) {
+      // Nếu bất kỳ trường nào cũng không được điền vào, ngăn việc gửi dữ liệu và hiển thị thông báo lỗi
+      alert('Vui lòng điền đầy đủ thông tin cho tất cả các trường');
+      return;
+    }
     try {
       const response = await axios.patch(`${baseURL}${ingredientRoutes}/${editIngredient.id}`, {
         name: editIngredient.name,
         quantity: editIngredient.quantity,
         unit: editIngredient.unit,
+        priceOfUnit: editIngredient.priceOfUnit,
         totalPrice: editIngredient.totalPrice
       }, {
         headers: { Authorization: `Bearer ${token}` }
@@ -83,6 +130,7 @@ function Warehouse({ token }) {
         name: '',
         quantity: '',
         unit: '',
+        priceOfUnit: '',
         totalPrice: '',
       });
     } catch (error) {
@@ -96,10 +144,14 @@ function Warehouse({ token }) {
       name: ingredient.name,
       quantity: ingredient.quantity,
       unit: ingredient.unit,
+      priceOfUnit: ingredient.priceOfUnit,
       totalPrice: ingredient.totalPrice
     });
   };
-
+  const handleAddInputChange = (e) => {
+    const { name, value } = e.target;
+    setAddIngredient({ ...addIngredient, [name]: value });
+  };
   const handleEditInputChange = (e) => {
     const { name, value } = e.target;
     setEditIngredient({ ...editIngredient, [name]: value });
@@ -109,74 +161,83 @@ function Warehouse({ token }) {
     setSearchTerm(e.target.value);
   };
 
-  const filteredIngredients = ingredients.filter(ingredient =>
-    ingredient.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
   const [isAddStock, setIsAddStock] = useState(false)
-  const handleAddStock = () => {
+  const [ingredientAddStock, setIngredientAddStock] = useState([]);
+  const handleAddStock = (ingredient) => {
+    setIngredientAddStock(ingredient)
     setIsAddStock(true);
   }
   const handleCancelAddStock = () => {
     setIsAddStock(false);
   }
+  const handleSaveAddStock = (data) => {
+    if (data) {
+      fetchIngredients();
+      alert("Nhập thành phần thành công");
+    }
+  }
 
   return (
     <div className="container mx-auto max-h-full px-4 py-8 flex flex-col overflow-x-auto mt-5">
-      <h1 className="text-3xl font-semibold mb-4">Quản lý Thành Phần</h1>
-      <div className="mb-4">
-        <h2 className="text-xl font-semibold mb-2">Thêm Thành Phần</h2>
-        <input type="text" name="name" placeholder="Tên Thành Phần" value={editIngredient.name} onChange={handleEditInputChange} className="border border-gray-300 rounded px-4 py-2 mb-2 lg:w-60 w-full" />
-        <input type="number" name="quantity" placeholder="Số Lượng" value={editIngredient.quantity} onChange={handleEditInputChange} className="border border-gray-300 rounded px-4 py-2 mb-2 lg:w-60 w-full" />
-        <input type="text" name="unit" placeholder="Đơn Vị" value={editIngredient.unit} onChange={handleEditInputChange} className="border border-gray-300 rounded px-4 py-2 mb-2 lg:w-60 w-full" />
-        <input type="number" name="totalPrice" placeholder="Giá" value={editIngredient.totalPrice} onChange={handleEditInputChange} className="border border-gray-300 rounded px-4 py-2 mb-2 lg:w-60 w-full" />
-        <button onClick={handleAddIngredient} className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 ml-2">Thêm</button>
-      </div>
-      <div className="mb-4">
-        <h2 className="text-xl font-semibold mb-2">Sửa Thành Phần</h2>
-        <input type="text" name="name" value={editIngredient.name} onChange={handleEditInputChange} className="border border-gray-300 rounded px-4 py-2 mb-2 lg:w-60 w-full" />
-        <input type="number" name="quantity" value={editIngredient.quantity} onChange={handleEditInputChange} className="border border-gray-300 rounded px-4 py-2 mb-2 lg:w-60 w-full" />
-        <input type="text" name="unit" value={editIngredient.unit} onChange={handleEditInputChange} className="border border-gray-300 rounded px-4 py-2 mb-2 lg:w-60 w-full" />
-        <input type="number" name="totalPrice" value={editIngredient.totalPrice} onChange={handleEditInputChange} className="border border-gray-300 rounded px-4 py-2 mb-2 lg:w-60 w-full" />
-        <button onClick={handleEditIngredient} className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 ml-2">Lưu</button>
-      </div>
-      <div>
-        <h2 className="text-xl font-semibold mb-2">Danh sách Thành Phần</h2>
-        <input type="text" placeholder="Nhập từ khóa tìm kiếm" onChange={handleSearch} className="border border-gray-300 rounded px-4 py-2 mb-2 lg:w-80 w-full" />
-        <button onClick={handleAddStock} className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 lg:ml-2 mb-2">Nhập hàng</button>
-        <div className='overflow-x-auto block max-h-96'>
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tên</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Số Lượng</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Đơn Vị</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Giá/đơn vị</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Giá</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ngày cập nhật</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hành Động</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {filteredIngredients.map(ingredient => (
-                <tr key={ingredient._id}>
-                  <td className="px-6 py-4 whitespace-nowrap">{ingredient.name}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">{ingredient.quantity}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">{ingredient.unit}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">{ingredient.priceOfUnit.toLocaleString('vi-VN')} đ</td>
-                  <td className="px-6 py-4 whitespace-nowrap">{ingredient.totalPrice.toLocaleString('vi-VN')} đ</td>
-                  <td className="px-6 py-4 whitespace-nowrap">{format(new Date(ingredient.updatedAt), 'dd/MM/yyyy HH:mm:ss')}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <button className="text-blue-500 mr-2" onClick={() => handleSelectEditIngredient(ingredient)}>Sửa</button>
-                    <button className="text-red-500" onClick={() => handleDeleteIngredient(ingredient)}>Xoá</button>
-                  </td>
+      <div className="bg-white rounded-lg shadow-md p-6">
+        <h1 className="text-3xl font-semibold mb-4">Quản lý Thành Phần</h1>
+        <div>
+          <input type="text" placeholder="Nhập từ khóa tìm kiếm" value={searchTerm} onChange={handleSearch} className="border border-gray-300 rounded px-4 py-2 mb-2 lg:w-80 w-full outline-none" />
+          <div className='overflow-x-auto block max-h-96'>
+            <table className="min-w-full divide-y divide-gray-200 border-2 rounded-md">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tên</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Số Lượng</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Đơn Vị</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Giá/đơn vị</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Giá</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ngày cập nhật</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hành Động</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {ingredients.map(ingredient => (
+                  <tr key={ingredient._id}>
+                    <td className="px-6 py-4 whitespace-nowrap">{ingredient.name}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">{ingredient.quantity}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">{ingredient.unit}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">{ingredient.priceOfUnit.toLocaleString('vi-VN')} đ</td>
+                    <td className="px-6 py-4 whitespace-nowrap">{ingredient.totalPrice.toLocaleString('vi-VN')} đ</td>
+                    <td className="px-6 py-4 whitespace-nowrap">{format(new Date(ingredient.updatedAt), 'dd/MM/yyyy HH:mm:ss')}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <button className="text-blue-500 mr-2" onClick={() => handleSelectEditIngredient(ingredient)}>Sửa</button>
+                      <button className="text-red-500" onClick={() => handleDeleteIngredient(ingredient)}>Xoá</button>
+                      <button className="ml-2 bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600" onClick={() => handleAddStock(ingredient)}>Nhập hàng</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="flex justify-center items-center mt-4">
+              <button onClick={handlePreviousPage} disabled={currentPage === 1} className="text-sm mr-2 px-3 py-1 bg-gray-200 rounded-md focus:outline-none">Trang trước</button>
+              <span className="mx-2 text-sm">Trang {currentPage} / {totalPages}</span>
+              <button onClick={handleNextPage} disabled={currentPage === totalPages} className="text-sm ml-2 px-3 py-1 bg-gray-200 rounded-md focus:outline-none">Trang sau</button>
+          </div>
+          {isAddStock && <AddStock token={token} onSave={handleSaveAddStock} ingredientAddStock={ingredientAddStock} onCancel={handleCancelAddStock} />}
         </div>
-        {isAddStock && <AddStock token={token} onCancel={handleCancelAddStock} />}
+        <div className='flex lg:flex-row flex-col justify-center items-center rounded p-4'>
+
+          <AddIngredientForm
+            addIngredient={addIngredient}
+            onAddIngredientChange={handleAddInputChange}
+            onAddIngredientSubmit={handleAddIngredient}
+          />
+
+          <EditIngredientForm
+            editIngredient={editIngredient}
+            onEditIngredientChange={handleEditInputChange}
+            onEditIngredientSubmit={handleEditIngredient}
+          />
+        </div>
       </div>
+
     </div>
   );
 }

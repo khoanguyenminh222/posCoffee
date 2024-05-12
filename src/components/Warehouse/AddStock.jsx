@@ -4,53 +4,44 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import { baseURL, ingredientExpenseRoutes, ingredientRoutes } from '@/api/api';
 
-function AddStock({ token, onCancel }) {
-    const [ingredients, setIngredients] = useState([]);
-    const [expenseItems, setExpenseItems] = useState([
-        { ingredient: '', quantity: '', unit: '', unitPrice: '', totalAmount: '' }
-    ]);
+function AddStock({ token, ingredientAddStock, onCancel, onSave }) {
+    const [quantityAction, setQuantityAction] = useState('add');
+    const [formData, setFormData] = useState({
+        quantity: ingredientAddStock.quantity,
+        priceOfUnit: ingredientAddStock.priceOfUnit,
+        totalPrice: ingredientAddStock.totalPrice
+    });
 
-    useEffect(() => {
-        const fetchIngredients = async () => {
-            try {
-                const response = await axios.get(`${baseURL}${ingredientRoutes}`, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                setIngredients(response.data);
-            } catch (error) {
-                console.error('Error fetching ingredients:', error);
-            }
-        };
-
-        fetchIngredients();
-    }, [token]);
-
-    const handleAddExpenseItem = () => {
-        setExpenseItems([...expenseItems, { ingredient: '', quantity: '', unit: '', totalAmount: '' }]);
+    const handleOptionChange = (event) => {
+        setQuantityAction(event.target.value);
     };
-
-    const handleRemoveExpenseItem = (index) => {
-        const newExpenseItems = [...expenseItems];
-        newExpenseItems.splice(index, 1);
-        setExpenseItems(newExpenseItems);
+    const handleChange = (event) => {
+        const { name, value } = event.target;
+        setFormData({
+            ...formData,
+            [name]: value
+        });
     };
-
-    const handleChange = (e, index) => {
-        const { name, value } = e.target;
-        const newExpenseItems = [...expenseItems];
-        newExpenseItems[index][name] = value;
-        setExpenseItems(newExpenseItems);
-    };
-
     const handleSubmit = async () => {
         try {
-            expenseItems.forEach(item => {
-                item.unitPrice = (item.totalAmount / item.quantity).toFixed(2);
+            
+            const { quantity, priceOfUnit, totalPrice } = formData;
+            if(!quantity || !totalPrice){
+                alert('Vui lòng điền số lượng và thành tiền');
+                return;
+            }
+            const expenseItem = {
+                quantity: parseInt(quantity),
+                priceOfUnit: priceOfUnit ? parseFloat(priceOfUnit) : '',
+                totalPrice: parseFloat(totalPrice)
+            };
+
+            const response = await axios.put(`${baseURL}${ingredientRoutes}/addStock/${ingredientAddStock._id}`, expenseItem, {
+                headers: { Authorization: `Bearer ${token}` },
+                params: { action: quantityAction }
             });
-            await axios.post(`${baseURL}${ingredientExpenseRoutes}`, expenseItems, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            alert('Nhập nguyên liệu thành công');
+            onSave(response.data)
+            onCancel();
         } catch (error) {
             console.error('Error adding ingredient expenses:', error);
             alert('Failed to add ingredient expenses');
@@ -61,21 +52,31 @@ function AddStock({ token, onCancel }) {
         <div className="fixed top-0 left-0 right-0 bottom-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50 overflow-auto">
             <div className="bg-white p-8 rounded-md shadow-md w-96 relative overflow-auto max-h-full">
                 <h2 className="text-2xl font-semibold mb-4">Nhập hàng</h2>
-                {expenseItems.map((item, index) => (
-                    <div key={index} className="mb-4">
-                        <select name="ingredient" value={item.ingredient} onChange={(e) => handleChange(e, index)} className="w-full border border-gray-300 rounded-md p-2 mb-2">
-                            <option value="">Chọn nguyên liệu</option>
-                            {ingredients.map((ingredient) => (
-                                <option key={ingredient._id} value={ingredient._id}>{ingredient.name}</option>
-                            ))}
-                        </select>
-                        <input type="number" name="quantity" value={item.quantity} onChange={(e) => handleChange(e, index)} placeholder="Số lượng" className="w-full border border-gray-300 rounded-md p-2 mb-2" />
-                        <input type="text" name="unit" value={item.unit} onChange={(e) => handleChange(e, index)} placeholder="Đơn vị" className="w-full border border-gray-300 rounded-md p-2 mb-2" />
-                        <input type="number" name="totalAmount" value={item.totalAmount} onChange={(e) => handleChange(e, index)} placeholder="Tổng tiền" className="w-full border border-gray-300 rounded-md p-2 mb-2" />
-                        {index > 0 && <button type="button" onClick={() => handleRemoveExpenseItem(index)} className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 mr-2">Xóa</button>}
+                <div className="mb-4">
+                    <label htmlFor="name" className="block mb-2">Tên nguyên liệu</label>
+                    <input type="text" id="name" name="name" value={ingredientAddStock.name} placeholder="Tên nguyên liệu" className="w-full border border-gray-300 rounded-md p-2 mb-2 outline-none" readOnly/>
+
+                    <label htmlFor="unit" className="block mb-2">Đơn vị tính</label>
+                    <input type="text" id="unit" name="unit" value={ingredientAddStock.unit} placeholder="Đơn vị tính" className="w-full border border-gray-300 rounded-md p-2 mb-2 outline-none" readOnly/>
+                    <div className="mb-2">
+                        <label className="mr-2">
+                            <input type="radio" value="add" checked={quantityAction === 'add'} onChange={handleOptionChange} className="mr-1"/>
+                            Cộng thêm
+                        </label>
+                        <label>
+                            <input type="radio" value="change" checked={quantityAction === 'change'}onChange={handleOptionChange}className="mr-1"/>
+                            Thay thế
+                        </label>
                     </div>
-                ))}
-                <button type="button" onClick={handleAddExpenseItem} className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 mr-2">Thêm mục chi phí</button>
+                    <label htmlFor="quantity" className="block mb-2">Số lượng <span className='text-red-500'>(*)</span></label>
+                    <input type="number" id="quantity" name="quantity" value={formData.quantity} onChange={handleChange} placeholder="Số lượng" className="w-full border border-gray-300 rounded-md p-2 mb-2 outline-none" />
+
+                    <label htmlFor="priceOfUnit" className="block mb-2">Đơn giá/đơn vị</label>
+                    <input type="number" id="priceOfUnit" name="priceOfUnit" value={formData.priceOfUnit} onChange={handleChange} placeholder="Giá/đơn vị" className="w-full border border-gray-300 rounded-md p-2 mb-2 outline-none" />
+
+                    <label htmlFor="totalPrice" className="block mb-2">Tổng tiền <span className='text-red-500'>(*)</span></label>
+                    <input type="number" id="totalPrice" name="totalPrice" value={formData.totalPrice} onChange={handleChange} placeholder="Tổng tiền" className="w-full border border-gray-300 rounded-md p-2 mb-2 outline-none" />
+                </div>
                 <button type="submit" onClick={handleSubmit} className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600">Xác nhận</button>
                 <button onClick={onCancel} className="absolute top-2 right-4 px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 flex items-center justify-center">
                     <FontAwesomeIcon icon={faTimes} />

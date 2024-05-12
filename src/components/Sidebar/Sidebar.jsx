@@ -45,7 +45,6 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
           const useridfromtoken = getUserIdFromToken(token);
           if (useridfromtoken) {
             setUserId(useridfromtoken);
-            console.log(token)
           }
         }
       }, [token])
