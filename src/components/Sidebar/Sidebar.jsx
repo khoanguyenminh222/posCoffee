@@ -8,7 +8,7 @@ import Link from 'next/link';
 import { getUserIdFromToken } from '@/helpers/getUserIdFromToken';
 import { baseURL, userRoutes } from '@/api/api';
 
-const Sidebar = ({ token, isOpen, toggleSidebar }) => {
+const Sidebar = ({ isOpen, toggleSidebar }) => {
     const [activeLink, setActiveLink] = useState("/home");
     const router = useRouter();
     const handleLogout = () => {
@@ -17,9 +17,8 @@ const Sidebar = ({ token, isOpen, toggleSidebar }) => {
         // Chuyển hướng đến trang đăng nhập
         router.push('/login');
     };
-
+    
     const sidebarRef = useRef(null);
-
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
@@ -38,6 +37,7 @@ const Sidebar = ({ token, isOpen, toggleSidebar }) => {
         };
     }, [isOpen, toggleSidebar]);
 
+    const token = Cookies.get('token');
     const [userId, setUserId] = useState();
     useEffect(() => {
         if (token) {
@@ -45,23 +45,26 @@ const Sidebar = ({ token, isOpen, toggleSidebar }) => {
           const useridfromtoken = getUserIdFromToken(token);
           if (useridfromtoken) {
             setUserId(useridfromtoken);
+            console.log(token)
           }
         }
       }, [token])
 
     const [user, setUser] = useState([]);
     useEffect(()=>{
-        const fetchUser = async() =>{
-            try {
-                const response = await axios.get(`${baseURL}${userRoutes}/userId/${userId}`, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                setUser(response.data);
-            } catch (error) {
-                console.log(error)
+        if(userId){
+            const fetchUser = async() =>{
+                try {
+                    const response = await axios.get(`${baseURL}${userRoutes}/userId/${userId}`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+                    setUser(response.data);
+                } catch (error) {
+                    console.log(error)
+                }
             }
+            fetchUser(); 
         }
-        fetchUser(); 
     },[userId]);
 
     return (
@@ -69,8 +72,15 @@ const Sidebar = ({ token, isOpen, toggleSidebar }) => {
             <div className="py-4 flex flex-col items-center w-full h-full">
                 <div className="flex flex-col items-center mb-4 mt-3">
                     <img src="/images/Coffee Ryo.png" alt="Logo" className="mb-2 rounded-full" width={80} height={80} />
-                    <p className="text-white text-sm">{user.fullname}</p>
-                    <p className="text-white text-xs">{user.role}</p>
+                    {
+                        user ? 
+                        <>
+                        <p className="text-white text-sm">{user.fullname}</p>
+                        <p className="text-white text-xs">{user.role}</p>
+                        </>
+                        :
+                        (<p>... loading</p>)
+                    }
                 </div>
                 {/* <img src="/images/Coffee Ryo.png" alt="Logo" className="mb-4 rounded-full" width={100} height={100}/> */}
                 <ul className="flex flex-col h-full">
@@ -103,5 +113,4 @@ const SidebarLink = ({ href, icon, label, activeLink, setActiveLink }) => {
         </Link>
     );
 };
-
 export default Sidebar;
