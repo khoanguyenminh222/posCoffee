@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHome, faBars, faBurger, faHistory, faSignOutAlt, faUser, faChartSimple, faWarehouse } from '@fortawesome/free-solid-svg-icons';
+import { faHome, faBurger, faHistory, faSignOutAlt, faUser, faChartSimple, faWarehouse, faBullhorn } from '@fortawesome/free-solid-svg-icons';
 import Cookies from 'js-cookie';
 import { useRouter } from 'next/router';
 import axios from 'axios';
@@ -87,6 +87,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                     <SidebarLink href="/management" icon={faBurger} label="Quản lý" activeLink={activeLink} setActiveLink={setActiveLink} />
                     <SidebarLink href="/user" icon={faUser} label="Nhân viên" activeLink={activeLink} setActiveLink={setActiveLink} />
                     <SidebarLink href="/dashboard" icon={faChartSimple} label="Dashboard" activeLink={activeLink} setActiveLink={setActiveLink} />
+                    <SidebarLink href="/promotion-management" icon={faBullhorn} label="Khuyến mãi" activeLink={activeLink} setActiveLink={setActiveLink} />
                     <SidebarLink href="/warehouse" icon={faWarehouse} label="Kho" activeLink={activeLink} setActiveLink={setActiveLink} />
                     <SidebarLink href="/history" icon={faHistory} label="Lịch sử" activeLink={activeLink} setActiveLink={setActiveLink} />
                 </ul>
