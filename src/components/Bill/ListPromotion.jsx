@@ -1,0 +1,59 @@
+import React, { useState } from 'react';
+
+function ListPromotion({ promotionList, onCancel, onSelectPromotion }) {
+    const [selectedPromotionIndex, setSelectedPromotionIndex] = useState(null);
+    const handleCancel = () => {
+        onCancel();
+    };
+    const handleSelect = () => {
+        if (selectedPromotionIndex !== null) {
+            onSelectPromotion(promotionList[selectedPromotionIndex]);
+        }
+    };
+    return (
+        <div className="fixed z-10 top-0 left-0 right-0 bottom-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
+            <div className="bg-white p-8 rounded-md shadow-md">
+                {promotionList.length === 0 ? (
+                    <p>Không có khuyến mãi nào được áp dụng.</p>
+                ) : (
+                    <ul>
+                        {promotionList.map((promotion, index) => (
+                            <li key={index} className="mb-2 text-center">
+                                <label className="flex items-center">
+                                    <input
+                                        type="radio"
+                                        name="promotion"
+                                        value={index}
+                                        checked={selectedPromotionIndex === index}
+                                        onChange={() => setSelectedPromotionIndex(index)}
+                                        className="mr-2"
+                                    />
+                                    <span>{promotion.promotion.name} - {promotion.promotion.description}</span>
+                                </label>
+                            </li>
+                        ))}
+                    </ul>
+                )}
+                <div className="mt-4 flex justify-end">
+                    <button
+                        type="button"
+                        onClick={handleCancel}
+                        className="mr-3 inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    >
+                        Huỷ
+                    </button>
+                    <button
+                        type="button"
+                        onClick={handleSelect}
+                        disabled={selectedPromotionIndex === null}
+                        className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-white cursor-pointer bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    >
+                        Xác nhận
+                    </button>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+export default ListPromotion

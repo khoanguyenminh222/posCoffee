@@ -140,10 +140,16 @@ function Home({ token }) {
     }
   };
 
-  const addToBill = (drink, quantity) => {
+  const addToBill = (drink, quantity, selectedTemperature, selectedSize, selectedSugar, selectedIce) => {
+    const selectedOptions = {
+      temperature: selectedTemperature,
+      size: selectedSize,
+      sugar: selectedSugar,
+      ice: selectedIce,
+    };
     // Kiểm tra xem đã tồn tại billItem có id là drink._id và options giống nhau không
     const existingItem = billItems.find(item => item.id === drink._id && JSON.stringify(item.options) === JSON.stringify(selectedOptions));
-
+    console.log(existingItem)
     // Nếu tồn tại billItem có id là drink._id và options giống nhau, không thêm mới vào billItems
     if (existingItem) {
       // Cập nhật số lượng của billItem đã tồn tại
@@ -290,6 +296,7 @@ function Home({ token }) {
                     token={token}
                     userId={userId}
                     billItems={billItems}
+                    addToBill={addToBill}
                     onDeleteAll={onDeleteAll}
                     onDeleteItem={onDeleteItem}
                     onIncrementItem={onIncrementItem}
@@ -307,6 +314,7 @@ function Home({ token }) {
               token={token}
               userId={userId}
               billItems={billItems}
+              addToBill={addToBill}
               onDeleteAll={onDeleteAll}
               onDeleteItem={onDeleteItem}
               onIncrementItem={onIncrementItem}

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getServerSideProps } from '@/helpers/cookieHelper';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEdit, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
+import { faEdit, faTrashAlt, faToggleOn, faToggleOff } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
 import { format } from 'date-fns';
 import PromotionCreateForm from '@/components/promotion-management/PromotionCreateForm';
@@ -46,12 +46,13 @@ function PromotionManagement({ token }) {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            console.log(newPromotion)
             // Call API to create new promotion
             const response = await axios.post(`${baseURL}${promotionRoutes}`, newPromotion, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            console.log(response.data); // Log response for testing
+            if(response.status>=200 && response.status<300){
+                alert('Thêm mới khuyến mãi thành công');
+            }
             // Reset form and close modal
             setNewPromotion({
                 name: '',
@@ -76,10 +77,17 @@ function PromotionManagement({ token }) {
         }
     };
 
-    const handleEditForm = async (e) => {
+    const handleEditForm = async (e, id) => {
         e.preventDefault();
         try {
-            console.log(newPromotion)
+            const response = await axios.put(`${baseURL}${promotionRoutes}/${id}`, newPromotion, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if(response.status>=200 && response.status<300){
+                alert("Cập nhật khuyến mã thành công");
+            }
+            setShowCreateForm(false);
+            fetchPromotionData();
         } catch (error) {
             console.error('Error updating promotion:', error);
         }
@@ -87,7 +95,6 @@ function PromotionManagement({ token }) {
 
     const handleSingleInputChange = (e, type) => {
         const { name, value } = e.target;
-        console.log(value)
         setNewPromotion(prevState => ({
             ...prevState,
             [type]: {
@@ -129,6 +136,39 @@ function PromotionManagement({ token }) {
         setShowCreateForm(true);
     };
 
+    const handleDelete = async(promotion) => {
+        if (window.confirm(`Bạn có muốn xoá ${promotion.name}?`)) {
+            try {
+                const response = await axios.delete(`${baseURL}${promotionRoutes}/${promotion._id}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                if(response.status>=200 && response.status<300){
+                    alert("Xoá promotion thành công");
+                    fetchPromotionData();
+                }
+            } catch (error) {
+                console.error('Error deleting promotion:', error);
+            }
+        }
+    }
+
+    // Cập nhật trạng thái isActive của promotion
+    const handleToggle = async (promotion) => {
+        try {
+            const response = await axios.put(`${baseURL}${promotionRoutes}/${promotion._id}`, {isActive: !promotion.isActive}, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if(response.status>=200 && response.status<300){
+                alert("Đã chuyển đổi trạng thái");
+                fetchPromotionData();
+                
+            }
+            
+        } catch (error) {
+            console.log("Có lỗi khi chuyển đổi trạng thái", error);
+        }
+    }
+
     return (
         <div className="container mx-auto max-h-full px-4 py-8 flex flex-col overflow-x-auto mt-5">
             <div className="bg-white rounded-lg shadow-md p-6 mb-4">
@@ -161,17 +201,27 @@ function PromotionManagement({ token }) {
                             <FontAwesomeIcon icon={faTrashAlt} className="text-red-500 cursor-pointer" onClick={() => handleDelete(promotion)} />
                         </div>
                         <h2 className="text-xl font-semibold mb-2">{promotion.name}</h2>
+                            
                         <p className="text-gray-700 mb-2">{promotion.description}</p>
+                        <div className='mb-2 flex justify-start items-center'>
+                            <FontAwesomeIcon
+                                icon={promotion.isActive ? faToggleOn : faToggleOff}
+                                className={`text-2xl cursor-pointer ${promotion.isActive ? 'text-green-500' : 'text-gray-500'}`}
+                                onClick={() => handleToggle(promotion)}
+                            />
+                            <span className="ml-2">{promotion.isActive ? 'Kích hoạt' : 'Vô hiệu hóa'}</span>
+                        </div>
+                        
                         {promotion.type === 'buy_category_get_free' && (
                             <div className="border-t border-gray-200 pt-4 mt-4">
                                 <p className="text-lg font-semibold mb-2">Chương trình khuyến mãi:</p>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-2">
-                                    <div>
+                                    <div className="capitalize">
                                         <p className="text-gray-800 font-semibold mb-2">Mua:</p>
                                         <p><span className="font-semibold">Sản phẩm:</span> {promotion.buyCategoryItems.category.name}</p>
                                         <p><span className="font-semibold">Số lượng:</span> {promotion.buyCategoryItems.quantity}</p>
                                     </div>
-                                    <div>
+                                    <div className="capitalize">
                                         <p className="text-gray-800 font-semibold mb-2">Nhận:</p>
                                         <p><span className="font-semibold">Sản phẩm:</span> {promotion.freeCategoryItems.category.name}</p>
                                         <p><span className="font-semibold">Số lượng:</span> {promotion.freeCategoryItems.quantity}</p>

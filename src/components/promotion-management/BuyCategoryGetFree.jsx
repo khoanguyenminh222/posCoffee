@@ -7,8 +7,8 @@ import { baseURL, categoriesRoutes, drinksRoutes } from '@/api/api';
 
 function BuyCategoryGetFree({ token, newPromotion, handleSingleInputChange, isEdit }) {
     const [categoryOptions, setCategoryOptions] = useState([]);
-    const categoryId = newPromotion['buyCategoryItems'].category._id ? newPromotion['buyCategoryItems'].category._id : newPromotion['buyCategoryItems'].category;
-
+    const categoryIdBuy = newPromotion['buyCategoryItems'].category._id ? newPromotion['buyCategoryItems'].category._id : newPromotion['buyCategoryItems'].category;
+    const categoryIdFree = newPromotion['freeCategoryItems'].category._id ? newPromotion['freeCategoryItems'].category._id : newPromotion['freeCategoryItems'].category;
     useEffect(() => {
         // Call API to fetch drink options
         const fetchCategoryOptions = async () => {
@@ -32,7 +32,7 @@ function BuyCategoryGetFree({ token, newPromotion, handleSingleInputChange, isEd
                         id="category"
                         name="category"
                         options={categoryOptions}
-                        value={categoryOptions.find(option => option.value === categoryId) || ''}
+                        value={categoryOptions.find(option => option.value === categoryIdBuy) || ''}
                         onChange={(selectedOption) => handleSingleInputChange({ target: { name: 'category', value: selectedOption.value } }, 'buyCategoryItems')}
                         isSearchable
                         placeholder="Chọn đồ uống"
@@ -67,7 +67,7 @@ function BuyCategoryGetFree({ token, newPromotion, handleSingleInputChange, isEd
                         id="category"
                         name="category"
                         options={categoryOptions}
-                        value={categoryOptions.find(option => option.value === newPromotion['freeCategoryItems'].category._id) || ''}
+                        value={categoryOptions.find(option => option.value === categoryIdFree) || ''}
                         onChange={(selectedOption) => handleSingleInputChange({ target: { name: 'category', value: selectedOption.value } }, 'freeCategoryItems')}
                         isSearchable
                         placeholder="Chọn đồ uống"

@@ -1,19 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFire, faTint } from '@fortawesome/free-solid-svg-icons';
+import { faFire, faTint, faGift } from '@fortawesome/free-solid-svg-icons';
 import { ref, getDownloadURL } from 'firebase/storage';
 import { storage } from '@/firebase';
 
 function DrinkOfCategory({ drink, addToBill, setSelectedOptions  }) {
   const { temperature, sugar, ice } = drink.options;
-  const [selectedTemperature, setSelectedTemperature] = useState('');
+  const determineDefaultTemperature = () => {
+    if (drink.options.temperature.includes('cold')) {
+        return 'cold';
+    } else if (drink.options.temperature.includes('hot')) {
+
+        return 'hot';
+    } else {
+        return ''; // or any fallback value you deem appropriate
+    }
+};
+  const [selectedTemperature, setSelectedTemperature] = useState(determineDefaultTemperature());
   const [selectedSugar, setSelectedSugar] = useState(null);
   const [selectedIce, setSelectedIce] = useState(null);
   const [selectedSize, setSelectedSize] = useState('M');
   const [quantity, setQuantity] = useState(1);
   const [imageUrl, setImageUrl] = useState(null);
   const [error, setError] = useState('');
-  
+
   useEffect(() => {
     const fetchImageUrl = async () => {
       try {
@@ -48,14 +58,18 @@ function DrinkOfCategory({ drink, addToBill, setSelectedOptions  }) {
       setError('Please select temperature and size.');
       return;
     }
-    addToBill(drink, quantity, selectedTemperature, selectedSize);
+    console.log(drink)
+    addToBill(drink, quantity, selectedTemperature, selectedSize, selectedSugar, selectedIce);
     setError('');
   };
 
   return (
-    <div className="flex flex-col items-center mx-auto my-6">
+    <div className="flex flex-col items-center mx-auto my-6 w-64">
       <div className="bg-white rounded-lg shadow-md">
-        <img src={imageUrl} alt="Drink" className="rounded-t-lg w-64 h-48 object-cover" />
+        <div className='flex justify-center items-center'>
+          <img src={imageUrl} alt="Drink" className="rounded-t-lg w-64 h-48 object-cover" />
+        </div>
+        
         <div className="lg:p-6 md:p-4 p-2">
           <div className='flex flex-col'>
             <div className="font-semibold text-lg uppercase text-nowrap">{drink.name}</div>
@@ -136,6 +150,21 @@ function DrinkOfCategory({ drink, addToBill, setSelectedOptions  }) {
                 </button>
               </div>
             </div>
+            {drink.promotions.length > 0 && (
+              <div className='flex items-center justify-center mt-4'>
+                <FontAwesomeIcon icon={faGift} size='1x' color='#0000FF' className='mr-2'/>
+                <div>
+                  {drink.promotions.map((promotion, promoIndex) => (
+                    <div key={promoIndex} className="">
+                      <p className="text-gray-500 text-sm">
+                        {promotion.description}
+                      </p>
+                      {/* Thêm các trường thông tin khác của promotion tùy theo loại */}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
             <div className="mt-4 flex-col justify-center text-center">
               {error && <div className="text-red-500">{error}</div>}
               <button onClick={handleAddToBill} className="bg-amber-600 text-white px-4 py-2 rounded-full hover:bg-amber-700 transition duration-300">

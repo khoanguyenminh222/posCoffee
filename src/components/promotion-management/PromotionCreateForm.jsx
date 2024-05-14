@@ -17,7 +17,7 @@ function PromotionCreateForm({ setShowCreateForm, token, newPromotion, setNewPro
         e.preventDefault();
         switch (formAction) {
             case 'edit':
-                handleEditForm(e);
+                handleEditForm(e,newPromotion._id);
                 break;
             case 'create':
                 handleSubmit(e);

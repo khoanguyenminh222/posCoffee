@@ -1,19 +1,20 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPrint } from '@fortawesome/free-solid-svg-icons';
+import { faPrint, faCircle, faCircleCheck } from '@fortawesome/free-solid-svg-icons';
 import DrinkBill from '../DrinkBill/DrinkBill';
-import { baseURL, billRoutes, drinksRoutes, userRoutes } from '@/api/api';
+import { baseURL, billRoutes, categoriesRoutes, drinksRoutes, promotionRoutes, userRoutes } from '@/api/api';
 import axios from 'axios';
 import { useReactToPrint } from 'react-to-print';
 import BillToPrint from './BillToPrint';
+import ListPromotion from './ListPromotion';
 
-function Bill({ userId, billItems, onDeleteAll, onDeleteItem, onIncrementItem, onDecrementItem, token }) {
+function Bill({ userId, billItems, addToBill, onDeleteAll, onDeleteItem, onIncrementItem, onDecrementItem, token }) {
     const [isPrinted, setIsPrinted] = useState(false);
     const [bill, setBill] = useState([]);
-    const [user, setUser] = useState([]); 
+    const [user, setUser] = useState([]);
 
-    useEffect(()=>{
-        const fetchUser = async() =>{
+    useEffect(() => {
+        const fetchUser = async () => {
             try {
                 const response = await axios.get(`${baseURL}${userRoutes}/userId/${userId}`, {
                     headers: { Authorization: `Bearer ${token}` }
@@ -23,8 +24,8 @@ function Bill({ userId, billItems, onDeleteAll, onDeleteItem, onIncrementItem, o
                 console.log(error)
             }
         }
-        fetchUser(); 
-    },[]);
+        fetchUser();
+    }, []);
     const totalAmount = billItems.reduce((total, item) => total + item.price * item.quantity, 0);
 
     const componentRef = useRef();
@@ -38,14 +39,23 @@ function Bill({ userId, billItems, onDeleteAll, onDeleteItem, onIncrementItem, o
                 alert("Không có đồ uống trong hóa đơn để lưu.");
                 return; // Không có đồ uống, không thực hiện lưu
             }
-
+            console.log(billItems)
+            const responsePromotion = await axios.post(`${baseURL}${promotionRoutes}/check-promotion`, {drinks: billItems}, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if(responsePromotion.data.promotions.length>0 && selectedPromotion==null){
+                setPromotionList(responsePromotion.data.promotions || [])
+                setIsListPromotion(true);
+                return;
+            }
+            
             const updatedBillItems = [];
             // Lặp qua từng đồ uống trong danh sách billItems và gửi yêu cầu API để lấy thông tin
             for (const item of billItems) {
                 const response = await axios.get(`${baseURL}${drinksRoutes}/${item.id}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
-                updatedBillItems.push({...item, ingredients: response.data.ingredients});
+                updatedBillItems.push({ ...item, ingredients: response.data.ingredients });
             }
             console.log(updatedBillItems)
             const data = {
@@ -54,17 +64,94 @@ function Bill({ userId, billItems, onDeleteAll, onDeleteItem, onIncrementItem, o
                 totalAmount: totalAmount,
             };
             // Gửi yêu cầu POST đến API
-            const response = await axios.post(`${baseURL}${billRoutes}`, data,{
+            const response = await axios.post(`${baseURL}${billRoutes}`, data, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setBill(response.data)
             setIsPrinted(true);
+            setSelectedPromotion(null)
         } catch (error) {
             console.error('Lỗi khi gửi yêu cầu POST:', error);
             // Xử lý lỗi nếu cần
         }
     };
 
+    const [isListPromotion, setIsListPromotion] = useState(false);
+    const [promotionList, setPromotionList] = useState([]);
+    const [selectedPromotion, setSelectedPromotion] = useState(null);
+    const handleApplyPromotion = async() => {
+        try {
+            const response = await axios.post(`${baseURL}${promotionRoutes}/check-promotion`, {drinks: billItems}, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setPromotionList(response.data.promotions || [])
+            setIsListPromotion(true);
+        } catch (error) {
+            console.error(error)
+        }
+    }
+    const handleCancelListPromotion = () => {
+        setIsListPromotion(false);
+    }
+    const handlePromotionSelect = async(data) => {
+        const currentDate = new Date();
+
+        if(data.promotion.isActive && currentDate >= new Date(data.promotion.startDate) && currentDate <= new Date(data.promotion.endDate)){
+            setSelectedPromotion(data);
+            setIsListPromotion(false);
+            switch (data.promotion.type) {
+                case 'buy_get_free':
+                    // Kiểm tra và áp dụng chương trình khuyến mãi "Mua X tặng Y"
+                    if (checkBuyGetFreeCondition(promotion)) {
+                        applyPromotion(promotion);
+                    } else {
+                        alert("Không đủ điều kiện để áp dụng chương trình khuyến mãi 'Mua X tặng Y'");
+                    }
+                    break;
+                case 'discount':
+                    // Kiểm tra và áp dụng chương trình khuyến mãi giảm giá
+                    if (checkDiscountCondition(promotion)) {
+                        applyPromotion(promotion);
+                    } else {
+                        alert("Không đủ điều kiện để áp dụng chương trình khuyến mãi giảm giá");
+                    }
+                    break;
+                case 'fixed_price':
+                    // Kiểm tra và áp dụng chương trình khuyến mãi giá cố định
+                    if (checkFixedPriceCondition(promotion)) {
+                        applyPromotion(promotion);
+                    } else {
+                        alert("Không đủ điều kiện để áp dụng chương trình khuyến mãi giá cố định");
+                    }
+                    break;
+                case 'buy_category_get_free':
+                    // Lấy ra các sản phẩm miễn phí từ chương trình khuyến mãi
+                    const freeCategoryItems = data.promotion.freeCategoryItems;
+                    
+                        const response = await axios.get(`${baseURL}${categoriesRoutes}/${freeCategoryItems.category}`, {
+                            headers: { Authorization: `Bearer ${token}` }
+                        });
+                        console.log(response.data)
+                        const freeBillItem = {
+                            _id: response.data._id, // Sử dụng id của sản phẩm miễn phí
+                            name: "FREE "+response.data.name, // Tên của sản phẩm miễn phí
+                            prices: {"M": 0, "L": 0}, // Giá của sản phẩm miễn phí là 0 (do đã miễn phí)
+                            quantity: freeCategoryItems.quantity, // Số lượng sản phẩm miễn phí
+                            options: {}, // Không có option cho sản phẩm miễn phí
+                        };
+                        console.log(freeBillItem)
+                        // Thêm sản phẩm miễn phí vào danh sách billItems
+                        addToBill(freeBillItem, freeCategoryItems.quantity, "", "", "", "");
+                    
+                    break;
+                default:
+                    alert("Loại chương trình khuyến mãi không hợp lệ");
+            }
+        }else{
+            console.log('Promotion is not active or not within the date range.');
+            alert("Chương trình khuyến mãi không còn")
+        }
+    };
 
     return (
         <>
@@ -72,12 +159,13 @@ function Bill({ userId, billItems, onDeleteAll, onDeleteItem, onIncrementItem, o
                 <img src="/images/avatar.png" alt="Avatar" className="w-10 h-10 rounded-full mr-2" />
                 <span className="text-lg font-semibold">{user.fullname}</span>
             </div>
-
+            {/* Tiêu đề hóa đơn */}
+            <div className='flex justify-between items-center mb-2'>
+                <h2 className="text-lg font-semibold">Hóa đơn</h2>
+                <button onClick={() => { onDeleteAll(); setIsPrinted(false) }} className="bg-red-500 text-white px-2 py-1 rounded-md">Xoá hết</button>
+            </div>
             {/* Phần hiển thị hóa đơn */}
             <div className="mb-4 overflow-y-auto max-h-96" style={{ scrollbarWidth: 'thin', scrollbarColor: 'gray', scrollbarTrackColor: 'rgba(0, 0, 0, 0.1)' }}>
-                {/* Tiêu đề hóa đơn */}
-                <h2 className="text-lg font-semibold mb-2">Hóa đơn</h2>
-                <button onClick={() => { onDeleteAll(); setIsPrinted(false) }} className="bg-red-500 text-white px-2 py-1 rounded-md mb-4">Xoá hết</button>
 
                 {/* Danh sách các mặt hàng trong hóa đơn */}
                 <div>
@@ -90,8 +178,15 @@ function Bill({ userId, billItems, onDeleteAll, onDeleteItem, onIncrementItem, o
                             onDecrement={() => onDecrementItem(item)} />
                     ))}
                 </div>
+
             </div>
+            
             <div className="absolute bottom-0 left-0 w-full bg-white p-4">
+                <div onClick={handleApplyPromotion} className='flex flex-row cursor-pointer hover:underline mb-2 justify-start items-center'>
+                    <p>Áp dụng khuyến mãi</p>
+                    <FontAwesomeIcon icon={faCircleCheck} color='green' className="ml-2" />
+                </div>
+                {isListPromotion && <ListPromotion promotionList={promotionList} onCancel={handleCancelListPromotion} onSelectPromotion={handlePromotionSelect}/>}
                 <div className="border-b-2 border-gray-300 mb-4"></div> {/* Đường kẻ đẹp hơn */}
                 {/* Hiển thị tổng tiền */}
                 <div className="text-lg font-semibold mb-2 flex justify-between">
@@ -106,7 +201,7 @@ function Bill({ userId, billItems, onDeleteAll, onDeleteItem, onIncrementItem, o
                     </button>
                     :
                     <button onClick={handlePrintBill} className="bg-amber-600 text-white px-4 py-2 rounded hover:bg-amber-700 flex items-center">
-                        <FontAwesomeIcon icon={faPrint} className="mr-2" /> Lưu
+                        <FontAwesomeIcon icon={faPrint} className="mr-2" /> Thanh toán
                     </button>}
                 <BillToPrint ref={componentRef} bill={bill} billItems={billItems} user={user} totalAmount={totalAmount} />
             </div>
