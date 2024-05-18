@@ -5,10 +5,11 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faRemove, faPlus } from '@fortawesome/free-solid-svg-icons';
 import { baseURL, categoriesRoutes, drinksRoutes } from '@/api/api';
 
-function BuyCategoryGetFree({ token, newPromotion, handleSingleInputChange, isEdit }) {
+function BuyCategoryGetFree({ token, newPromotion, handleSingleInputChange, handleInputChange, isEdit, handleAddRowCategory, handleAddRowDrink, handleRemoveRow }) {
     const [categoryOptions, setCategoryOptions] = useState([]);
-    const categoryIdBuy = newPromotion['buyCategoryItems'].category._id ? newPromotion['buyCategoryItems'].category._id : newPromotion['buyCategoryItems'].category;
-    const categoryIdFree = newPromotion['freeCategoryItems'].category._id ? newPromotion['freeCategoryItems'].category._id : newPromotion['freeCategoryItems'].category;
+    const [drinkOptions, setDrinkOptions] = useState([]);
+    //const categoryIdBuy = newPromotion.conditions['buy_category_get_free']['buyCategoryItems'].category._id ? newPromotion.conditions['buy_category_get_free']['buyCategoryItems'].category._id : newPromotion.conditions['buy_category_get_free']['buyCategoryItems'].category;
+    //const categoryIdFree = newPromotion.conditions['buy_category_get_free']['freeCategoryItems'].category._id ? newPromotion.conditions['buy_category_get_free']['freeCategoryItems'].category._id : newPromotion.conditions['buy_category_get_free']['freeCategoryItems'].category;
     useEffect(() => {
         // Call API to fetch drink options
         const fetchCategoryOptions = async () => {
@@ -21,80 +22,104 @@ function BuyCategoryGetFree({ token, newPromotion, handleSingleInputChange, isEd
                 console.error('Error fetching category options:', error);
             }
         };
+        const fetchDrinkOptions = async () => {
+            try {
+                const response = await axios.get(`${baseURL}${drinksRoutes}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                setDrinkOptions(response.data.map(drink => ({ value: drink._id, label: drink.name })));
+            } catch (error) {
+                console.error('Error fetching drink options:', error);
+            }
+        };
         fetchCategoryOptions();
+        fetchDrinkOptions();
     }, []);
     return (
         <div>
             <h3 className="font-semibold mb-2 capitalize">Đồ uống mua</h3>
-            <div className="flex items-center mb-2">
-                {isEdit ?
+            {newPromotion.conditions.buy_category_get_free.buyCategoryItems.map((item, index) => (
+                <div key={index} className="flex items-center mb-2">
                     <Select
                         id="category"
                         name="category"
                         options={categoryOptions}
-                        value={categoryOptions.find(option => option.value === categoryIdBuy) || ''}
-                        onChange={(selectedOption) => handleSingleInputChange({ target: { name: 'category', value: selectedOption.value } }, 'buyCategoryItems')}
+                        value={categoryOptions.find(option => option.value === item.category) || ''}
+                        onChange={(selectedOption) => handleInputChange({ target: { name: 'category', value: selectedOption.value } }, 'buy_category_get_free', 'buyCategoryItems', index, 'category')}
                         isSearchable
                         placeholder="Chọn đồ uống"
                         className="w-2/3 mr-2 outline-blue-500"
+                        required={true}
                     />
-                    :
-                    <Select
-                        id="category"
-                        name="category"
-                        options={categoryOptions}
-                        value={categoryOptions.find(option => option.value === newPromotion['buyCategoryItems'].category) || ''}
-                        onChange={(selectedOption) => handleSingleInputChange({ target: { name: 'category', value: selectedOption.value } }, 'buyCategoryItems')}
-                        isSearchable
-                        placeholder="Chọn đồ uống"
-                        className="w-2/3 mr-2 outline-blue-500"
+                     <input
+                        type="number"
+                        name="quantity"
+                        placeholder="Số lượng"
+                        value={item.quantity}
+                        onChange={(e) => handleInputChange(e, 'buy_category_get_free', 'buyCategoryItems', index, 'quantity')}
+                        className="border rounded-md px-3 py-2 w-1/3 mr-2 outline-blue-500"
+                        required={true}
                     />
-                }
-                <input
-                    type="number"
-                    name="quantity"
-                    placeholder="Số lượng"
-                    value={newPromotion['buyCategoryItems'].quantity}
-                    onChange={(e) => handleSingleInputChange(e, 'buyCategoryItems')}
-                    className="border rounded-md px-3 py-2 w-1/3 mr-2 outline-blue-500"
-                />
-            </div>
+                    {index > 0 && (
+                        <button
+                            type="button"
+                            className="bg-red-500 text-white font-semibold px-4 py-2 rounded-lg outline-blue-500"
+                            onClick={() => handleRemoveRow('buy_category_get_free', 'buyCategoryItems', index)}
+                        >
+                            <FontAwesomeIcon icon={faRemove} size="lg" />
+                        </button>
+                    )}
+                </div>
+            ))}
+            <button
+                type="button"
+                className="bg-blue-500 text-white font-semibold w-10 h-10 flex items-center justify-center rounded-full mb-2"
+                onClick={() => handleAddRowCategory('buy_category_get_free', 'buyCategoryItems')}
+            >
+                <FontAwesomeIcon icon={faPlus} />
+            </button>
+
             <h3 className="font-semibold mb-2 capitalize">Đồ uống được tặng</h3>
-
-            <div className="flex items-center mb-2">
-                {isEdit ?
+            {newPromotion.conditions.buy_category_get_free.freeCategoryItems.map((item, index) => (
+                <div key={index} className="flex items-center mb-2">
                     <Select
-                        id="category"
-                        name="category"
-                        options={categoryOptions}
-                        value={categoryOptions.find(option => option.value === categoryIdFree) || ''}
-                        onChange={(selectedOption) => handleSingleInputChange({ target: { name: 'category', value: selectedOption.value } }, 'freeCategoryItems')}
+                        id="drink"
+                        name="drink"
+                        options={drinkOptions}
+                        value={drinkOptions.find(option => option.value === item.drink) || ''}
+                        onChange={(selectedOption) => handleInputChange({ target: { name: 'drink', value: selectedOption.value } }, 'buy_category_get_free', 'freeCategoryItems', index, 'drink')}
                         isSearchable
                         placeholder="Chọn đồ uống"
                         className="w-2/3 mr-2 outline-blue-500"
+                        required={true}
                     />
-                    :
-                    <Select
-                        id="category"
-                        name="category"
-                        options={categoryOptions}
-                        value={categoryOptions.find(option => option.value === newPromotion['freeCategoryItems'].category) || ''}
-                        onChange={(selectedOption) => handleSingleInputChange({ target: { name: 'category', value: selectedOption.value } }, 'freeCategoryItems')}
-                        isSearchable
-                        placeholder="Chọn đồ uống"
-                        className="w-2/3 mr-2 outline-blue-500"
+                    <input
+                        type="number"
+                        name="quantity"
+                        placeholder="Số lượng"
+                        value={item.quantity}
+                        onChange={(e) => handleInputChange(e, 'buy_category_get_free', 'freeCategoryItems', index, 'quantity')}
+                        className="border rounded-md px-3 py-2 w-1/3 mr-2 outline-blue-500"
+                        required={true}
                     />
-                }
-
-                <input
-                    type="number"
-                    name="quantity"
-                    placeholder="Số lượng"
-                    value={newPromotion['freeCategoryItems'].quantity}
-                    onChange={(e) => handleSingleInputChange(e, 'freeCategoryItems')}
-                    className="border rounded-md px-3 py-2 w-1/3 mr-2 outline-blue-500"
-                />
-            </div>
+                    {index > 0 && (
+                        <button
+                            type="button"
+                            className="bg-red-500 text-white font-semibold px-4 py-2 rounded-lg outline-blue-500"
+                            onClick={() => handleRemoveRow('buy_category_get_free', 'freeCategoryItems', index)}
+                        >
+                            <FontAwesomeIcon icon={faRemove} size="lg" />
+                        </button>
+                    )}
+                </div>
+            ))}
+            <button
+                type="button"
+                className="bg-blue-500 text-white font-semibold w-10 h-10 flex items-center justify-center rounded-full mb-2"
+                onClick={() => handleAddRowDrink('buy_category_get_free', 'freeCategoryItems')}
+            >
+                <FontAwesomeIcon icon={faPlus} />
+            </button>
         </div>
     )
 }

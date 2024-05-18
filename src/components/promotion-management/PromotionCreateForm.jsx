@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import BuyGetFree from './BuyGetFree';
 import BuyCategoryGetFree from './BuyCategoryGetFree';
 
-function PromotionCreateForm({ setShowCreateForm, token, newPromotion, setNewPromotion, handleSubmit, handleEditForm, handleInputChange, handleAddRow, handleRemoveRow, handleSingleInputChange, isEdit }) {
+function PromotionCreateForm({ setShowCreateForm, token, newPromotion, setNewPromotion, handleSubmit, handleEditForm, handleInputChange, handleAddRowDrink, handleAddRowCategory, handleRemoveRow, handleSingleInputChange, isEdit }) {
     const [formAction, setFormAction] = useState('Tạo Mới');
 
     useEffect(() => {
@@ -120,6 +120,10 @@ function PromotionCreateForm({ setShowCreateForm, token, newPromotion, setNewPro
                             newPromotion={newPromotion}
                             handleSingleInputChange={handleSingleInputChange}
                             isEdit={isEdit}
+                            handleInputChange={handleInputChange}
+                            handleAddRowCategory={handleAddRowCategory}
+                            handleAddRowDrink={handleAddRowDrink}
+                            handleRemoveRow={handleRemoveRow}
                         />
                     )}
                     {/* Add similar logic for other types */}

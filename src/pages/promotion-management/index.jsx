@@ -4,6 +4,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEdit, faTrashAlt, faToggleOn, faToggleOff } from '@fortawesome/free-solid-svg-icons';
 import axios from 'axios';
 import { format } from 'date-fns';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import PromotionCreateForm from '@/components/promotion-management/PromotionCreateForm';
 import { baseURL, promotionRoutes } from '@/api/api';
 
@@ -14,13 +16,23 @@ function PromotionManagement({ token }) {
     const [newPromotion, setNewPromotion] = useState({
         name: '',
         description: '',
-        type: 'buy_get_free',
-        buyItems: [{ drink: '', quantity: '' }],
-        freeItems: [{ drink: '', quantity: '' }],
-        discountPercent: null,
-        fixedPriceItems: [{ drink: '', fixedPrice: '' }],
-        buyCategoryItems: { category: '', quantity: '' },
-        freeCategoryItems: { category: '', quantity: '' },
+        type: 'buy_category_get_free',
+        conditions: {
+            buy_get_free: {
+                buyItems: [{ drink: '', quantity: '' }],
+                freeItems: [{ drink: '', quantity: '' }]
+            },
+            discount: {
+                discountPercent: null
+            },
+            fixed_price: {
+                fixedPriceItems: [{ drink: '', fixedPrice: '' }]
+            },
+            buy_category_get_free: {
+                buyCategoryItems: [{ category: '', quantity: '' }],
+                freeCategoryItems: [{ drink: '', quantity: '' }]
+            }
+        },
         startDate: new Date().toISOString().slice(0, 10),
         endDate: new Date().toISOString().slice(0, 10),
         isActive: true
@@ -32,6 +44,7 @@ function PromotionManagement({ token }) {
             const promotionsResponse = await axios.get(`${baseURL}${promotionRoutes}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
+            console.log(promotionsResponse.data)
             setPromotions(promotionsResponse.data);
         } catch (error) {
             console.error('Error fetching promotion:', error);
@@ -44,13 +57,51 @@ function PromotionManagement({ token }) {
 
     // Function to handle form submission
     const handleSubmit = async (e) => {
+
         e.preventDefault();
+
+        if (!newPromotion.name) {
+            toast.warn('Yêu cầu nhập tên khuyến mãi.');
+            return;
+        }
+        if (!newPromotion.description) {
+            toast.warn('Yêu cầu nhập mô tả.');
+            return;
+        }
+        // Lọc các loại có giá trị
+        const filteredConditions = Object.entries(newPromotion.conditions).reduce((acc, [key, value]) => {
+            if (value && Object.keys(value).length !== 0) {
+                // Lọc ra từng điều kiện có giá trị
+                const filteredCondition = Object.entries(value).reduce((subAcc, [subKey, subValue]) => {
+                    if (Array.isArray(subValue)) {
+                        // Lọc ra từng mục có giá trị
+                        const filteredItems = subValue.filter(item => Object.values(item).every(val => val !== ''));
+                        if (filteredItems.length > 0) {
+                            subAcc[subKey] = filteredItems;
+                        }
+                    }
+                    return subAcc;
+                }, {});
+
+                // Nếu trong điều kiện này vẫn còn mục có giá trị, thì thêm vào filteredConditions
+                if (Object.keys(filteredCondition).length !== 0) {
+                    acc[key] = filteredCondition;
+                }
+            }
+            return acc;
+        }, {});
+
+        // Loại bỏ trường conditions ra khỏi newPromotion nếu không còn loại nào có giá trị
+        const conditions = Object.keys(filteredConditions).length === 0 ? {} : { conditions: filteredConditions };
+        const promotionData = { ...newPromotion, ...conditions };
+        console.log(promotionData.conditions.buy_category_get_free)
+
         try {
             // Call API to create new promotion
-            const response = await axios.post(`${baseURL}${promotionRoutes}`, newPromotion, {
+            const response = await axios.post(`${baseURL}${promotionRoutes}`, promotionData, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            if(response.status>=200 && response.status<300){
+            if (response.status >= 200 && response.status < 300) {
                 alert('Thêm mới khuyến mãi thành công');
             }
             // Reset form and close modal
@@ -58,12 +109,22 @@ function PromotionManagement({ token }) {
                 name: '',
                 description: '',
                 type: 'buy_get_free',
-                buyItems: [{ drink: '', quantity: '' }],
-                freeItem: [{ drink: '', quantity: '' }],
-                discountPercent: null,
-                fixedPriceItems: [{ drink: '', fixedPrice: '' }],
-                buyCategoryItems: { category: '', quantity: '' },
-                freeCategoryItems: { category: '', quantity: '' },
+                conditions: {
+                    buy_get_free: {
+                        buyItems: [{ drink: '', quantity: '' }],
+                        freeItems: [{ drink: '', quantity: '' }]
+                    },
+                    discount: {
+                        discountPercent: null
+                    },
+                    fixed_price: {
+                        fixedPriceItems: [{ category: '', fixedPrice: '' }]
+                    },
+                    buy_category_get_free: {
+                        buyCategoryItems: [{ category: '', quantity: '' }],
+                        freeCategoryItems: [{ drink: '', quantity: '' }]
+                    }
+                },
                 startDate: new Date().toISOString().slice(0, 10),
                 endDate: new Date().toISOString().slice(0, 10),
                 isActive: true
@@ -77,13 +138,41 @@ function PromotionManagement({ token }) {
         }
     };
 
+    const handleOpenCreateForm = () => {
+        setShowCreateForm(true);
+        setNewPromotion({
+            name: '',
+            description: '',
+            type: 'buy_category_get_free',
+            conditions: {
+                buy_get_free: {
+                    buyItems: [{ drink: '', quantity: '' }],
+                    freeItems: [{ drink: '', quantity: '' }]
+                },
+                discount: {
+                    discountPercent: null
+                },
+                fixed_price: {
+                    fixedPriceItems: [{ drink: '', fixedPrice: '' }]
+                },
+                buy_category_get_free: {
+                    buyCategoryItems: [{ category: '', quantity: '' }],
+                    freeCategoryItems: [{ drink: '', quantity: '' }]
+                }
+            },
+            startDate: new Date().toISOString().slice(0, 10),
+            endDate: new Date().toISOString().slice(0, 10),
+            isActive: true
+        })
+    }
+
     const handleEditForm = async (e, id) => {
         e.preventDefault();
         try {
             const response = await axios.put(`${baseURL}${promotionRoutes}/${id}`, newPromotion, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            if(response.status>=200 && response.status<300){
+            if (response.status >= 200 && response.status < 300) {
                 alert("Cập nhật khuyến mã thành công");
             }
             setShowCreateForm(false);
@@ -105,29 +194,57 @@ function PromotionManagement({ token }) {
     };
 
     // Function to handle changes in input fields
-    const handleInputChange = (e, index, type) => {
+    const handleInputChange = (e, conditionType, itemType, index, field) => {
         const { name, value } = e.target;
-        const list = [...newPromotion[type]];
-        list[index][name] = value;
-        setNewPromotion(prevState => ({
-            ...prevState,
-            [type]: list
-        }));
+
+        setNewPromotion(prevState => {
+            const conditions = { ...prevState.conditions };
+            const items = [...conditions[conditionType][itemType]];
+            items[index] = { ...items[index], [field]: value };
+
+            conditions[conditionType][itemType] = items;
+            return { ...prevState, conditions };
+        });
     };
 
     // Function to add new row for buyItems, freeItem, and fixedPriceItems
-    const handleAddRow = (type) => {
-        setNewPromotion(prevState => ({
-            ...prevState,
-            [type]: [...prevState[type], { drink: '', quantity: '' }]
-        }));
+    const handleAddRowDrink = (conditionType, rowType) => {
+        setNewPromotion(prevState => {
+            const conditions = { ...prevState.conditions };
+            const items = conditions[conditionType][rowType];
+            // Kiểm tra xem trường trước đó đã có giá trị hay chưa
+            const lastItem = items[items.length - 1];
+            if (!lastItem || (lastItem.drink !== '' && lastItem.quantity !== '')) {
+                // Nếu trường trước đó đã có giá trị hoặc không có hàng trước đó, thêm hàng mới
+                conditions[conditionType][rowType].push({ drink: '', quantity: '' });
+            }
+            return { ...prevState, conditions };
+        });
+    };
+
+    const handleAddRowCategory = (conditionType, rowType) => {
+        setNewPromotion(prevState => {
+            const conditions = { ...prevState.conditions };
+            const items = conditions[conditionType][rowType];
+            // Kiểm tra xem trường trước đó đã có giá trị hay chưa
+            const lastItem = items[items.length - 1];
+            if (!lastItem || (lastItem.category !== '' && lastItem.quantity !== '')) {
+                // Nếu trường trước đó đã có giá trị hoặc không có hàng trước đó, thêm hàng mới
+                conditions[conditionType][rowType].push({ category: '', quantity: '' });
+            }
+            return { ...prevState, conditions };
+        });
     };
 
     // Function to remove row for buyItems, freeItem, and fixedPriceItems
-    const handleRemoveRow = (index, type) => {
-        const list = [...newPromotion[type]];
-        list.splice(index, 1);
-        setNewPromotion({ ...newPromotion, [type]: list });
+    const handleRemoveRow = (conditionType, rowType, index) => {
+        setNewPromotion(prevState => {
+            const conditions = { ...prevState.conditions };
+            const updatedItems = [...conditions[conditionType][rowType]];
+            updatedItems.splice(index, 1);
+            conditions[conditionType][rowType] = updatedItems;
+            return { ...prevState, conditions };
+        });
     };
 
     const handleEdit = (promotion) => {
@@ -136,13 +253,13 @@ function PromotionManagement({ token }) {
         setShowCreateForm(true);
     };
 
-    const handleDelete = async(promotion) => {
+    const handleDelete = async (promotion) => {
         if (window.confirm(`Bạn có muốn xoá ${promotion.name}?`)) {
             try {
                 const response = await axios.delete(`${baseURL}${promotionRoutes}/${promotion._id}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
-                if(response.status>=200 && response.status<300){
+                if (response.status >= 200 && response.status < 300) {
                     alert("Xoá promotion thành công");
                     fetchPromotionData();
                 }
@@ -155,15 +272,15 @@ function PromotionManagement({ token }) {
     // Cập nhật trạng thái isActive của promotion
     const handleToggle = async (promotion) => {
         try {
-            const response = await axios.put(`${baseURL}${promotionRoutes}/${promotion._id}`, {isActive: !promotion.isActive}, {
+            const response = await axios.put(`${baseURL}${promotionRoutes}/${promotion._id}`, { isActive: !promotion.isActive }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            if(response.status>=200 && response.status<300){
+            if (response.status >= 200 && response.status < 300) {
                 alert("Đã chuyển đổi trạng thái");
                 fetchPromotionData();
-                
+
             }
-            
+
         } catch (error) {
             console.log("Có lỗi khi chuyển đổi trạng thái", error);
         }
@@ -173,7 +290,7 @@ function PromotionManagement({ token }) {
         <div className="container mx-auto max-h-full px-4 py-8 flex flex-col overflow-x-auto mt-5">
             <div className="bg-white rounded-lg shadow-md p-6 mb-4">
                 <h1 className="text-3xl font-semibold mb-4">Quản lý Khuyến Mãi</h1>
-                <button className="bg-blue-500 text-white font-semibold px-4 py-2 rounded-lg" onClick={() => setShowCreateForm(true)}>Tạo Mới</button>
+                <button className="bg-blue-500 text-white font-semibold px-4 py-2 rounded-lg" onClick={() => handleOpenCreateForm()}>Tạo Mới</button>
             </div>
             {/* Promotion Creation Form Modal */}
             {showCreateForm &&
@@ -185,7 +302,8 @@ function PromotionManagement({ token }) {
                     handleSubmit={handleSubmit}
                     handleEditForm={handleEditForm}
                     handleInputChange={handleInputChange}
-                    handleAddRow={handleAddRow}
+                    handleAddRowDrink={handleAddRowDrink}
+                    handleAddRowCategory={handleAddRowCategory}
                     handleRemoveRow={handleRemoveRow}
                     handleSingleInputChange={handleSingleInputChange}
                     isEdit={isEdit}
@@ -201,7 +319,6 @@ function PromotionManagement({ token }) {
                             <FontAwesomeIcon icon={faTrashAlt} className="text-red-500 cursor-pointer" onClick={() => handleDelete(promotion)} />
                         </div>
                         <h2 className="text-xl font-semibold mb-2">{promotion.name}</h2>
-                            
                         <p className="text-gray-700 mb-2">{promotion.description}</p>
                         <div className='mb-2 flex justify-start items-center'>
                             <FontAwesomeIcon
@@ -211,20 +328,28 @@ function PromotionManagement({ token }) {
                             />
                             <span className="ml-2">{promotion.isActive ? 'Kích hoạt' : 'Vô hiệu hóa'}</span>
                         </div>
-                        
+
                         {promotion.type === 'buy_category_get_free' && (
                             <div className="border-t border-gray-200 pt-4 mt-4">
                                 <p className="text-lg font-semibold mb-2">Chương trình khuyến mãi:</p>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-2">
+                                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-8">
                                     <div className="capitalize">
                                         <p className="text-gray-800 font-semibold mb-2">Mua:</p>
-                                        <p><span className="font-semibold">Sản phẩm:</span> {promotion.buyCategoryItems.category.name}</p>
-                                        <p><span className="font-semibold">Số lượng:</span> {promotion.buyCategoryItems.quantity}</p>
+                                        {promotion.conditions.buy_category_get_free.buyCategoryItems.map((item, index) => (
+                                            <div key={index}>
+                                                <p><span className="font-semibold">Sản phẩm:</span> {item.category.name}</p>
+                                                <p><span className="font-semibold">Số lượng:</span> {item.quantity}</p>
+                                            </div>
+                                        ))}
                                     </div>
                                     <div className="capitalize">
                                         <p className="text-gray-800 font-semibold mb-2">Nhận:</p>
-                                        <p><span className="font-semibold">Sản phẩm:</span> {promotion.freeCategoryItems.category.name}</p>
-                                        <p><span className="font-semibold">Số lượng:</span> {promotion.freeCategoryItems.quantity}</p>
+                                        {promotion.conditions.buy_category_get_free.freeCategoryItems.map((item, index) => (
+                                            <div key={index}>
+                                                <p><span className="font-semibold">Sản phẩm:</span> {item.drink.name}</p>
+                                                <p><span className="font-semibold">Số lượng:</span> {item.quantity}</p>
+                                            </div>
+                                        ))}
                                     </div>
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -242,7 +367,7 @@ function PromotionManagement({ token }) {
                     </div>
                 ))}
             </div>
-
+            <ToastContainer />
         </div>
     );
 }
