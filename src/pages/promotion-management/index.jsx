@@ -44,7 +44,6 @@ function PromotionManagement({ token }) {
             const promotionsResponse = await axios.get(`${baseURL}${promotionRoutes}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            console.log(promotionsResponse.data)
             setPromotions(promotionsResponse.data);
         } catch (error) {
             console.error('Error fetching promotion:', error);
@@ -94,7 +93,6 @@ function PromotionManagement({ token }) {
         // Loại bỏ trường conditions ra khỏi newPromotion nếu không còn loại nào có giá trị
         const conditions = Object.keys(filteredConditions).length === 0 ? {} : { conditions: filteredConditions };
         const promotionData = { ...newPromotion, ...conditions };
-        console.log(promotionData.conditions.buy_category_get_free)
 
         try {
             // Call API to create new promotion
@@ -102,13 +100,13 @@ function PromotionManagement({ token }) {
                 headers: { Authorization: `Bearer ${token}` }
             });
             if (response.status >= 200 && response.status < 300) {
-                alert('Thêm mới khuyến mãi thành công');
+                toast.success('Thêm mới khuyến mãi thành công');
             }
             // Reset form and close modal
             setNewPromotion({
                 name: '',
                 description: '',
-                type: 'buy_get_free',
+                type: 'buy_category_get_free',
                 conditions: {
                     buy_get_free: {
                         buyItems: [{ drink: '', quantity: '' }],
@@ -139,7 +137,7 @@ function PromotionManagement({ token }) {
     };
 
     const handleOpenCreateForm = () => {
-        setShowCreateForm(true);
+        setShowCreateForm(!showCreateForm);
         setNewPromotion({
             name: '',
             description: '',
@@ -173,7 +171,7 @@ function PromotionManagement({ token }) {
                 headers: { Authorization: `Bearer ${token}` }
             });
             if (response.status >= 200 && response.status < 300) {
-                alert("Cập nhật khuyến mã thành công");
+                toast.success('Cập nhật khuyến mã thành công');
             }
             setShowCreateForm(false);
             fetchPromotionData();
@@ -181,17 +179,6 @@ function PromotionManagement({ token }) {
             console.error('Error updating promotion:', error);
         }
     }
-
-    const handleSingleInputChange = (e, type) => {
-        const { name, value } = e.target;
-        setNewPromotion(prevState => ({
-            ...prevState,
-            [type]: {
-                ...prevState[type],
-                [name]: value
-            }
-        }));
-    };
 
     // Function to handle changes in input fields
     const handleInputChange = (e, conditionType, itemType, index, field) => {
@@ -260,7 +247,7 @@ function PromotionManagement({ token }) {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 if (response.status >= 200 && response.status < 300) {
-                    alert("Xoá promotion thành công");
+                    toast.success('Xoá khuyến mãi thành công');
                     fetchPromotionData();
                 }
             } catch (error) {
@@ -271,16 +258,16 @@ function PromotionManagement({ token }) {
 
     // Cập nhật trạng thái isActive của promotion
     const handleToggle = async (promotion) => {
+        console.log(promotion)
         try {
-            const response = await axios.put(`${baseURL}${promotionRoutes}/${promotion._id}`, { isActive: !promotion.isActive }, {
+            const response = await axios.put(`${baseURL}${promotionRoutes}/setActive/${promotion._id}`, { isActive: !promotion.isActive }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
+            console.log(response)
             if (response.status >= 200 && response.status < 300) {
-                alert("Đã chuyển đổi trạng thái");
+                toast.success('Đã chuyển đổi trạng thái');
                 fetchPromotionData();
-
             }
-
         } catch (error) {
             console.log("Có lỗi khi chuyển đổi trạng thái", error);
         }
@@ -296,8 +283,8 @@ function PromotionManagement({ token }) {
             {showCreateForm &&
                 <PromotionCreateForm
                     token={token}
-                    setShowCreateForm={setShowCreateForm}
                     newPromotion={newPromotion}
+                    setShowCreateForm={setShowCreateForm}
                     setNewPromotion={setNewPromotion}
                     handleSubmit={handleSubmit}
                     handleEditForm={handleEditForm}
@@ -305,8 +292,8 @@ function PromotionManagement({ token }) {
                     handleAddRowDrink={handleAddRowDrink}
                     handleAddRowCategory={handleAddRowCategory}
                     handleRemoveRow={handleRemoveRow}
-                    handleSingleInputChange={handleSingleInputChange}
                     isEdit={isEdit}
+                    handleOpenCreateForm={handleOpenCreateForm}
                 />
             }
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">

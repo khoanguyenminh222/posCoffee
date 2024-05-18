@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import BuyGetFree from './BuyGetFree';
 import BuyCategoryGetFree from './BuyCategoryGetFree';
 
-function PromotionCreateForm({ setShowCreateForm, token, newPromotion, setNewPromotion, handleSubmit, handleEditForm, handleInputChange, handleAddRowDrink, handleAddRowCategory, handleRemoveRow, handleSingleInputChange, isEdit }) {
+function PromotionCreateForm({ setShowCreateForm, handleOpenCreateForm, token, newPromotion, setNewPromotion, handleSubmit, handleEditForm, handleInputChange, handleAddRowDrink, handleAddRowCategory, handleRemoveRow, isEdit }) {
     const [formAction, setFormAction] = useState('Tạo Mới');
 
     useEffect(() => {
@@ -27,6 +27,10 @@ function PromotionCreateForm({ setShowCreateForm, token, newPromotion, setNewPro
                 break;
         }
     };
+
+    const handleCancelForm = () => {
+        setShowCreateForm(false);
+    }
     return (
         <div className="fixed top-0 left-0 z-10 w-full h-full bg-gray-800 bg-opacity-50 flex justify-center items-center">
             <div className="bg-white rounded-none lg:rounded-lg shadow-md p-6 max-h-full overflow-auto w-96 lg:w-full lg:max-w-xl md:w-full md:max-w-md max-w-sm">
@@ -118,7 +122,6 @@ function PromotionCreateForm({ setShowCreateForm, token, newPromotion, setNewPro
                         <BuyCategoryGetFree
                             token={token}
                             newPromotion={newPromotion}
-                            handleSingleInputChange={handleSingleInputChange}
                             isEdit={isEdit}
                             handleInputChange={handleInputChange}
                             handleAddRowCategory={handleAddRowCategory}
@@ -129,7 +132,7 @@ function PromotionCreateForm({ setShowCreateForm, token, newPromotion, setNewPro
                     {/* Add similar logic for other types */}
                     {/* End of additional fields */}
                     <button type="submit" className="bg-blue-500 text-white font-semibold px-4 py-2 rounded-lg">{isEdit ? 'Lưu' : 'Tạo Mới'}</button>
-                    <button type="button" className="bg-gray-500 text-white font-semibold px-4 py-2 rounded-lg ml-2" onClick={() => setShowCreateForm(false)}>Hủy</button>
+                    <button type="button" className="bg-gray-500 text-white font-semibold px-4 py-2 rounded-lg ml-2" onClick={() => handleCancelForm()}>Hủy</button>
                 </form>
             </div>
         </div>

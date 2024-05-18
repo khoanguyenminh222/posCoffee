@@ -5,11 +5,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faRemove, faPlus } from '@fortawesome/free-solid-svg-icons';
 import { baseURL, categoriesRoutes, drinksRoutes } from '@/api/api';
 
-function BuyCategoryGetFree({ token, newPromotion, handleSingleInputChange, handleInputChange, isEdit, handleAddRowCategory, handleAddRowDrink, handleRemoveRow }) {
+function BuyCategoryGetFree({ token, newPromotion, handleInputChange, isEdit, handleAddRowCategory, handleAddRowDrink, handleRemoveRow }) {
     const [categoryOptions, setCategoryOptions] = useState([]);
     const [drinkOptions, setDrinkOptions] = useState([]);
-    //const categoryIdBuy = newPromotion.conditions['buy_category_get_free']['buyCategoryItems'].category._id ? newPromotion.conditions['buy_category_get_free']['buyCategoryItems'].category._id : newPromotion.conditions['buy_category_get_free']['buyCategoryItems'].category;
-    //const categoryIdFree = newPromotion.conditions['buy_category_get_free']['freeCategoryItems'].category._id ? newPromotion.conditions['buy_category_get_free']['freeCategoryItems'].category._id : newPromotion.conditions['buy_category_get_free']['freeCategoryItems'].category;
     useEffect(() => {
         // Call API to fetch drink options
         const fetchCategoryOptions = async () => {
@@ -44,14 +42,19 @@ function BuyCategoryGetFree({ token, newPromotion, handleSingleInputChange, hand
                         id="category"
                         name="category"
                         options={categoryOptions}
-                        value={categoryOptions.find(option => option.value === item.category) || ''}
+                        value={
+                            isEdit
+                                ? categoryOptions.find(option => option.value === (item.category._id || item.category)) || ''
+                                : categoryOptions.find(option => option.value === item.category) || ''
+                        }
                         onChange={(selectedOption) => handleInputChange({ target: { name: 'category', value: selectedOption.value } }, 'buy_category_get_free', 'buyCategoryItems', index, 'category')}
                         isSearchable
                         placeholder="Chọn đồ uống"
                         className="w-2/3 mr-2 outline-blue-500"
                         required={true}
                     />
-                     <input
+
+                    <input
                         type="number"
                         name="quantity"
                         placeholder="Số lượng"
@@ -86,7 +89,11 @@ function BuyCategoryGetFree({ token, newPromotion, handleSingleInputChange, hand
                         id="drink"
                         name="drink"
                         options={drinkOptions}
-                        value={drinkOptions.find(option => option.value === item.drink) || ''}
+                        value={
+                            isEdit
+                                ? drinkOptions.find(option => option.value === (item.drink._id || item.drink)) || ''
+                                : drinkOptions.find(option => option.value === item.drink) || ''
+                        }
                         onChange={(selectedOption) => handleInputChange({ target: { name: 'drink', value: selectedOption.value } }, 'buy_category_get_free', 'freeCategoryItems', index, 'drink')}
                         isSearchable
                         placeholder="Chọn đồ uống"
