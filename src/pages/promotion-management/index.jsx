@@ -8,6 +8,8 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import PromotionCreateForm from '@/components/promotion-management/PromotionCreateForm';
 import { baseURL, promotionRoutes } from '@/api/api';
+import View_BuyCategoryGetFree from '@/components/promotion-management/View_BuyCategoryGetFree';
+import View_BuyGetFree from '@/components/promotion-management/View_BuyGetFree';
 
 
 function PromotionManagement({ token }) {
@@ -47,6 +49,7 @@ function PromotionManagement({ token }) {
             setPromotions(promotionsResponse.data);
         } catch (error) {
             console.error('Error fetching promotion:', error);
+            toast.error(error.message)
         }
     }
 
@@ -100,7 +103,7 @@ function PromotionManagement({ token }) {
                 headers: { Authorization: `Bearer ${token}` }
             });
             if (response.status >= 200 && response.status < 300) {
-                toast.success('Thêm mới khuyến mãi thành công');
+                toast.success(response.data.message);
             }
             // Reset form and close modal
             setNewPromotion({
@@ -133,6 +136,7 @@ function PromotionManagement({ token }) {
             fetchPromotionData();
         } catch (error) {
             console.error('Error creating promotion:', error);
+            toast.error(error.message)
         }
     };
 
@@ -171,12 +175,13 @@ function PromotionManagement({ token }) {
                 headers: { Authorization: `Bearer ${token}` }
             });
             if (response.status >= 200 && response.status < 300) {
-                toast.success('Cập nhật khuyến mã thành công');
+                toast.success(response.data.message);
             }
             setShowCreateForm(false);
             fetchPromotionData();
         } catch (error) {
             console.error('Error updating promotion:', error);
+            toast.error(error.message)
         }
     }
 
@@ -247,11 +252,12 @@ function PromotionManagement({ token }) {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 if (response.status >= 200 && response.status < 300) {
-                    toast.success('Xoá khuyến mãi thành công');
+                    toast.success(response.data.message);
                     fetchPromotionData();
                 }
             } catch (error) {
                 console.error('Error deleting promotion:', error);
+                toast.error(error.message)
             }
         }
     }
@@ -265,11 +271,12 @@ function PromotionManagement({ token }) {
             });
             console.log(response)
             if (response.status >= 200 && response.status < 300) {
-                toast.success('Đã chuyển đổi trạng thái');
+                toast.success(response.data.message);
                 fetchPromotionData();
             }
         } catch (error) {
             console.log("Có lỗi khi chuyển đổi trạng thái", error);
+            toast.error(error.message)
         }
     }
 
@@ -316,41 +323,22 @@ function PromotionManagement({ token }) {
                             <span className="ml-2">{promotion.isActive ? 'Kích hoạt' : 'Vô hiệu hóa'}</span>
                         </div>
 
-                        {promotion.type === 'buy_category_get_free' && (
-                            <div className="border-t border-gray-200 pt-4 mt-4">
-                                <p className="text-lg font-semibold mb-2">Chương trình khuyến mãi:</p>
-                                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-8">
-                                    <div className="capitalize">
-                                        <p className="text-gray-800 font-semibold mb-2">Mua:</p>
-                                        {promotion.conditions.buy_category_get_free.buyCategoryItems.map((item, index) => (
-                                            <div key={index}>
-                                                <p><span className="font-semibold">Sản phẩm:</span> {item.category.name}</p>
-                                                <p><span className="font-semibold">Số lượng:</span> {item.quantity}</p>
-                                            </div>
-                                        ))}
-                                    </div>
-                                    <div className="capitalize">
-                                        <p className="text-gray-800 font-semibold mb-2">Nhận:</p>
-                                        {promotion.conditions.buy_category_get_free.freeCategoryItems.map((item, index) => (
-                                            <div key={index}>
-                                                <p><span className="font-semibold">Sản phẩm:</span> {item.drink.name}</p>
-                                                <p><span className="font-semibold">Số lượng:</span> {item.quantity}</p>
-                                            </div>
-                                        ))}
-                                    </div>
+                        <div className="border-t border-gray-200 pt-4 mt-4">
+                            <p className="text-lg font-semibold mb-2">Chương trình khuyến mãi:</p>
+
+                            {promotion.type === 'buy_category_get_free' && <View_BuyCategoryGetFree promotion={promotion}/>}
+                            {promotion.type === 'buy_get_free' && <View_BuyGetFree promotion={promotion}/>}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <p className="text-gray-800 font-semibold mb-2">Ngày bắt đầu:</p>
+                                    <p>{format(new Date(promotion.startDate), 'dd/MM/yyyy')}</p>
                                 </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <p className="text-gray-800 font-semibold mb-2">Ngày bắt đầu:</p>
-                                        <p>{format(new Date(promotion.startDate), 'dd/MM/yyyy')}</p>
-                                    </div>
-                                    <div>
-                                        <p className="text-gray-800 font-semibold mb-2">Ngày kết thúc:</p>
-                                        <p>{format(new Date(promotion.endDate), 'dd/MM/yyyy')}</p>
-                                    </div>
+                                <div>
+                                    <p className="text-gray-800 font-semibold mb-2">Ngày kết thúc:</p>
+                                    <p>{format(new Date(promotion.endDate), 'dd/MM/yyyy')}</p>
                                 </div>
                             </div>
-                        )}
+                        </div>
                     </div>
                 ))}
             </div>

@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faRemove, faPlus  } from '@fortawesome/free-solid-svg-icons';
 import { baseURL, drinksRoutes } from '@/api/api';
 
-function BuyGetFree({ token, newPromotion, handleInputChange, handleAddRow, handleRemoveRow }) {
+function BuyGetFree({ token, newPromotion, handleInputChange, handleAddRowDrink, handleRemoveRow, isEdit }) {
     const [drinkOptions, setDrinkOptions] = useState([]);
 
     useEffect(() => {
@@ -25,14 +25,18 @@ function BuyGetFree({ token, newPromotion, handleInputChange, handleAddRow, hand
     return (
         <div>
             <h3 className="font-semibold mb-2 capitalize">Đồ uống mua</h3>
-            {newPromotion.buyItems.map((item, index) => (
+            {newPromotion.conditions.buy_get_free.buyItems.map((item, index) => (
                 <div key={index} className="flex items-center mb-2">
                     <Select
                         id="drink"
                         name="drink"
                         options={drinkOptions}
-                        value={drinkOptions.find(option => option.value === (item.drink || ''))}
-                        onChange={(selectedOption) => handleInputChange({ target: { name: 'drink', value: selectedOption.value } }, index, 'buyItems')}
+                        value={
+                            isEdit
+                                ? drinkOptions.find(option => option.value === (item.drink._id || item.drink)) || ''
+                                : drinkOptions.find(option => option.value === item.drink) || ''
+                        }
+                        onChange={(selectedOption) => handleInputChange({ target: { name: 'drink', value: selectedOption.value } }, 'buy_get_free', 'buyItems', index, 'drink')}
                         isSearchable
                         placeholder="Chọn đồ uống"
                         className="w-1/2 mr-2 outline-blue-500"
@@ -42,14 +46,14 @@ function BuyGetFree({ token, newPromotion, handleInputChange, handleAddRow, hand
                         name="quantity"
                         placeholder="Số lượng"
                         value={item.quantity}
-                        onChange={(e) => handleInputChange(e, index, 'buyItems')}
+                        onChange={(e) => handleInputChange(e, 'buy_get_free', 'buyItems', index, 'quantity')}
                         className="border rounded-md px-3 py-2 w-1/4 mr-2 outline-blue-500"
                     />
                     {index > 0 && (
                         <button
                             type="button"
                             className="bg-red-500 text-white font-semibold px-4 py-2 rounded-lg outline-blue-500"
-                            onClick={() => handleRemoveRow(index, 'buyItems')}
+                            onClick={() => handleRemoveRow('buy_get_free', 'buyItems', index)}
                         >
                             <FontAwesomeIcon icon={faRemove} size="lg" />
                         </button>
@@ -59,19 +63,23 @@ function BuyGetFree({ token, newPromotion, handleInputChange, handleAddRow, hand
             <button
                 type="button"
                 className="bg-blue-500 text-white font-semibold w-10 h-10 flex items-center justify-center rounded-full mb-2"
-                onClick={() => handleAddRow('buyItems')}
+                onClick={() => handleAddRowDrink('buy_get_free', 'buyItems')}
             >
                 <FontAwesomeIcon icon={faPlus} />
             </button>
             <h3 className="font-semibold mb-2 capitalize">Đồ uống được tặng</h3>
-            {newPromotion.freeItems.map((item, index) => (
+            {newPromotion.conditions.buy_get_free.freeItems.map((item, index) => (
                 <div key={index} className="flex items-center mb-2">
                     <Select
                         id="drink"
                         name="drink"
                         options={drinkOptions}
-                        value={drinkOptions.find(option => option.value === (item.drink || ''))}
-                        onChange={(selectedOption) => handleInputChange({ target: { name: 'drink', value: selectedOption.value } }, index, 'freeItems')}
+                        value={
+                            isEdit
+                                ? drinkOptions.find(option => option.value === (item.drink._id || item.drink)) || ''
+                                : drinkOptions.find(option => option.value === item.drink) || ''
+                        }
+                        onChange={(selectedOption) => handleInputChange({ target: { name: 'drink', value: selectedOption.value } }, 'buy_get_free', 'freeItems', index, 'drink')}
                         isSearchable
                         placeholder="Chọn đồ uống"
                         className="w-1/2 mr-2 outline-blue-500"
@@ -81,14 +89,14 @@ function BuyGetFree({ token, newPromotion, handleInputChange, handleAddRow, hand
                         name="quantity"
                         placeholder="Số lượng"
                         value={item.quantity}
-                        onChange={(e) => handleInputChange(e, index, 'freeItems')}
+                        onChange={(e) => handleInputChange(e, 'buy_get_free', 'freeItems', index, 'quantity')}
                         className="border rounded-md px-3 py-2 w-1/4 mr-2 outline-blue-500"
                     />
                     {index > 0 && (
                         <button
                             type="button"
                             className="bg-red-500 text-white font-semibold px-4 py-2 rounded-lg outline-blue-500"
-                            onClick={() => handleRemoveRow(index, 'freeItems')}
+                            onClick={() => handleRemoveRow('buy_get_free', 'freeItems', index)}
                         >
                             <FontAwesomeIcon icon={faRemove} size="lg" />
                         </button>
@@ -98,7 +106,7 @@ function BuyGetFree({ token, newPromotion, handleInputChange, handleAddRow, hand
             <button
                 type="button"
                 className="bg-blue-500 text-white font-semibold w-10 h-10 flex items-center justify-center rounded-full mb-2"
-                onClick={() => handleAddRow('freeItems')}
+                onClick={() => handleAddRowDrink('buy_get_free', 'freeItems')}
             >
                 <FontAwesomeIcon icon={faPlus} />
             </button>

@@ -155,9 +155,10 @@ function DrinkOfCategory({ drink, addToBill, setSelectedOptions  }) {
                 <FontAwesomeIcon icon={faGift} size='1x' color='#0000FF' className='mr-2'/>
                 <div>
                   {drink.promotions.map((promotion, promoIndex) => (
+                    
                     <div key={promoIndex} className="">
                       <p className="text-gray-500 text-sm">
-                        {promotion.description}
+                        {promotion.name}
                       </p>
                       {/* Thêm các trường thông tin khác của promotion tùy theo loại */}
                     </div>
