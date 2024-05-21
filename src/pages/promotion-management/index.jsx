@@ -10,6 +10,7 @@ import PromotionCreateForm from '@/components/promotion-management/PromotionCrea
 import { baseURL, promotionRoutes } from '@/api/api';
 import View_BuyCategoryGetFree from '@/components/promotion-management/View_BuyCategoryGetFree';
 import View_BuyGetFree from '@/components/promotion-management/View_BuyGetFree';
+import View_FixedPrice from '@/components/promotion-management/View_FixedPrice';
 
 
 function PromotionManagement({ token }) {
@@ -18,17 +19,18 @@ function PromotionManagement({ token }) {
     const [newPromotion, setNewPromotion] = useState({
         name: '',
         description: '',
-        type: 'buy_category_get_free',
+        type: 'buy_get_free',
         conditions: {
             buy_get_free: {
                 buyItems: [{ drink: '', quantity: '' }],
                 freeItems: [{ drink: '', quantity: '' }]
             },
             discount: {
+                totalAmount: null,
                 discountPercent: null
             },
             fixed_price: {
-                fixedPriceItems: [{ drink: '', fixedPrice: '' }]
+                fixedPriceItems: [{ category: '', fixedPrice: '' }]
             },
             buy_category_get_free: {
                 buyCategoryItems: [{ category: '', quantity: '' }],
@@ -59,7 +61,7 @@ function PromotionManagement({ token }) {
 
     // Function to handle form submission
     const handleSubmit = async (e) => {
-
+        console.log(newPromotion)
         e.preventDefault();
 
         if (!newPromotion.name) {
@@ -77,15 +79,32 @@ function PromotionManagement({ token }) {
                 const filteredCondition = Object.entries(value).reduce((subAcc, [subKey, subValue]) => {
                     if (Array.isArray(subValue)) {
                         // Lọc ra từng mục có giá trị
-                        const filteredItems = subValue.filter(item => Object.values(item).every(val => val !== ''));
+                        const filteredItems = subValue.filter(item => {
+                            if (subKey === 'fixedPriceItems') {
+                                return item.category && item.fixedPrice;
+                            } else if (subKey === 'buyItems' || subKey === 'freeItems') {
+                                return item.drink && item.quantity;
+                            } else if (subKey === 'buyCategoryItems') {
+                                return item.category && item.quantity;
+                            } else if (subKey === 'freeCategoryItems') {
+                                return item.drink && item.quantity;
+                            }
+                            return Object.values(item).every(val => val !== '');
+                        });
                         if (filteredItems.length > 0) {
                             subAcc[subKey] = filteredItems;
                         }
+                    } else if (typeof subValue === 'number' && subValue > 0) {
+                        // Bao gồm các giá trị số không phải mảng hợp lệ
+                        subAcc[subKey] = subValue;
+                    } else if (subValue !== '') {
+                        // Bao gồm các giá trị không phải mảng và không rỗng
+                        subAcc[subKey] = subValue;
                     }
                     return subAcc;
                 }, {});
-
-                // Nếu trong điều kiện này vẫn còn mục có giá trị, thì thêm vào filteredConditions
+    
+                // Nếu điều kiện này vẫn còn mục có giá trị, thêm vào filteredConditions
                 if (Object.keys(filteredCondition).length !== 0) {
                     acc[key] = filteredCondition;
                 }
@@ -96,7 +115,7 @@ function PromotionManagement({ token }) {
         // Loại bỏ trường conditions ra khỏi newPromotion nếu không còn loại nào có giá trị
         const conditions = Object.keys(filteredConditions).length === 0 ? {} : { conditions: filteredConditions };
         const promotionData = { ...newPromotion, ...conditions };
-
+        console.log(promotionData)
         try {
             // Call API to create new promotion
             const response = await axios.post(`${baseURL}${promotionRoutes}`, promotionData, {
@@ -109,13 +128,14 @@ function PromotionManagement({ token }) {
             setNewPromotion({
                 name: '',
                 description: '',
-                type: 'buy_category_get_free',
+                type: 'buy_get_free',
                 conditions: {
                     buy_get_free: {
                         buyItems: [{ drink: '', quantity: '' }],
                         freeItems: [{ drink: '', quantity: '' }]
                     },
                     discount: {
+                        totalAmount: null,
                         discountPercent: null
                     },
                     fixed_price: {
@@ -145,17 +165,18 @@ function PromotionManagement({ token }) {
         setNewPromotion({
             name: '',
             description: '',
-            type: 'buy_category_get_free',
+            type: 'buy_get_free',
             conditions: {
                 buy_get_free: {
                     buyItems: [{ drink: '', quantity: '' }],
                     freeItems: [{ drink: '', quantity: '' }]
                 },
                 discount: {
+                    totalAmount: null,
                     discountPercent: null
                 },
                 fixed_price: {
-                    fixedPriceItems: [{ drink: '', fixedPrice: '' }]
+                    fixedPriceItems: [{ category: '', fixedPrice: '' }]
                 },
                 buy_category_get_free: {
                     buyCategoryItems: [{ category: '', quantity: '' }],
@@ -174,6 +195,7 @@ function PromotionManagement({ token }) {
             const response = await axios.put(`${baseURL}${promotionRoutes}/${id}`, newPromotion, {
                 headers: { Authorization: `Bearer ${token}` }
             });
+            console.log(response.data)
             if (response.status >= 200 && response.status < 300) {
                 toast.success(response.data.message);
             }
@@ -188,13 +210,22 @@ function PromotionManagement({ token }) {
     // Function to handle changes in input fields
     const handleInputChange = (e, conditionType, itemType, index, field) => {
         const { name, value } = e.target;
-
+    
         setNewPromotion(prevState => {
             const conditions = { ...prevState.conditions };
-            const items = [...conditions[conditionType][itemType]];
-            items[index] = { ...items[index], [field]: value };
-
-            conditions[conditionType][itemType] = items;
+    
+            if (Array.isArray(conditions[conditionType][itemType])) {
+                // Handle iterable items (e.g., fixed_price, buy_get_free, buy_category_get_free)
+                const items = [...conditions[conditionType][itemType]];
+                items[index] = { ...items[index], [field]: value };
+                conditions[conditionType][itemType] = items;
+            } else {
+                // Handle non-iterable items (e.g., discount)
+                conditions[conditionType] = {
+                    ...conditions[conditionType],
+                    [field]: value
+                };
+            }
             return { ...prevState, conditions };
         });
     };
@@ -220,10 +251,21 @@ function PromotionManagement({ token }) {
             const items = conditions[conditionType][rowType];
             // Kiểm tra xem trường trước đó đã có giá trị hay chưa
             const lastItem = items[items.length - 1];
-            if (!lastItem || (lastItem.category !== '' && lastItem.quantity !== '')) {
-                // Nếu trường trước đó đã có giá trị hoặc không có hàng trước đó, thêm hàng mới
+            // Kiểm tra nếu có quantity
+            if (!lastItem || (lastItem.category !== '' && (lastItem.quantity !== undefined && lastItem.quantity !== ''))) {
                 conditions[conditionType][rowType].push({ category: '', quantity: '' });
+            } 
+            // Kiểm tra nếu có fixedPrice
+            else if (!lastItem || (lastItem.category !== '' && (lastItem.fixedPrice !== undefined && lastItem.fixedPrice !== ''))) {
+                conditions[conditionType][rowType].push({ category: '', fixedPrice: '' });
             }
+            // Loại bỏ trường quantity nếu không cần thiết
+            conditions[conditionType][rowType] = conditions[conditionType][rowType].map(item => {
+            if (item.fixedPrice !== undefined) {
+                delete item.quantity;
+            }
+            return item;
+        });
             return { ...prevState, conditions };
         });
     };
@@ -328,6 +370,7 @@ function PromotionManagement({ token }) {
 
                             {promotion.type === 'buy_category_get_free' && <View_BuyCategoryGetFree promotion={promotion}/>}
                             {promotion.type === 'buy_get_free' && <View_BuyGetFree promotion={promotion}/>}
+                            {promotion.type === 'fixed_price' && <View_FixedPrice promotion={promotion}/>}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <p className="text-gray-800 font-semibold mb-2">Ngày bắt đầu:</p>

@@ -1,9 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPrint, faCircle, faCircleCheck } from '@fortawesome/free-solid-svg-icons';
+import { faCircle, faCircleCheck } from '@fortawesome/free-regular-svg-icons';
+import { faPrint } from '@fortawesome/free-solid-svg-icons';
 import DrinkBill from '../DrinkBill/DrinkBill';
 import { baseURL, billRoutes, categoriesRoutes, drinksRoutes, promotionRoutes, userRoutes } from '@/api/api';
 import axios from 'axios';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { useReactToPrint } from 'react-to-print';
 import BillToPrint from './BillToPrint';
 import ListPromotion from './ListPromotion';
@@ -39,7 +42,6 @@ function Bill({ userId, billItems, addToBill, onDeleteAll, onDeleteItem, onIncre
                 alert("Không có đồ uống trong hóa đơn để lưu.");
                 return; // Không có đồ uống, không thực hiện lưu
             }
-            console.log(billItems)
             const responsePromotion = await axios.post(`${baseURL}${promotionRoutes}/check-promotion`, {drinks: billItems}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -57,7 +59,6 @@ function Bill({ userId, billItems, addToBill, onDeleteAll, onDeleteItem, onIncre
                 });
                 updatedBillItems.push({ ...item, ingredients: response.data.ingredients });
             }
-            console.log(updatedBillItems)
             const data = {
                 userId: userId,
                 drinks: updatedBillItems,
@@ -70,8 +71,10 @@ function Bill({ userId, billItems, addToBill, onDeleteAll, onDeleteItem, onIncre
             setBill(response.data)
             setIsPrinted(true);
             setSelectedPromotion(null)
+            toast.success('Đã tạo mới hoá đơn');
         } catch (error) {
             console.error('Lỗi khi gửi yêu cầu POST:', error);
+            toast.error(error.message);
             // Xử lý lỗi nếu cần
         }
     };
@@ -92,61 +95,28 @@ function Bill({ userId, billItems, addToBill, onDeleteAll, onDeleteItem, onIncre
     }
     const handleCancelListPromotion = () => {
         setIsListPromotion(false);
+        setSelectedPromotion(null)
     }
     const handlePromotionSelect = async(data) => {
         const currentDate = new Date();
+        const promotion = data.promotion
+        const selectedFreeItem = data.selectedFreeItem
 
-        if(data.promotion.isActive && currentDate >= new Date(data.promotion.startDate) && currentDate <= new Date(data.promotion.endDate)){
-            setSelectedPromotion(data);
+        if(promotion.isActive && currentDate >= new Date(promotion.startDate) && currentDate <= new Date(promotion.endDate)){
+            setSelectedPromotion(promotion);
             setIsListPromotion(false);
-            switch (data.promotion.type) {
-                case 'buy_get_free':
-                    // Kiểm tra và áp dụng chương trình khuyến mãi "Mua X tặng Y"
-                    if (checkBuyGetFreeCondition(promotion)) {
-                        applyPromotion(promotion);
-                    } else {
-                        alert("Không đủ điều kiện để áp dụng chương trình khuyến mãi 'Mua X tặng Y'");
-                    }
-                    break;
-                case 'discount':
-                    // Kiểm tra và áp dụng chương trình khuyến mãi giảm giá
-                    if (checkDiscountCondition(promotion)) {
-                        applyPromotion(promotion);
-                    } else {
-                        alert("Không đủ điều kiện để áp dụng chương trình khuyến mãi giảm giá");
-                    }
-                    break;
-                case 'fixed_price':
-                    // Kiểm tra và áp dụng chương trình khuyến mãi giá cố định
-                    if (checkFixedPriceCondition(promotion)) {
-                        applyPromotion(promotion);
-                    } else {
-                        alert("Không đủ điều kiện để áp dụng chương trình khuyến mãi giá cố định");
-                    }
-                    break;
-                case 'buy_category_get_free':
-                    // Lấy ra các sản phẩm miễn phí từ chương trình khuyến mãi
-                    const freeCategoryItems = data.promotion.freeCategoryItems;
-                    
-                        const response = await axios.get(`${baseURL}${categoriesRoutes}/${freeCategoryItems.category}`, {
-                            headers: { Authorization: `Bearer ${token}` }
-                        });
-                        console.log(response.data)
-                        const freeBillItem = {
-                            _id: response.data._id, // Sử dụng id của sản phẩm miễn phí
-                            name: "FREE "+response.data.name, // Tên của sản phẩm miễn phí
-                            prices: {"M": 0, "L": 0}, // Giá của sản phẩm miễn phí là 0 (do đã miễn phí)
-                            quantity: freeCategoryItems.quantity, // Số lượng sản phẩm miễn phí
-                            options: {}, // Không có option cho sản phẩm miễn phí
-                        };
-                        console.log(freeBillItem)
-                        // Thêm sản phẩm miễn phí vào danh sách billItems
-                        addToBill(freeBillItem, freeCategoryItems.quantity, "", "", "", "");
-                    
-                    break;
-                default:
-                    alert("Loại chương trình khuyến mãi không hợp lệ");
-            }
+            const response = await axios.get(`${baseURL}${drinksRoutes}/${selectedFreeItem.itemId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            const freeBillItem = {
+                _id: response.data._id, // Sử dụng id của sản phẩm miễn phí
+                name: "FREE "+response.data.name, // Tên của sản phẩm miễn phí
+                prices: {"M": 0, "L": 0}, // Giá của sản phẩm miễn phí là 0 (do đã miễn phí)
+                quantity: selectedFreeItem.quantity, // Số lượng sản phẩm miễn phí
+                options: {}, // Không có option cho sản phẩm miễn phí
+            };
+            //Thêm sản phẩm miễn phí vào danh sách billItems
+            addToBill(freeBillItem, selectedFreeItem.quantity, "", "", "", "");
         }else{
             console.log('Promotion is not active or not within the date range.');
             alert("Chương trình khuyến mãi không còn")
@@ -162,7 +132,7 @@ function Bill({ userId, billItems, addToBill, onDeleteAll, onDeleteItem, onIncre
             {/* Tiêu đề hóa đơn */}
             <div className='flex justify-between items-center mb-2'>
                 <h2 className="text-lg font-semibold">Hóa đơn</h2>
-                <button onClick={() => { onDeleteAll(); setIsPrinted(false) }} className="bg-red-500 text-white px-2 py-1 rounded-md">Xoá hết</button>
+                <button onClick={() => { onDeleteAll(); setIsPrinted(false); setSelectedPromotion(null) }} className="bg-red-500 text-white px-2 py-1 rounded-md">Xoá hết</button>
             </div>
             {/* Phần hiển thị hóa đơn */}
             <div className="mb-4 overflow-y-auto max-h-96" style={{ scrollbarWidth: 'thin', scrollbarColor: 'gray', scrollbarTrackColor: 'rgba(0, 0, 0, 0.1)' }}>
@@ -184,7 +154,9 @@ function Bill({ userId, billItems, addToBill, onDeleteAll, onDeleteItem, onIncre
             <div className="absolute bottom-0 left-0 w-full bg-white p-4">
                 <div onClick={handleApplyPromotion} className='flex flex-row cursor-pointer hover:underline mb-2 justify-start items-center'>
                     <p>Áp dụng khuyến mãi</p>
-                    <FontAwesomeIcon icon={faCircleCheck} color='green' className="ml-2" />
+                    {selectedPromotion ? <FontAwesomeIcon icon={faCircleCheck} color='green' className="ml-2" />
+                    :
+                    <FontAwesomeIcon icon={faCircle} color='black' className="ml-2" />}
                 </div>
                 {isListPromotion && <ListPromotion promotionList={promotionList} onCancel={handleCancelListPromotion} onSelectPromotion={handlePromotionSelect}/>}
                 <div className="border-b-2 border-gray-300 mb-4"></div> {/* Đường kẻ đẹp hơn */}
@@ -203,7 +175,7 @@ function Bill({ userId, billItems, addToBill, onDeleteAll, onDeleteItem, onIncre
                     <button onClick={handlePrintBill} className="bg-amber-600 text-white px-4 py-2 rounded hover:bg-amber-700 flex items-center">
                         <FontAwesomeIcon icon={faPrint} className="mr-2" /> Thanh toán
                     </button>}
-                <BillToPrint ref={componentRef} bill={bill} billItems={billItems} user={user} totalAmount={totalAmount} />
+                <BillToPrint ref={componentRef} bill={bill} billItems={billItems} user={user} totalAmount={totalAmount} />   
             </div>
         </>
     );

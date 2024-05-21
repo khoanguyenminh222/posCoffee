@@ -9,6 +9,8 @@ import { storage } from '@/firebase';
 import axios from 'axios';
 import { getServerSideProps } from '@/helpers/cookieHelper';
 import { getUserIdFromToken } from '@/helpers/getUserIdFromToken';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function Home({ token }) {
   const [drinks, setDrinks] = useState([]);
@@ -147,9 +149,23 @@ function Home({ token }) {
       sugar: selectedSugar,
       ice: selectedIce,
     };
+
+    // Kiểm tra xem có chương trình khuyến mãi fixed_price không
+    const fixedPricePromotion = drink.promotions.find(promotion => promotion.type === 'fixed_price');
+
+    // Sử dụng giá gốc nếu không có khuyến mãi fixed_price hoặc không có mục phù hợp
+    let price = selectedSize === 'M' ? drink.prices.M : drink.prices.L;
+
+    if (fixedPricePromotion) {
+        const fixedPriceItem = fixedPricePromotion.conditions.fixed_price.fixedPriceItems.find(item => item.category._id === drink.categoryId);
+        if (fixedPriceItem) {
+            price = fixedPriceItem.fixedPrice;
+        }
+    }
+
     // Kiểm tra xem đã tồn tại billItem có id là drink._id và options giống nhau không
     const existingItem = billItems.find(item => item.id === drink._id && JSON.stringify(item.options) === JSON.stringify(selectedOptions));
-    console.log(existingItem)
+
     // Nếu tồn tại billItem có id là drink._id và options giống nhau, không thêm mới vào billItems
     if (existingItem) {
       // Cập nhật số lượng của billItem đã tồn tại
@@ -157,22 +173,25 @@ function Home({ token }) {
         if (item.id === drink._id && JSON.stringify(item.options) === JSON.stringify(selectedOptions)) {
           return { ...item, quantity: item.quantity + quantity };
         }
+        
+        
         return item;
       });
-
+      toast.success('Cập nhật số lượng ' + updatedBillItems[0].name);
       setBillItems(updatedBillItems);
     } else {
       // Nếu chưa tồn tại billItem có id là drink._id và options giống nhau, thêm mới vào billItems
       const billItem = {
         id: drink._id,
         name: drink.name,
-        price: selectedOptions.size === 'M' ? drink.prices.M : drink.prices.L,
+        price: price,
         quantity: quantity,
         options: selectedOptions
       };
-
+      toast.success('Đã thêm ' + billItem.name + ' vào hoá đơn');
       setBillItems([...billItems, billItem]);
     }
+
   };
 
   const searchDrinks = () => {
@@ -322,7 +341,7 @@ function Home({ token }) {
           </div>
         )
       }
-
+    <ToastContainer />
 
     </>
   );

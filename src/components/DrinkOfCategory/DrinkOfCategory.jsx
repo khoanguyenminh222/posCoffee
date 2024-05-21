@@ -32,6 +32,7 @@ function DrinkOfCategory({ drink, addToBill, setSelectedOptions  }) {
         setImageUrl(url);
       } catch (error) {
         console.error('Error getting image URL:', error);
+        toast.error(error.message);
       }
     };
     fetchImageUrl();
@@ -58,7 +59,6 @@ function DrinkOfCategory({ drink, addToBill, setSelectedOptions  }) {
       setError('Please select temperature and size.');
       return;
     }
-    console.log(drink)
     addToBill(drink, quantity, selectedTemperature, selectedSize, selectedSugar, selectedIce);
     setError('');
   };
@@ -74,7 +74,31 @@ function DrinkOfCategory({ drink, addToBill, setSelectedOptions  }) {
           <div className='flex flex-col'>
             <div className="font-semibold text-lg uppercase text-nowrap">{drink.name}</div>
             <div className='flex justify-between'>
-              <div className="text-gray-600 text-sm mt-2">{selectedSize === 'M' ? drink.prices.M.toLocaleString('vi-VN') : drink.prices.L.toLocaleString('vi-VN')}đ</div>
+
+              {drink.promotions.some(promotion => promotion.type === 'fixed_price') ? (
+                <>
+                  {drink.promotions
+                    .filter(promotion => promotion.type === 'fixed_price')
+                    .map((promotion, index) => (
+                      <div key={index}>
+                        <ul>
+                          {promotion.conditions.fixed_price.fixedPriceItems.map((item, idx) => (
+                            item.category._id === drink.categoryId && (
+                              <div className='text-gray-600 text-sm mt-2' key={idx}>{item.fixedPrice.toLocaleString('vi-VN')}đ</div>
+                            )
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+                  <div className="text-gray-600 text-sm mt-2 line-through">
+                    {selectedSize === 'M' ? drink.prices.M.toLocaleString('vi-VN') : drink.prices.L.toLocaleString('vi-VN')}đ
+                  </div>
+                </>
+              ) : (
+                <div className="text-gray-600 text-sm mt-2">
+                  {selectedSize === 'M' ? drink.prices.M.toLocaleString('vi-VN') : drink.prices.L.toLocaleString('vi-VN')}đ
+                </div>
+              )}
               <div className="flex items-center">
                 {['M', 'L'].map((option, index) => (
                   <div key={index} className={`w-6 h-6 rounded-full flex items-center justify-center cursor-pointer mr-2 ${selectedSize === option ? 'bg-amber-500 text-white rounded-full' : 'bg-gray-200'}`} onClick={() => {setSelectedSize((prevOption) => prevOption === option ? null : option); updateSelectedOptions('size', option);}}>

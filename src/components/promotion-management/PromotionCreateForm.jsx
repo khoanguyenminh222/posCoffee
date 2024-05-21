@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import BuyGetFree from './BuyGetFree';
 import BuyCategoryGetFree from './BuyCategoryGetFree';
+import FixedPrice from './FixedPrice';
+import Discount from './Discount';
 
 function PromotionCreateForm({ setShowCreateForm, token, newPromotion, setNewPromotion, handleSubmit, handleEditForm, handleInputChange, handleAddRowDrink, handleAddRowCategory, handleRemoveRow, isEdit }) {
     const [formAction, setFormAction] = useState('Tạo Mới');
@@ -125,6 +127,24 @@ function PromotionCreateForm({ setShowCreateForm, token, newPromotion, setNewPro
                             handleAddRowCategory={handleAddRowCategory}
                             handleAddRowDrink={handleAddRowDrink}
                             handleRemoveRow={handleRemoveRow}
+                        />
+                    )}
+                    {newPromotion.type === 'fixed_price' && (
+                        <FixedPrice 
+                            token={token}
+                            newPromotion={newPromotion}
+                            isEdit={isEdit}
+                            handleInputChange={handleInputChange}
+                            handleAddRowCategory={handleAddRowCategory}
+                            handleRemoveRow={handleRemoveRow}
+                        />
+                    )}
+                    {newPromotion.type === 'discount' && (
+                        <Discount 
+                            token={token}
+                            newPromotion={newPromotion}
+                            isEdit={isEdit}
+                            handleInputChange={handleInputChange}
                         />
                     )}
                     {/* Add similar logic for other types */}

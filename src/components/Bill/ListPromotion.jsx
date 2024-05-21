@@ -1,14 +1,73 @@
 import React, { useState } from 'react';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function ListPromotion({ promotionList, onCancel, onSelectPromotion }) {
-    const [selectedPromotionIndex, setSelectedPromotionIndex] = useState(null);
+    const [selectedPromotionIndex, setSelectedPromotionIndex] = useState(-1);
+    const [selectedFreeItem, setSelectedFreeItem] = useState([{itemId: '', quantity: 0}]);
     const handleCancel = () => {
         onCancel();
     };
     const handleSelect = () => {
-        if (selectedPromotionIndex !== null) {
-            onSelectPromotion(promotionList[selectedPromotionIndex]);
+        if(selectedPromotionIndex < 0) {
+            toast.warn('Yêu cầu chọn khuyến mãi.');
+            return;
         }
+        const selectedFreeItemId = selectedFreeItem[selectedPromotionIndex];
+
+        if(selectedFreeItemId == null) {
+            toast.warn('Yêu cầu chọn đồ uống.');
+            return;
+        }
+        onSelectPromotion({
+            promotion: promotionList[selectedPromotionIndex].promotion,
+            selectedFreeItem: selectedFreeItem[selectedPromotionIndex]
+        });
+        toast.success('Đã áp dụng mã khuyến mãi');
+    };
+
+    const handleFreeItemChange = (promotionIndex, itemId, quantity) => {
+        setSelectedFreeItem(prevSelectedFreeItem => {
+            const updatedSelectedFreeItem = { ...prevSelectedFreeItem };
+            updatedSelectedFreeItem[promotionIndex] = { itemId, quantity };
+            return updatedSelectedFreeItem;
+        });
+    };
+    const renderFreeItems = (promotion, promotionIndex) => {
+        if (promotion.type === 'buy_get_free') {
+            return promotion.conditions.buy_get_free.freeItems.map((item, index) => (
+                <li key={index}>
+                    <label className="flex items-center">
+                        <input
+                            type="radio"
+                            name={`freeItem-${promotionIndex}`}
+                            value={item.drink._id}
+                            checked={selectedFreeItem[promotionIndex] && selectedFreeItem[promotionIndex].itemId === item.drink._id}
+                            onChange={() => handleFreeItemChange(promotionIndex, item.drink._id, item.quantity)}
+                            className="mr-2"
+                        />
+                        <span>{item.drink.name} - Số lượng: {item.quantity}</span>
+                    </label>
+                </li>
+            ));
+        } else if (promotion.type === 'buy_category_get_free') {
+            return promotion.conditions.buy_category_get_free.freeCategoryItems.map((item, index) => (
+                <li className="capitalize" key={index}>
+                    <label className="flex items-center">
+                        <input
+                            type="radio"
+                            name={`freeItem-${promotionIndex}`}
+                            value={item.drink._id}
+                            checked={selectedFreeItem[promotionIndex] && selectedFreeItem[promotionIndex].itemId === item.drink._id}
+                            onChange={() => handleFreeItemChange(promotionIndex, item.drink._id, item.quantity)}
+                            className="mr-2"
+                        />
+                        <span>{item.drink.name} - Số lượng: {item.quantity}</span>
+                    </label>
+                </li>
+            ));
+        }
+        return null;
     };
     return (
         <div className="fixed z-10 top-0 left-0 right-0 bottom-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
@@ -30,6 +89,11 @@ function ListPromotion({ promotionList, onCancel, onSelectPromotion }) {
                                     />
                                     <span>{promotion.promotion.name} - {promotion.promotion.description}</span>
                                 </label>
+                                {selectedPromotionIndex === index && (
+                                    <ul className="mt-2 ml-4 text-left">
+                                        {renderFreeItems(promotion.promotion, index)}
+                                    </ul>
+                                )}
                             </li>
                         ))}
                     </ul>
