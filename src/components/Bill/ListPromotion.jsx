@@ -4,7 +4,12 @@ import 'react-toastify/dist/ReactToastify.css';
 
 function ListPromotion({ promotionList, onCancel, onSelectPromotion }) {
     const [selectedPromotionIndex, setSelectedPromotionIndex] = useState(-1);
-    const [selectedFreeItem, setSelectedFreeItem] = useState([{itemId: '', quantity: 0}]);
+    const [selectedFreeItem, setSelectedFreeItem] = useState(
+        promotionList.reduce((acc, _, index) => {
+            acc[index] = { itemId: '', quantity: 0 };
+            return acc;
+        }, {})
+    );
     const handleCancel = () => {
         onCancel();
     };
@@ -13,25 +18,31 @@ function ListPromotion({ promotionList, onCancel, onSelectPromotion }) {
             toast.warn('Yêu cầu chọn khuyến mãi.');
             return;
         }
-        const selectedFreeItemId = selectedFreeItem[selectedPromotionIndex];
-
-        if(selectedFreeItemId == null) {
-            toast.warn('Yêu cầu chọn đồ uống.');
-            return;
+        const selectedPromotion = promotionList[selectedPromotionIndex];
+        if (selectedPromotion.type === 'buy_get_free' || selectedPromotion.type === 'buy_category_get_free') {
+            const selectedFreeItemId = selectedFreeItem[selectedPromotionIndex];
+            if (!selectedFreeItemId) {
+                toast.warn('Yêu cầu chọn đồ uống.');
+                return;
+            }
+            onSelectPromotion({
+                promotion: selectedPromotion,
+                selectedFreeItem: selectedFreeItem[selectedPromotionIndex]
+            });
+        } else {
+            onSelectPromotion({
+                promotion: selectedPromotion,
+                selectedFreeItem: null
+            });
         }
-        onSelectPromotion({
-            promotion: promotionList[selectedPromotionIndex].promotion,
-            selectedFreeItem: selectedFreeItem[selectedPromotionIndex]
-        });
         toast.success('Đã áp dụng mã khuyến mãi');
     };
 
     const handleFreeItemChange = (promotionIndex, itemId, quantity) => {
-        setSelectedFreeItem(prevSelectedFreeItem => {
-            const updatedSelectedFreeItem = { ...prevSelectedFreeItem };
-            updatedSelectedFreeItem[promotionIndex] = { itemId, quantity };
-            return updatedSelectedFreeItem;
-        });
+        setSelectedFreeItem(prevSelectedFreeItem => ({
+            ...prevSelectedFreeItem,
+            [promotionIndex]: { itemId, quantity }
+        }));
     };
     const renderFreeItems = (promotion, promotionIndex) => {
         if (promotion.type === 'buy_get_free') {
@@ -66,7 +77,7 @@ function ListPromotion({ promotionList, onCancel, onSelectPromotion }) {
                     </label>
                 </li>
             ));
-        }
+        } 
         return null;
     };
     return (
@@ -87,11 +98,11 @@ function ListPromotion({ promotionList, onCancel, onSelectPromotion }) {
                                         onChange={() => setSelectedPromotionIndex(index)}
                                         className="mr-2"
                                     />
-                                    <span>{promotion.promotion.name} - {promotion.promotion.description}</span>
+                                    <span>{promotion.description}</span>
                                 </label>
                                 {selectedPromotionIndex === index && (
                                     <ul className="mt-2 ml-4 text-left">
-                                        {renderFreeItems(promotion.promotion, index)}
+                                        {renderFreeItems(promotion, index)}
                                     </ul>
                                 )}
                             </li>
