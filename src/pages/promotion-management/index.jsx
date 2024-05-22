@@ -11,6 +11,7 @@ import { baseURL, promotionRoutes } from '@/api/api';
 import View_BuyCategoryGetFree from '@/components/promotion-management/View_BuyCategoryGetFree';
 import View_BuyGetFree from '@/components/promotion-management/View_BuyGetFree';
 import View_FixedPrice from '@/components/promotion-management/View_FixedPrice';
+import View_Discount from '@/components/promotion-management/View_Discount';
 
 
 function PromotionManagement({ token }) {
@@ -61,7 +62,7 @@ function PromotionManagement({ token }) {
 
     // Function to handle form submission
     const handleSubmit = async (e) => {
-        console.log(newPromotion)
+
         e.preventDefault();
 
         if (!newPromotion.name) {
@@ -115,7 +116,7 @@ function PromotionManagement({ token }) {
         // Loại bỏ trường conditions ra khỏi newPromotion nếu không còn loại nào có giá trị
         const conditions = Object.keys(filteredConditions).length === 0 ? {} : { conditions: filteredConditions };
         const promotionData = { ...newPromotion, ...conditions };
-        console.log(promotionData)
+
         try {
             // Call API to create new promotion
             const response = await axios.post(`${baseURL}${promotionRoutes}`, promotionData, {
@@ -195,7 +196,6 @@ function PromotionManagement({ token }) {
             const response = await axios.put(`${baseURL}${promotionRoutes}/${id}`, newPromotion, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            console.log(response.data)
             if (response.status >= 200 && response.status < 300) {
                 toast.success(response.data.message);
             }
@@ -371,7 +371,8 @@ function PromotionManagement({ token }) {
                             {promotion.type === 'buy_category_get_free' && <View_BuyCategoryGetFree promotion={promotion}/>}
                             {promotion.type === 'buy_get_free' && <View_BuyGetFree promotion={promotion}/>}
                             {promotion.type === 'fixed_price' && <View_FixedPrice promotion={promotion}/>}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {promotion.type === 'discount' && <View_Discount promotion={promotion}/>}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
                                 <div>
                                     <p className="text-gray-800 font-semibold mb-2">Ngày bắt đầu:</p>
                                     <p>{format(new Date(promotion.startDate), 'dd/MM/yyyy')}</p>
