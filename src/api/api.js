@@ -1,4 +1,4 @@
-const baseURL = 'http://localhost:10000' || 'https://api-pos-coffee.vercel.app';
+const baseURL = 'https://api-pos-coffee.vercel.app';
 const categoriesRoutes = '/api/categories';
 //get all
 //get by id /:id
