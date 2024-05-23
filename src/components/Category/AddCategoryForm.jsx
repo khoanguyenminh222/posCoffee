@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { baseURL, categoriesRoutes } from '@/api/api';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function AddCategoryForm({token, onSave, onCancel}) {
   const [name, setName] = useState('');
@@ -27,20 +29,21 @@ function AddCategoryForm({token, onSave, onCancel}) {
           'Authorization': `Bearer ${token}`
         }
       });
-      console.log(response)
-      if (response.status == 201) {
+      if (response.status === 201) {
+        toast.success(response.data.message);
         setName(''); // Đặt lại giá trị của name và imageFile sau khi thêm category thành công
         setImageFile(null);
-        alert('Thêm thành công');
-        onSave(response.data);
+        onSave(response.data.newCategory);
         onCancel();
       } else {
-        alert('Có lỗi xảy ra');
+        toast.error(response.data.message);
       }
-
     } catch (error) {
-      console.error('Error adding category:', error);
-      alert('Có lỗi xảy ra khi thêm thức uống');
+      if(error.response){
+        toast.error(error.response.data.message);
+      }else{
+        toast.error(error.message)
+      }
     }
   };
 

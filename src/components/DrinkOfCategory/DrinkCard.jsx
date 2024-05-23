@@ -31,15 +31,9 @@ const DrinkCard = ({ token, drink, deleteDrink, editCard }) => {
         setIsEditing(false);
     };
 
-    const handleSaveEdit = (formdata) => {
-        if(formdata.status==201){
-            alert("Cập nhật thành công");
-            editCard(formdata.data)
-            setIsEditing(false);
-        }else{
-            alert("Có lỗi xảy ra");
-        }
-        
+    const handleSaveEdit = (data) => {
+        editCard(data.updatedDrink)
+        setIsEditing(false);
     };
     const handleDelete = async() => {
         deleteDrink(drink._id,drink.name)
@@ -50,14 +44,9 @@ const DrinkCard = ({ token, drink, deleteDrink, editCard }) => {
     const handleCancelIngredients = () => {
         setIsEditIngredients(false);
     };
-    const handleSaveIngredients = (formdata) => {
-        if(formdata.status==201){
-            alert("Cập nhật thành công");
-            editCard(formdata.data)
-            setIsEditing(false);
-        }else{
-            alert("Có lỗi xảy ra");
-        }
+    const handleSaveIngredients = (data) => {
+        editCard(data.drink)
+        setIsEditing(false);
     };
     return (
         <>

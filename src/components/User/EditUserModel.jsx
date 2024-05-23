@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { baseURL, userRoutes } from '@/api/api';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function EditUserModal({ token, user, onClose, onUpdateUser }) {
     const [formData, setFormData] = useState({
@@ -53,15 +55,18 @@ function EditUserModal({ token, user, onClose, onUpdateUser }) {
                 headers: { Authorization: `Bearer ${token}` }
             });
             if (response.status == 201) {
-                alert("Cập nhật thông tin người dùng thành công");
+                toast.success(response.data.message);
                 onUpdateUser();
                 onClose();
             } else {
-                alert("Có lỗi khi cập nhật thông tin người dùng");
+                toast.error(response.data.message);
             }
         } catch (error) {
-            console.log("Error updating user: ", error);
-            alert("Error updating user");
+            if(error.response){
+                toast.error(error.response.data.message);
+            }else{
+                toast.error(error.message)
+            }
         }
     };
     const validatePhoneNumber = (phoneNumber) => {

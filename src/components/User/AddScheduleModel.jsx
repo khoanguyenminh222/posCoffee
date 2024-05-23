@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { baseURL, weekScheduleRoutes } from '@/api/api';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function AddScheduleModal({ token, user, onClose, onScheduleUpdated }) {
     const [startDate, setStartDate] = useState('');
@@ -16,7 +18,6 @@ function AddScheduleModal({ token, user, onClose, onScheduleUpdated }) {
     });
 
     const handleSaveSchedule = async () => {
-        console.log("userid",user._id)
         try {
             // Chuyển đổi kiểu dữ liệu của startDate và endDate sang kiểu Date
             const formattedStartDate = new Date(startDate);
@@ -41,22 +42,18 @@ function AddScheduleModal({ token, user, onClose, onScheduleUpdated }) {
             const response = await axios.post(`${baseURL}${weekScheduleRoutes}`, scheduleData, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            if(response.status==201){
-                alert("Thêm thành công")
+            if (response.status === 201) {
+                toast.success(response.data.message);
                 onScheduleUpdated();
                 onClose()
+            } else {
+                toast.error(response.data.message);
             }
-            else{
-                alert('Lỗi tạo mới lịch')
-            }
-            // Đóng modal sau khi lưu thành công
-            onClose();
         } catch (error) {
-            if(error.response.status==400){
-                alert("Bạn đã thêm lịch cho người này ở tuần này rồi")
+            if(error.response){
+                toast.error(error.response.data.message);
             }else{
-                console.error('Error saving schedule:', error);
-                alert("Error saving schedule")
+                toast.error(error.message)
             }
         }
     };
@@ -75,7 +72,7 @@ function AddScheduleModal({ token, user, onClose, onScheduleUpdated }) {
             setShifts(updatedShifts);
         } else {
             // Nếu chưa chọn thời gian bắt đầu hoặc kết thúc, hiển thị cảnh báo hoặc không thực hiện hành động gì
-            console.log('Vui lòng chọn thời gian bắt đầu và kết thúc trước khi thêm thời gian mới.');
+            toast.warning("Vui lòng chọn thời gian bắt đầu và kết thúc trước khi thêm thời gian mới.");
         }
     };
 

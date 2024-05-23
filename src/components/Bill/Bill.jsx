@@ -25,7 +25,7 @@ function Bill({ userId, billItems, addToBill, onDeleteAll, onDeleteItem, onIncre
                 });
                 setUser(response.data);
             } catch (error) {
-                console.log(error)
+                toast.error(error.message)
             }
         }
         fetchUser();
@@ -76,7 +76,12 @@ function Bill({ userId, billItems, addToBill, onDeleteAll, onDeleteItem, onIncre
             toast.success('Đã tạo mới hoá đơn');
         } catch (error) {
             console.error('Lỗi khi gửi yêu cầu POST:', error);
-            toast.error(error.message);
+            if(error.response){
+                toast.error(error.response.data.message);
+            }else{
+                toast.error(error.message)
+            }
+            
             // Xử lý lỗi nếu cần
         }
     };
@@ -89,11 +94,14 @@ function Bill({ userId, billItems, addToBill, onDeleteAll, onDeleteItem, onIncre
             const response = await axios.post(`${baseURL}${promotionRoutes}/check-promotion`, { drinks: billItems }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            console.log(response.data.promotions)
             setPromotionList(response.data.promotions || [])
             setIsListPromotion(true);
         } catch (error) {
-            console.error(error)
+            if(error.response){
+                toast.error(error.response.data.message);
+            }else{
+                toast.error(error.message)
+            }
         }
     }
     const handleCancelListPromotion = () => {
@@ -118,7 +126,6 @@ function Bill({ userId, billItems, addToBill, onDeleteAll, onDeleteItem, onIncre
 
             // Nếu không phải khuyến mãi loại discount, tiếp tục xử lý selectedFreeItem
             if (!selectedFreeItem || !selectedFreeItem.itemId) {
-                console.error('Selected free item is required for this promotion type.');
                 toast.warning("Yêu cầu chọn đồ uống miễn phí.");
                 return;
             }
@@ -139,11 +146,13 @@ function Bill({ userId, billItems, addToBill, onDeleteAll, onDeleteItem, onIncre
                 // Thêm sản phẩm miễn phí vào danh sách billItems
                 addToBill(freeBillItem, selectedFreeItem.quantity, "", "", "", "");
             } catch (error) {
-                console.error('Error fetching free item data:', error);
-                toast.error("Đã xảy ra lỗi khi lấy thông tin đồ uống miễn phí.");
+                if(error.response){
+                    toast.error(error.response.data.message);
+                }else{
+                    toast.error(error.message)
+                }
             }
         } else {
-            console.log('Promotion is not active or not within the date range.');
             toast.error("Chương trình khuyến mãi không còn");
         }
     };

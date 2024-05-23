@@ -1,6 +1,8 @@
 import { baseURL, categoriesRoutes } from '@/api/api';
 import React, { useState } from 'react';
 import axios from 'axios';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function EditCategoryForm({ token, category, onSave, onCancel }) {
   const [name, setName] = useState(category.name);
@@ -28,10 +30,18 @@ function EditCategoryForm({ token, category, onSave, onCancel }) {
           'Authorization': `Bearer ${token}`
         }
       });
-      onSave(response.data); // Gọi hàm onSave khi request thành công
+      if (response.status === 201) {
+        toast.success(response.data.message);
+        onSave(response.data); // Gọi hàm onSave khi request thành công
+      } else {
+        toast.error(response.data.message);
+      }
     } catch (error) {
-      console.error('Error saving category:', error);
-      // Xử lý lỗi nếu có
+      if(error.response){
+        toast.error(error.response.data.message);
+      }else{
+        toast.error(error.message)
+      }
     }
   };
 

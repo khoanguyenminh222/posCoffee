@@ -8,9 +8,12 @@ import EditScheduleModel from '@/components/User/EditScheduleModel';
 import AddUserModal from '@/components/User/AddUserModel';
 import EditUserModal from '@/components/User/EditUserModel';
 import { getServerSideProps } from '@/helpers/cookieHelper';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function User({ token }) {
     const [users, setUsers] = useState([]);
+    const [usersOfSchedule, setUsersOfSchedule] = useState([]);
     const [showModalAddSchedule, setShowModalAddSchedule] = useState(false);
     const [showModalEditSchedule, setShowModalEditSchedule] = useState(false);
     const [showModalAddUser, setShowModalAddUser] = useState(false);
@@ -51,15 +54,18 @@ function User({ token }) {
                 const response = await axios.delete(`${baseURL}${userRoutes}/${user._id}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
-                if (response.status == 201) {
-                    alert("Xóa nhân viên thành công");
+                if (response.status === 201) {
+                    toast.success(response.data.message);
                     handleUserUpdated();
                 } else {
-                    alert("Có lỗi khi xoá")
+                    toast.error(response.data.message);
                 }
-
             } catch (error) {
-                console.error('Error delete for user:', error);
+                if(error.response){
+                    toast.error(error.response.data.message);
+                  }else{
+                    toast.error(error.message)
+                  }
             }
         }
     };
@@ -118,18 +124,34 @@ function User({ token }) {
                 const response = await axios.delete(`${baseURL}${weekScheduleRoutes}/${user._id}?startDate=${startDate}&endDate=${endDate}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
-                if (response.status == 201) {
-                    alert("Xóa lịch làm việc thành công");
+                if (response.status === 201) {
+                    toast.success(response.data.message);
                     fetchWeekScheduleForAllUsers(startDate, endDate);
                 } else {
-                    alert("Có lỗi khi xoá")
+                    toast.error(response.data.message);
                 }
-
             } catch (error) {
-                console.error('Error delete schedules for user:', error);
+                if(error.response){
+                    toast.error(error.response.data.message);
+                }else{
+                    toast.error(error.message)
+                }
             }
         }
     };
+    useEffect(() => {
+        const fetchUsersOfSchedule = async () => {
+            try {
+                const response = await axios.get(`${baseURL}${userRoutes}/getAll`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                setUsersOfSchedule(response.data);
+            } catch (error) {
+                console.error('Error fetching all users:', error);
+            }
+        }
+        fetchUsersOfSchedule();
+    },[])
 
     useEffect(() => {
         if (scheduleUpdated) {
@@ -274,7 +296,7 @@ function User({ token }) {
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200 overflow-y-auto">
-                                    {users.map((user, index) => {
+                                    {usersOfSchedule.map((user, index) => {
                                         const userSchedule = schedule.find(item => item.user._id === user._id);
                                         if (!userSchedule) return null; // Không có lịch làm việc cho người dùng này
 
@@ -397,6 +419,7 @@ function User({ token }) {
                 {/* Hiển thị model chỉnh sửa nhân viên */}
                 {showModalEditUser && <EditUserModal token={token} user={selectedUser} onClose={handleCloseEditModelUser} onUpdateUser={handleUserUpdated} />}
             </div>
+            <ToastContainer/>
         </div>
     );
 }

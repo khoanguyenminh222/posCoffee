@@ -13,7 +13,6 @@ import View_BuyGetFree from '@/components/promotion-management/View_BuyGetFree';
 import View_FixedPrice from '@/components/promotion-management/View_FixedPrice';
 import View_Discount from '@/components/promotion-management/View_Discount';
 
-
 function PromotionManagement({ token }) {
     const [promotions, setPromotions] = useState([]);
     const [showCreateForm, setShowCreateForm] = useState(false);
@@ -124,40 +123,46 @@ function PromotionManagement({ token }) {
             });
             if (response.status >= 200 && response.status < 300) {
                 toast.success(response.data.message);
+                // Reset form and close modal
+                setNewPromotion({
+                    name: '',
+                    description: '',
+                    type: 'buy_get_free',
+                    conditions: {
+                        buy_get_free: {
+                            buyItems: [{ drink: '', quantity: '' }],
+                            freeItems: [{ drink: '', quantity: '' }]
+                        },
+                        discount: {
+                            totalAmount: null,
+                            discountPercent: null
+                        },
+                        fixed_price: {
+                            fixedPriceItems: [{ category: '', fixedPrice: '' }]
+                        },
+                        buy_category_get_free: {
+                            buyCategoryItems: [{ category: '', quantity: '' }],
+                            freeCategoryItems: [{ drink: '', quantity: '' }]
+                        }
+                    },
+                    startDate: new Date().toISOString().slice(0, 10),
+                    endDate: new Date().toISOString().slice(0, 10),
+                    isActive: true
+                });
+                setShowCreateForm(false);
+                // Refresh promotion list
+                // You may want to refactor this to fetch promotions only when needed
+                fetchPromotionData();
+            } else {
+                toast.error(response.data.message);
             }
-            // Reset form and close modal
-            setNewPromotion({
-                name: '',
-                description: '',
-                type: 'buy_get_free',
-                conditions: {
-                    buy_get_free: {
-                        buyItems: [{ drink: '', quantity: '' }],
-                        freeItems: [{ drink: '', quantity: '' }]
-                    },
-                    discount: {
-                        totalAmount: null,
-                        discountPercent: null
-                    },
-                    fixed_price: {
-                        fixedPriceItems: [{ category: '', fixedPrice: '' }]
-                    },
-                    buy_category_get_free: {
-                        buyCategoryItems: [{ category: '', quantity: '' }],
-                        freeCategoryItems: [{ drink: '', quantity: '' }]
-                    }
-                },
-                startDate: new Date().toISOString().slice(0, 10),
-                endDate: new Date().toISOString().slice(0, 10),
-                isActive: true
-            });
-            setShowCreateForm(false);
-            // Refresh promotion list
-            // You may want to refactor this to fetch promotions only when needed
-            fetchPromotionData();
+            
         } catch (error) {
-            console.error('Error creating promotion:', error);
-            toast.error(error.message)
+            if(error.response){
+                toast.error(error.response.data.message);
+            }else{
+                toast.error(error.message)
+            }
         }
     };
 
@@ -198,12 +203,17 @@ function PromotionManagement({ token }) {
             });
             if (response.status >= 200 && response.status < 300) {
                 toast.success(response.data.message);
+                setShowCreateForm(false);
+                fetchPromotionData();
+            } else {
+                toast.error(response.data.message);
             }
-            setShowCreateForm(false);
-            fetchPromotionData();
         } catch (error) {
-            console.error('Error updating promotion:', error);
-            toast.error(error.message)
+            if(error.response){
+                toast.error(error.response.data.message);
+            }else{
+                toast.error(error.message)
+            }
         }
     }
 
@@ -296,10 +306,15 @@ function PromotionManagement({ token }) {
                 if (response.status >= 200 && response.status < 300) {
                     toast.success(response.data.message);
                     fetchPromotionData();
+                } else {
+                    toast.error(response.data.message);
                 }
             } catch (error) {
-                console.error('Error deleting promotion:', error);
-                toast.error(error.message)
+                if(error.response){
+                    toast.error(error.response.data.message);
+                }else{
+                    toast.error(error.message)
+                }
             }
         }
     }
@@ -311,14 +326,18 @@ function PromotionManagement({ token }) {
             const response = await axios.put(`${baseURL}${promotionRoutes}/setActive/${promotion._id}`, { isActive: !promotion.isActive }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            console.log(response)
             if (response.status >= 200 && response.status < 300) {
                 toast.success(response.data.message);
                 fetchPromotionData();
+            } else {
+                toast.error(response.data.message);
             }
         } catch (error) {
-            console.log("Có lỗi khi chuyển đổi trạng thái", error);
-            toast.error(error.message)
+            if(error.response){
+                toast.error(error.response.data.message);
+            }else{
+                toast.error(error.message)
+            }
         }
     }
 

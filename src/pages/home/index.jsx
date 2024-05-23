@@ -151,7 +151,6 @@ function Home({ token }) {
     };
 
     // Kiểm tra xem có chương trình khuyến mãi fixed_price không
-    console.log(drink)
     const fixedPricePromotion = drink.promotions?.find(promotion => promotion.type === 'fixed_price');
 
     // Sử dụng giá gốc nếu không có khuyến mãi fixed_price hoặc không có mục phù hợp

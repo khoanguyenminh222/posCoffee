@@ -3,6 +3,8 @@ import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes } from '@fortawesome/free-solid-svg-icons';
 import { baseURL, ingredientExpenseRoutes, ingredientRoutes } from '@/api/api';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function AddStock({ token, ingredientAddStock, onCancel, onSave }) {
     const [quantityAction, setQuantityAction] = useState('add');
@@ -27,7 +29,7 @@ function AddStock({ token, ingredientAddStock, onCancel, onSave }) {
             
             const { quantity, priceOfUnit, totalPrice } = formData;
             if(!quantity || !totalPrice){
-                alert('Vui lòng điền số lượng và thành tiền');
+                toast.warning('Vui lòng điền số lượng và thành tiền');
                 return;
             }
             const expenseItem = {
@@ -40,11 +42,18 @@ function AddStock({ token, ingredientAddStock, onCancel, onSave }) {
                 headers: { Authorization: `Bearer ${token}` },
                 params: { action: quantityAction }
             });
-            onSave(response.data)
-            onCancel();
+            if (response.status>=200 && response.status<300) {
+                toast.success(response.data.message);
+                onCancel();
+            } else {
+                toast.error(response.data.message);
+            }
         } catch (error) {
-            console.error('Error adding ingredient expenses:', error);
-            alert('Failed to add ingredient expenses');
+            if(error.response){
+                toast.error(error.response.data.message);
+            }else{
+                toast.error(error.message)
+            }
         }
     };
 

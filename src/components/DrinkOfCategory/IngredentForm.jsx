@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { baseURL, drinksRoutes, ingredientRoutes } from '@/api/api';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function IngredientForm({ token, drink, onCancel, onSave }) {
     const [ingredients, setIngredients] = useState([]);
@@ -48,7 +50,7 @@ function IngredientForm({ token, drink, onCancel, onSave }) {
                 setAddedIngredients([...addedIngredients, { ...selectedIngredientInfo, quantity }]);
                 
             }else{
-                window.confirm(`Nguyên liệu đã tồn tại`)
+                toast.warning('Nguyên liệu đã tồn tại');
             }
             setSelectedIngredient('');
             setQuantity('');
@@ -64,10 +66,19 @@ function IngredientForm({ token, drink, onCancel, onSave }) {
             const response = await axios.post(`${baseURL}${drinksRoutes}/${drink._id}/ingredients`, {ingredients:addedIngredients}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            onSave(response);
-            onCancel();
+            if (response.status === 201) {
+                toast.success(response.data.message);
+                onSave(response.data);
+                onCancel();
+            } else {
+                toast.error(response.data.message);
+            }
         } catch (error) {
-            console.error('Lỗi khi thêm danh sách thành phần:', error);
+            if(error.response){
+                toast.error(error.response.data.message);
+            }else{
+                toast.error(error.message)
+            }
         }
     };
 

@@ -3,6 +3,8 @@ import axios from 'axios';
 import { baseURL, weekScheduleRoutes } from '@/api/api';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash } from '@fortawesome/free-solid-svg-icons';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function EditScheduleModal({ token, user, onClose, onScheduleUpdated, startDate, endDate }) {
     const [shifts, setShifts] = useState({
@@ -54,16 +56,19 @@ function EditScheduleModal({ token, user, onClose, onScheduleUpdated, startDate,
             const response = await axios.put(`${baseURL}${weekScheduleRoutes}/${user._id}`, scheduleData,{
                 headers: { Authorization: `Bearer ${token}` }
             });
-            if(response.status == 201){
-                alert("Cập nhật thành công")
+            if (response.status === 201) {
+                toast.success(response.data.message);
                 onClose();
                 onScheduleUpdated();
-            }else{
-                alert("Lỗi cập nhật")
+            } else {
+                toast.error(response.data.message);
             }
         } catch (error) {
-            console.error('Error saving schedule:', error);
-            alert("Error saving schedule")
+            if(error.response){
+                toast.error(error.response.data.message);
+            }else{
+                toast.error(error.message)
+            }
         }
     };
 
@@ -80,7 +85,7 @@ function EditScheduleModal({ token, user, onClose, onScheduleUpdated, startDate,
             setShifts(updatedShifts);
         } else {
             // Nếu chưa chọn thời gian bắt đầu hoặc kết thúc, hiển thị cảnh báo hoặc không thực hiện hành động gì
-            console.log('Vui lòng chọn thời gian bắt đầu và kết thúc trước khi thêm thời gian mới.');
+            toast.warning("Vui lòng chọn thời gian bắt đầu và kết thúc trước khi thêm thời gian mới.");
         }
     };
 

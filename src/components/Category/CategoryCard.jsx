@@ -39,14 +39,14 @@ const CategoryCard = ({ token, category, onSelect, onDeleteCategory, onEditCateg
         setIsEditing(false);
     };
 
-    const handleSaveEdit = (formData) => {
-        if(formData){
-            setName(formData.name);
-            setImg(formData.img)
-            onEditCategory({ _id: category._id, name: formData.name, img: formData.img });
-            alert('Cập nhật thành công')
+    const handleSaveEdit = (data) => {
+        const updatedCategory = data.updatedCategory
+        if(updatedCategory){
+            setName(updatedCategory.name);
+            setImg(updatedCategory.img)
+            onEditCategory({ _id: category._id, name: updatedCategory.name, img: updatedCategory.img });
         }else{
-            alert('Có lỗi xảy ra')
+            console.log('Có lỗi xảy ra')
         }
         setIsEditing(false);
     };

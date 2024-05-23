@@ -6,6 +6,8 @@ import { baseURL, ingredientRoutes } from '@/api/api';
 import AddStock from '@/components/Warehouse/AddStock';
 import AddIngredientForm from '@/components/Warehouse/AddIngredientForm';
 import EditIngredientForm from '@/components/Warehouse/EditIngredientForm';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function Warehouse({ token }) {
   const [ingredients, setIngredients] = useState([]);
@@ -63,7 +65,7 @@ function Warehouse({ token }) {
   const handleAddIngredient = async () => {
     if (!addIngredient.name || !addIngredient.quantity || !addIngredient.unit || !addIngredient.totalPrice) {
       // Nếu bất kỳ trường nào cũng không được điền vào, ngăn việc gửi dữ liệu và hiển thị thông báo lỗi
-      alert('Vui lòng điền đầy đủ thông tin cho tất cả các trường');
+      toast.warning('Vui lòng điền đầy đủ thông tin cho tất cả các trường');
       return;
     }
     try {
@@ -76,20 +78,24 @@ function Warehouse({ token }) {
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      console.log(response)
-
-      setIngredients([...ingredients, response.data]);
-      setAddIngredient({
-        name: '',
-        quantity: '',
-        unit: '',
-        priceOfUnit: '',
-        totalPrice: ''
-      });
+      if (response.status === 201) {
+        toast.success(response.data.message);
+        setIngredients([...ingredients, response.data.newIngredient]);
+        setAddIngredient({
+          name: '',
+          quantity: '',
+          unit: '',
+          priceOfUnit: '',
+          totalPrice: ''
+        });
+      } else {
+        toast.error(response.data.message);
+      }
     } catch (error) {
-      console.error('Lỗi khi thêm thành phần:', error);
-      if (error.response.status == 409) {
-        alert("Đã có thành phần '" + addIngredient.name + "' tồn tại")
+      if(error.response){
+        toast.error(error.response.data.message);
+      }else{
+        toast.error(error.message)
       }
     }
   };
@@ -101,9 +107,18 @@ function Warehouse({ token }) {
         await axios.delete(`${baseURL}${ingredientRoutes}/${ingredient._id}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        setIngredients(ingredients.filter(i => i._id !== ingredient._id));
+        if (response.status>=200 && response.status<300) {
+          toast.success(response.data.message);
+          setIngredients(ingredients.filter(i => i._id !== ingredient._id));
+        } else {
+          toast.error(response.data.message);
+        }
       } catch (error) {
-        console.error('Lỗi khi xoá thành phần:', error);
+        if(error.response){
+          toast.error(error.response.data.message);
+        }else{
+          toast.error(error.message)
+        }
       }
     }
   };
@@ -111,7 +126,7 @@ function Warehouse({ token }) {
   const handleEditIngredient = async () => {
     if (!editIngredient.name || !editIngredient.quantity || !editIngredient.unit || !editIngredient.totalPrice) {
       // Nếu bất kỳ trường nào cũng không được điền vào, ngăn việc gửi dữ liệu và hiển thị thông báo lỗi
-      alert('Vui lòng điền đầy đủ thông tin cho tất cả các trường');
+      toast.warning('Vui lòng điền đầy đủ thông tin cho tất cả các trường');
       return;
     }
     try {
@@ -124,17 +139,26 @@ function Warehouse({ token }) {
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setIngredients(ingredients.map(ingredient => (ingredient._id === response.data._id ? response.data : ingredient)));
-      setEditIngredient({
-        id: '',
-        name: '',
-        quantity: '',
-        unit: '',
-        priceOfUnit: '',
-        totalPrice: '',
-      });
+      if (response.status>=200 && response.status<300) {
+        toast.success(response.data.message);
+        setIngredients(ingredients.map(ingredient => (ingredient._id === response.data.updatedIngredient._id ? response.data.updatedIngredient : ingredient)));
+        setEditIngredient({
+          id: '',
+          name: '',
+          quantity: '',
+          unit: '',
+          priceOfUnit: '',
+          totalPrice: '',
+        });
+      } else {
+        toast.error(response.data.message);
+      }
     } catch (error) {
-      console.error('Lỗi khi sửa thành phần:', error);
+      if(error.response){
+        toast.error(error.response.data.message);
+      }else{
+        toast.error(error.message)
+      }
     }
   };
 
@@ -169,12 +193,6 @@ function Warehouse({ token }) {
   }
   const handleCancelAddStock = () => {
     setIsAddStock(false);
-  }
-  const handleSaveAddStock = (data) => {
-    if (data) {
-      fetchIngredients();
-      alert("Nhập thành phần thành công");
-    }
   }
 
   return (
@@ -220,7 +238,7 @@ function Warehouse({ token }) {
               <span className="mx-2 text-sm">Trang {currentPage} / {totalPages}</span>
               <button onClick={handleNextPage} disabled={currentPage === totalPages} className="text-sm ml-2 px-3 py-1 bg-gray-200 rounded-md focus:outline-none">Trang sau</button>
           </div>
-          {isAddStock && <AddStock token={token} onSave={handleSaveAddStock} ingredientAddStock={ingredientAddStock} onCancel={handleCancelAddStock} />}
+          {isAddStock && <AddStock token={token} ingredientAddStock={ingredientAddStock} onCancel={handleCancelAddStock} />}
         </div>
         <div className='flex lg:flex-row flex-col justify-center items-center rounded p-4'>
 
@@ -237,7 +255,7 @@ function Warehouse({ token }) {
           />
         </div>
       </div>
-
+      <ToastContainer/>
     </div>
   );
 }

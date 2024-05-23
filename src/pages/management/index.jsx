@@ -9,6 +9,8 @@ import AddCategoryForm from '@/components/Category/AddCategoryForm';
 import AddDrinkForm from '@/components/DrinkOfCategory/AddDrinkForm';
 import { getServerSideProps } from '@/helpers/cookieHelper';
 import { getUserIdFromToken } from '@/helpers/getUserIdFromToken';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function Management({token}) {
   const [categories, setCategories] = useState([]);
@@ -106,16 +108,19 @@ function Management({token}) {
         const response = await axios.delete(`${baseURL}${categoriesRoutes}/${categoryId}`,{
           headers: { Authorization: `Bearer ${token}` }
         });
-        if (response.status === 201) {
-          alert("Xoá thành công");
+        if (response.status>=200 && response.status<300) {
+          toast.success(response.data.message);
           const updatedCategories = categories.filter(category => category._id !== categoryId);
           setCategories(updatedCategories);
         } else {
-          alert("Có lỗi xảy ra");
+          toast.error(response.data.message);
         }
       } catch (error) {
-        console.error('Error deleting category:', error);
-        alert("Error deleting category");
+        if(error.response){
+          toast.error(error.response.data.message);
+        }else{
+          toast.error(error.message)
+        }
       }
     }
   };
@@ -130,7 +135,7 @@ function Management({token}) {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (response.status === 201) {
-          alert("Xoá thành công");
+          toast.success(response.data.message);
 
           // Cập nhật state của drinks bằng danh sách mới loại bỏ đồ uống đã xoá
           const updatedDrinks = drinks.filter(drink => drink._id !== drinkId);
@@ -144,11 +149,14 @@ function Management({token}) {
             setSelectedDrinks(updatedDrinks);
           }
         } else {
-          alert("Có lỗi xảy ra");
+          toast.error(response.data.message);
         }
       } catch (error) {
-        console.error('Error deleting drink:', error);
-        alert("Error deleting drink");
+        if(error.response){
+          toast.error(error.response.data.message);
+        }else{
+          toast.error(error.message)
+        }
       }
     }
   };
@@ -228,6 +236,7 @@ function Management({token}) {
       {isAddingDrink && (
         <AddDrinkForm token={token} onSave={handleSaveDrink} onCancel={handleCancelAddDrink} />
       )}
+      <ToastContainer/>
     </>
   );
 }

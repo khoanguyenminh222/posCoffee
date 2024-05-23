@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { baseURL, userRoutes } from '@/api/api';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function AddUserModal({ token, onClose, onUpdateUser }) {
     const [formData, setFormData] = useState({
@@ -42,15 +44,18 @@ function AddUserModal({ token, onClose, onUpdateUser }) {
                 headers: { Authorization: `Bearer ${token}` }
             });
             if (response.status === 201) {
-                alert("Tạo mới nhân viên thành công");
+                toast.success(response.data.message);
                 onUpdateUser();
                 onClose();
             } else {
-                alert("Có lỗi tạo mới nhân viên");
+                toast.error(response.data.message);
             }
         } catch (error) {
-            console.log("Error save user: ",error);
-            alert("Error save user")
+            if(error.response){
+                toast.error(error.response.data.message);
+            }else{
+                toast.error(error.message)
+            }
         }
         
     };

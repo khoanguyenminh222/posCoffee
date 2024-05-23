@@ -1,6 +1,8 @@
 import { baseURL, categoriesRoutes, drinksRoutes } from '@/api/api';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function AddDrinkForm({ token, onCancel, onSave }) {
     const [name, setName] = useState('');
@@ -160,7 +162,6 @@ function AddDrinkForm({ token, onCancel, onSave }) {
         if (imageFile) {
             formData.append('image', imageFile);
         }
-        console.log(formData)
         try {
             const response = await axios.post(`${baseURL}${drinksRoutes}`, formData, {
                 headers: {
@@ -168,16 +169,19 @@ function AddDrinkForm({ token, onCancel, onSave }) {
                     'Authorization': `Bearer ${token}`
                 }
             });
-            if(response.status==201){
-                alert("Tạo mới thành công");
-                onSave(response.data); // Call the onSave function when request is successful
+            if (response.status === 201) {
+                toast.success(response.data.message);
+                onSave(response.data.drink); // Call the onSave function when request is successful
                 onCancel();
-            }else{
-                alert("Có lỗi");
+            } else {
+                toast.error(response.data.message);
             }
         } catch (error) {
-            console.error('Error saving drink:', error);
-            alert('Error saving drink');
+            if(error.response){
+                toast.error(error.response.data.message);
+            }else{
+                toast.error(error.message)
+            }
         }
     };
 

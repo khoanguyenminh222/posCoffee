@@ -5,6 +5,8 @@ import axios from 'axios';
 import { baseURL, userRoutes } from '@/api/api';
 import Cookies from 'js-cookie';
 import { useRouter } from 'next/router';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function Login() {
     const [username, setUsername] = useState('test');
@@ -32,7 +34,7 @@ function Login() {
         try {
             const response = await axios.post(`${baseURL}${userRoutes}/login`, userData)
             if (response.status==201) {
-                alert(response.data.message)
+                toast.success(response.data.message);
                 // Xác định thời điểm hiện tại
                 const now = new Date();
                 // Đặt thời gian hết hạn của cookie là một thời điểm trong quá khứ
@@ -40,12 +42,14 @@ function Login() {
                 Cookies.set('token', response.data.token, { expires: expireTime, secure: true });
                 router.push('/home');
             }else{
-                console.error('Login failed with status:', response.status);
-                alert('Đăng nhập thất bại');
+                toast.error(response.data.message);
             }
         } catch (error) {
-            console.error('Error logging in:', error);
-            alert('Error logging in');
+            if(error.response){
+                toast.error(error.response.data.message);
+            }else{
+                toast.error(error.message);
+            }
         }
         
     };
@@ -98,6 +102,7 @@ function Login() {
             <div className="hidden md:block w-1/2 lg:w-2/3 bg-gray-400">
                 <img className='w-full h-full object-cover' src="/images/background.jpg" alt="background" />
             </div>
+            <ToastContainer/>
         </div>
     )
 }
